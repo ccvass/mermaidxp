@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mermaid Diagram Viewer</title>
+    <script>
+      // Suppress Tailwind CDN production warning BEFORE Tailwind loads
+      if (typeof window !== 'undefined') {
+        const originalWarn = console.warn;
+        console.warn = function (...args) {
+          if (
+            args[0] &&
+            typeof args[0] === 'string' &&
+            args[0].includes('cdn.tailwindcss.com should not be used in production')
+          ) {
+            return; // Suppress this specific warning
+          }
+          originalWarn.apply(console, args);
+        };
+      }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Configurar Tailwind para evitar warnings en desarrollo
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {},
+        },
+      };
+    </script>
+    <!-- Mermaid now loaded lazily via lazyMermaidLoader.ts -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f2f5;
+      }
+      #root {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      /* Custom scrollbar for webkit browsers */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+      .diagram-canvas-bg {
+        background-image:
+          linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+          linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+      .diagram-canvas-bg-dark {
+        background-image:
+          linear-gradient(to right, #374151 1px, transparent 1px),
+          linear-gradient(to bottom, #374151 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+    </style>
+    <!-- Import map removed - React is bundled by Vite -->
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- UNIFIED RESIZE OVERRIDE SYSTEM -->
+    <script src="/resize-override.js"></script>
+  </body>
+</html>

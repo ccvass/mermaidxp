@@ -1,0 +1,370 @@
+import React, { type FC, type SVGProps } from 'react';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { toggleTheme, toggleSidebar, showNotification } from '../../store/slices/uiSlice';
+import FileOperations from '../header/FileOperations';
+import CollaborationPanel from '../collaboration/CollaborationPanel';
+import { exportService } from '../../services/exportService';
+import { UserMenu } from '../auth/UserMenu';
+import { LoginModal } from '../auth/LoginModal';
+import { useAuth } from '../../contexts/AuthContext';
+
+interface HeaderProps {
+  title: string;
+}
+
+const MenuIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+    {...props}
+  >
+    <line x1="4" y1="6" x2="20" y2="6" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="18" x2="20" y2="18" />
+  </svg>
+);
+
+const CloseIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+    {...props}
+  >
+    <line x1="6" y1="6" x2="18" y2="18" />
+    <line x1="6" y1="18" x2="18" y2="6" />
+  </svg>
+);
+
+const UsersIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+    {...props}
+  >
+    <circle cx="9" cy="8" r="3" />
+    <circle cx="17" cy="8" r="3" />
+    <path d="M3 20c0-3.3137 3.6863-6 7-6s7 2.6863 7 6" />
+    <path d="M12 20c0-2 2.5-4 5-4" />
+  </svg>
+);
+
+const SunIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+    {...props}
+  >
+    <circle cx="12" cy="12" r="4" />
+    <line x1="12" y1="2" x2="12" y2="6" />
+    <line x1="12" y1="18" x2="12" y2="22" />
+    <line x1="2" y1="12" x2="6" y2="12" />
+    <line x1="18" y1="12" x2="22" y2="12" />
+    <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
+    <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
+    <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
+    <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
+  </svg>
+);
+
+const MoonIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+    {...props}
+  >
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+  </svg>
+);
+
+const DownloadIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+    {...props}
+  >
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);
+
+export const Header: FC<HeaderProps> = ({ title }) => {
+  const dispatch = useAppDispatch();
+  const { theme, isSidebarVisible } = useAppSelector((state) => state.ui);
+  const [showCollabPanel, setShowCollabPanel] = React.useState(false);
+  const [showExportMenu, setShowExportMenu] = React.useState(false);
+  const [showLoginModal, setShowLoginModal] = React.useState(false);
+  const { user } = useAuth();
+
+  const handleToggleTheme = () => {
+    dispatch(toggleTheme());
+  };
+
+  const handleToggleSidebar = () => {
+    dispatch(toggleSidebar());
+  };
+
+  const handleToggleCollaboration = () => {
+    setShowCollabPanel(!showCollabPanel);
+  };
+
+  const sidebarTitle = isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar';
+  const themeTitle = theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme';
+
+  const handleExport = async (format: 'svg' | 'png' | 'jpeg') => {
+    // Require authentication for export
+    if (!user) {
+      setShowLoginModal(true);
+      dispatch(
+        showNotification({
+          message: 'You must sign in to export diagrams',
+          type: 'warning',
+        })
+      );
+      return;
+    }
+
+    try {
+      // Find SVG in mermaid container
+      const svgElement: SVGElement | null = document.querySelector('#mermaid-container svg');
+
+      if (!svgElement) {
+        dispatch(
+          showNotification({
+            message: 'No diagram found. Please render a diagram first.',
+            type: 'error',
+          })
+        );
+        return;
+      }
+
+      if (format === 'svg') {
+        await exportService.exportSVG(svgElement, 'diagram');
+        dispatch(
+          showNotification({
+            message: 'Diagram exported as SVG',
+            type: 'success',
+          })
+        );
+      } else if (format === 'png') {
+        await exportService.exportPNG(svgElement, 'diagram', 'white');
+        dispatch(
+          showNotification({
+            message: 'Diagram exported as PNG',
+            type: 'success',
+          })
+        );
+      } else if (format === 'jpeg') {
+        // For JPEG, convert SVG to data URL to avoid CORS issues
+        const svgString = new XMLSerializer().serializeToString(svgElement);
+        const bbox = (svgElement as SVGGraphicsElement).getBBox();
+        const width = Math.ceil(bbox.width * 2);
+        const height = Math.ceil(bbox.height * 2);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+          throw new Error('Failed to get canvas context');
+        }
+
+        // White background for JPEG
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, width, height);
+
+        // Use data URL instead of blob to avoid CORS
+        const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+        const img = new Image();
+
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'diagram.jpeg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                dispatch(
+                  showNotification({
+                    message: 'Diagram exported as JPEG',
+                    type: 'success',
+                  })
+                );
+              }
+            },
+            'image/jpeg',
+            0.95
+          );
+        };
+
+        img.onerror = () => {
+          dispatch(
+            showNotification({
+              message: 'Failed to export JPEG',
+              type: 'error',
+            })
+          );
+        };
+
+        img.src = svgDataUrl;
+      }
+
+      setShowExportMenu(false);
+    } catch (error) {
+      console.error('Export error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to export diagram';
+      dispatch(
+        showNotification({
+          message: `Export failed: ${errorMessage}`,
+          type: 'error',
+        })
+      );
+    }
+  };
+
+  return (
+    <>
+      <header
+        className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between"
+        role="banner"
+      >
+        {/* Left: Logo & Sidebar Toggle */}
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={handleToggleSidebar}
+            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            title={sidebarTitle}
+            aria-label={sidebarTitle}
+          >
+            {isSidebarVisible ? <CloseIcon /> : <MenuIcon />}
+          </button>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h1>
+        </div>
+
+        {/* Right: File Ops + Actions */}
+        <div className="flex items-center space-x-2">
+          <FileOperations />
+
+          <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />
+
+          {/* Export Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Export Diagram"
+              aria-label="Export Diagram"
+            >
+              <DownloadIcon />
+            </button>
+
+            {showExportMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowExportMenu(false)} />
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-20">
+                  <div className="py-1">
+                    <button
+                      onClick={() => handleExport('svg')}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      📄 Export as SVG
+                    </button>
+                    <button
+                      onClick={() => handleExport('png')}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      🖼️ Export as PNG
+                    </button>
+                    <button
+                      onClick={() => handleExport('jpeg')}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      📸 Export as JPEG
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />
+
+          <button
+            onClick={handleToggleCollaboration}
+            className={`p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+              showCollabPanel ? 'bg-blue-100 dark:bg-blue-900' : ''
+            }`}
+            title="Live Collaboration (Toggle Panel)"
+            aria-label="Live Collaboration"
+          >
+            <UsersIcon />
+          </button>
+
+          <button
+            onClick={handleToggleTheme}
+            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            title={themeTitle}
+            aria-label={themeTitle}
+          >
+            {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+          </button>
+
+          <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />
+
+          {/* Auth Section */}
+          {user ? (
+            <UserMenu />
+          ) : (
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+            >
+              Sign In
+            </button>
+          )}
+        </div>
+      </header>
+
+      {showCollabPanel && <CollaborationPanel />}
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+    </>
+  );
+};

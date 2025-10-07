@@ -1,0 +1,84 @@
+/* Custom styles for the application */
+
+/* Disable all tooltips in canvas area */
+#mermaid-container * {
+  pointer-events: auto !important;
+}
+
+#mermaid-container *[title] {
+  pointer-events: none !important;
+}
+
+#mermaid-container svg * {
+  pointer-events: auto !important;
+}
+
+/* Completely disable browser tooltips for SVG elements */
+svg title {
+  display: none !important;
+}
+
+/* Draggable elements styling */
+.draggable-element {
+  cursor: grab !important;
+}
+
+.draggable-element:active {
+  cursor: grabbing !important;
+}
+
+.dragging {
+  cursor: grabbing !important;
+  opacity: 0.8;
+}
+
+/* Canvas background grid */
+.diagram-canvas-bg {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.diagram-canvas-bg-dark {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #2d3748;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4a5568;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #2d3748;
+}
