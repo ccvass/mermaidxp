@@ -6,6 +6,7 @@ import CollaborationPanel from '../collaboration/CollaborationPanel';
 import { exportService } from '../../services/exportService';
 import { mermaidService } from '../../services/mermaidService';
 import { Theme } from '../../types/ui.types';
+import { jsPDF } from 'jspdf';
 import { UserMenu } from '../auth/UserMenu';
 import { LoginModal } from '../auth/LoginModal';
 import { useAuth } from '../../contexts/AuthContext';
@@ -210,11 +211,11 @@ export const Header: FC<HeaderProps> = ({ title }) => {
     }
   };
 
-  const handleExportAllPages = async (format: 'svg' | 'png') => {
+  const handleExportAllPages = async (format: 'svg' | 'png' | 'pdf') => {
     if (!user) { setShowLoginModal(true); return; }
     try {
       setShowExportMenu(false);
-      dispatch(showNotification({ message: `Exporting ${sheets.length} pages as ${format.toUpperCase()}...`, type: 'info' }));
+      dispatch(showNotification({ message: `Exporting ${sheets.length} pages...`, type: 'info' }));
 
       const themeEnum = theme === 'dark' ? Theme.Dark : Theme.Light;
       const container = document.createElement('div');
@@ -222,21 +223,68 @@ export const Header: FC<HeaderProps> = ({ title }) => {
       container.style.left = '-9999px';
       document.body.appendChild(container);
 
-      for (let i = 0; i < sheets.length; i++) {
-        const result = await mermaidService.render(sheets[i].code, themeEnum);
-        if (result.svg) {
+      if (format === 'pdf') {
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = pdf.internal.pageSize.getHeight();
+        const padding = 40;
+
+        for (let i = 0; i < sheets.length; i++) {
+          if (i > 0) pdf.addPage();
+          const result = await mermaidService.render(sheets[i].code, themeEnum);
+          if (!result.svg) continue;
+
           container.innerHTML = result.svg;
           const svg = container.querySelector('svg');
-          if (svg) {
-            const name = `${(i + 1).toString().padStart(2, '0')}-${sheets[i].title.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            if (format === 'svg') await exportService.exportSVG(svg as unknown as SVGElement, name);
-            else await exportService.exportPNG(svg as unknown as SVGElement, name, 'white');
-            await new Promise(r => setTimeout(r, 300));
+          if (!svg) continue;
+
+          // SVG to canvas
+          const svgStr = new XMLSerializer().serializeToString(svg);
+          const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+          const img = await new Promise<HTMLImageElement>((res, rej) => {
+            const im = new Image();
+            im.onload = () => res(im);
+            im.onerror = rej;
+            im.src = dataUrl;
+          });
+
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width * 2 || 1600;
+          canvas.height = img.height * 2 || 1200;
+          const ctx = canvas.getContext('2d')!;
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          const scale = Math.min((pdfW - 2 * padding) / canvas.width, (pdfH - 2 * padding) / canvas.height);
+          const w = canvas.width * scale;
+          const h = canvas.height * scale;
+          const x = (pdfW - w) / 2;
+          const y = (pdfH - h) / 2;
+
+          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, w, h);
+        }
+
+        document.body.removeChild(container);
+        pdf.save('diagrams.pdf');
+        dispatch(showNotification({ message: `Exported ${sheets.length} pages as PDF`, type: 'success' }));
+      } else {
+        for (let i = 0; i < sheets.length; i++) {
+          const result = await mermaidService.render(sheets[i].code, themeEnum);
+          if (result.svg) {
+            container.innerHTML = result.svg;
+            const svg = container.querySelector('svg');
+            if (svg) {
+              const name = `${(i + 1).toString().padStart(2, '0')}-${sheets[i].title.replace(/[^a-zA-Z0-9]/g, '_')}`;
+              if (format === 'svg') await exportService.exportSVG(svg as unknown as SVGElement, name);
+              else await exportService.exportPNG(svg as unknown as SVGElement, name, 'white');
+              await new Promise(r => setTimeout(r, 300));
+            }
           }
         }
+        document.body.removeChild(container);
+        dispatch(showNotification({ message: `Exported ${sheets.length} pages`, type: 'success' }));
       }
-      document.body.removeChild(container);
-      dispatch(showNotification({ message: `Exported ${sheets.length} pages`, type: 'success' }));
     } catch (error) {
       dispatch(showNotification({ message: 'Export failed', type: 'error' }));
     }
@@ -316,6 +364,12 @@ export const Header: FC<HeaderProps> = ({ title }) => {
                           className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         >
                           🖼️ All pages as PNG
+                        </button>
+                        <button
+                          onClick={() => handleExportAllPages('pdf')}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          📑 All pages in one PDF
                         </button>
                       </>
                     )}
