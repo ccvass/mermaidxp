@@ -12,7 +12,6 @@ export function applyCanvasTransform(
   pan: { x: number; y: number }
 ): void {
   if (!element) {
-    console.warn('applyCanvasTransform: Element is null or undefined');
     return;
   }
 
@@ -61,12 +60,10 @@ export function applyCanvasTransform(
  */
 export function applyCanvasTransformLegacy(element: HTMLElement | SVGElement, transform: Transform): void {
   if (!element) {
-    console.warn('applyCanvasTransformLegacy: Element is null');
     return;
   }
 
   if (!transform) {
-    console.warn('applyCanvasTransformLegacy: Transform is null');
     return;
   }
 
@@ -75,7 +72,6 @@ export function applyCanvasTransformLegacy(element: HTMLElement | SVGElement, tr
     const svgRoot = element.tagName.toLowerCase() === 'svg' ? (element as SVGElement) : element.querySelector('svg');
 
     if (!svgRoot) {
-      console.warn('applyCanvasTransformLegacy: SVG root element not found');
       return;
     }
 
@@ -137,7 +133,6 @@ export function getSVGBounds(element: SVGElement): { width: number; height: numb
       y: bbox.y || 0,
     };
   } catch (error) {
-    console.warn('Error getting SVG bounds:', error);
     return { width: 400, height: 300, x: 0, y: 0 };
   }
 }

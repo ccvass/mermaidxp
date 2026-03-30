@@ -75,7 +75,6 @@ export class Transform {
    */
   applyToElement(element: HTMLElement): void {
     if (!element) {
-      console.warn('Transform.applyToElement: Element is null');
       return;
     }
 
@@ -94,7 +93,6 @@ export class Transform {
    */
   applySVGGroup(element: SVGElement): void {
     if (!element) {
-      console.warn('Transform.applySVGGroup: Element is null');
       return;
     }
 
@@ -183,7 +181,6 @@ export class Transform {
    */
   apply(ctx: CanvasRenderingContext2D): void {
     if (!ctx) {
-      console.warn('Transform.apply: Context is null');
       return;
     }
 
@@ -204,7 +201,6 @@ export class Transform {
    */
   applySVG(element: SVGGraphicsElement): void {
     if (!element) {
-      console.warn('Transform.applySVG: Element is null');
       return;
     }
 

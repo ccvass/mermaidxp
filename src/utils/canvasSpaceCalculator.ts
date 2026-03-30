@@ -56,12 +56,6 @@ function detectUIElementSizes(): {
   const sidebarElement = document.querySelector('aside[role="complementary"]');
   const sidebarWidth = sidebarElement ? sidebarElement.getBoundingClientRect().width : 0;
 
-  console.log('Canvas space debug:', {
-    header: headerHeight,
-    toolbar: toolbarHeight,
-    sidebar: sidebarWidth,
-  });
-
   return {
     headerHeight,
     toolbarHeight,
@@ -129,16 +123,6 @@ export function calculateCanvasSpace(padding: number = 40): CanvasSpaceInfo {
     ...deviceInfo,
   };
 
-  console.log('Canvas space calculation debug:', {
-    window: `${windowWidth}x${windowHeight}`,
-    viewport: `${viewportWidth}x${viewportHeight}`,
-    canvas: `${canvasWidth}x${canvasHeight}`,
-    effective: `${effectiveWidth}x${effectiveHeight}`,
-    ui: { header: headerHeight, toolbar: toolbarHeight, sidebar: sidebarWidth },
-    device: deviceInfo.isMobile ? 'mobile' : deviceInfo.isTablet ? 'tablet' : 'desktop',
-    pixelRatio: devicePixelRatio,
-  });
-
   return spaceInfo;
 }
 
@@ -162,7 +146,6 @@ export function getCanvasContainer(): HTMLElement | null {
     }
   }
 
-  console.warn('⚠️ Canvas container not found');
   return null;
 }
 
@@ -182,11 +165,7 @@ export function validateCanvasSpace(spaceInfo: CanvasSpaceInfo): boolean {
     spaceInfo.canvasHeight > 0;
 
   if (!isValid) {
-    console.warn('⚠️ Invalid canvas space detected:', {
-      effective: `${spaceInfo.effectiveWidth}x${spaceInfo.effectiveHeight}`,
-      canvas: `${spaceInfo.canvasWidth}x${spaceInfo.canvasHeight}`,
-      minimums: `${minWidth}x${minHeight}`,
-    });
+    // Canvas space insufficient
   }
 
   return isValid;

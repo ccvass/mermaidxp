@@ -14,12 +14,10 @@ export const useHistoryEngine = () => {
   const { past, future, featureEnabled, activeGroupId, present } = useAppSelector((s) => s.historyEngine);
 
   const undo = useCallback(() => {
-    console.log('🔙 UNDO called - Past length:', past.length, 'Can undo:', past.length > 0);
     dispatch(historyUndo());
   }, [dispatch, past.length]);
 
   const redo = useCallback(() => {
-    console.log('🔜 REDO called - Future length:', future.length, 'Can redo:', future.length > 0);
     dispatch(historyRedo());
   }, [dispatch, future.length]);
   const startGroup = useCallback((label?: string) => dispatch(beginGroup(label)), [dispatch]);

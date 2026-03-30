@@ -58,7 +58,6 @@ export const loadPersistedState = (): DeepPartial<RootState> | undefined => {
     const parsedState = JSON.parse(serializedState);
 
     if (!isValidPersistedState(parsedState)) {
-      console.warn('Invalid persisted state found, ignoring it');
       localStorage.removeItem(STORAGE_KEY);
       return undefined;
     }

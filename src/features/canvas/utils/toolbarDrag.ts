@@ -54,7 +54,6 @@ export function applyToolbarDragData(dataTransfer: DataTransfer | null, data: To
     dataTransfer.setData(CANVAS_DRAG_DATA_TYPE, JSON.stringify(data));
   } catch (error) {
     // Silently ignore failures (e.g. unsupported formats)
-    console.warn('Failed to set toolbar drag data', error);
   }
 }
 
@@ -70,7 +69,6 @@ export function extractToolbarDragData(dataTransfer: DataTransfer | null): Toolb
     if (!raw) return null;
     return JSON.parse(raw) as ToolbarDragData;
   } catch (error) {
-    console.warn('Failed to parse toolbar drag data', error);
     return null;
   }
 }
@@ -112,7 +110,6 @@ export function buildElementFromToolbarDrag(
           return context.measureText(payload.content || '').width;
         }
       } catch (error) {
-        console.warn('Failed to measure text width', error);
       }
     }
     return Math.max(payload.content.length, 1) * payload.fontSize * 0.6;

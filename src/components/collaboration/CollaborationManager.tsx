@@ -111,7 +111,6 @@ export const CollaborationManager: React.FC<CollaborationManagerProps> = ({
         handleSessionState(message.payload);
         break;
       default:
-        console.log('Unknown collaboration message:', message.type);
     }
   }, []);
   // reference to avoid unused warning in disabled build

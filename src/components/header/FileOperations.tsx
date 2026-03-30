@@ -266,7 +266,6 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
       try {
         setRecentFiles(JSON.parse(stored));
       } catch {
-        console.warn('Failed to parse recent files from localStorage');
       }
     }
   }, []);

@@ -77,7 +77,6 @@ class LazyMermaidLoader {
       script.async = true;
 
       script.onload = () => {
-        console.log('✅ Mermaid library loaded dynamically');
         this.status.loaded = true;
         this.status.loading = false;
         resolve();

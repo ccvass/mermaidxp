@@ -31,7 +31,6 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
   // Clear rendered elements when restoring from history
   useEffect(() => {
     if (isRestoring) {
-      console.log('🧹 RESTORE MODE - clearing all cached state');
       // CRITICAL: Clear the ref BEFORE clearing DOM so the next render knows to recreate everything
       renderedElementsRef.current.clear();
 
@@ -42,7 +41,6 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
           const transformGroup = svgElement.querySelector('g[data-custom-elements-layer]');
           if (transformGroup) {
             const rendered = transformGroup.querySelectorAll('[data-element-id]');
-            console.log('🧹 Force removing', rendered.length, 'elements from DOM');
             rendered.forEach((el) => el.remove());
           }
         }
@@ -52,23 +50,12 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
 
   // Render elements in the SVG
   useEffect(() => {
-    console.log(
-      '🎨 CanvasElementRenderer useEffect triggered. Elements:',
-      Object.keys(elements).length,
-      'isRestoring:',
-      isRestoring,
-      'renderVersion:',
-      renderVersion
-    );
-
     // CRITICAL: Don't render while restoring - let cleanup happen first
     if (isRestoring) {
-      console.log('⏸️ SKIPPING render - isRestoring is true');
       return;
     }
 
     if (!containerRef.current) {
-      console.warn('⚠️ containerRef.current is null');
       return;
     }
 
@@ -77,7 +64,6 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
 
     // If no SVG exists (blank canvas), create a basic one
     if (!svgElement) {
-      console.log('🔧 No SVG found, creating blank canvas SVG');
       svgElement = document.createElementNS(SVG_NS, 'svg');
       svgElement.setAttribute('width', '100%');
       svgElement.setAttribute('height', '100%');
@@ -89,9 +75,7 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
       // The SVG should be clean and DiagramDisplay will apply transforms when needed
 
       containerRef.current.appendChild(svgElement);
-      console.log('✅ Blank SVG canvas created (no transform applied - managed by DiagramDisplay)');
     } else {
-      console.log('✅ SVG found, proceeding with render');
     }
 
     const tryRender = () => {
@@ -101,7 +85,6 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
       // Find or create the custom elements container
       let customElementsLayer = svgElement.querySelector('g[data-custom-elements-layer]');
       if (!customElementsLayer) {
-        console.log('🔧 Creating custom elements layer');
         customElementsLayer = document.createElementNS(SVG_NS, 'g');
         customElementsLayer.setAttribute('data-custom-elements-layer', 'true');
         customElementsLayer.setAttribute('class', 'custom-elements-layer');
@@ -126,7 +109,6 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
         if (!currentElementIds.has(id)) {
           const existingElement = transformGroup.querySelector(`[data-element-id="${id}"]`);
           if (existingElement) {
-            console.log('🗑️ Removing element from DOM:', id);
             existingElement.remove();
           }
           renderedIds.delete(id);
@@ -142,7 +124,6 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
           updateElementInSVG(existingElement as SVGElement, element, selectedElementIds.includes(element.id));
         } else {
           // Create new element
-          console.log('➕ Creating new element:', element.id, element.type);
           const svgElement = createElementSVG(element, selectedElementIds.includes(element.id));
           if (svgElement) {
             transformGroup.appendChild(svgElement);
@@ -151,8 +132,6 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
         }
       });
 
-      console.log('✅ Render complete. Rendered IDs:', Array.from(renderedIds));
-      console.log('   Current element count in state:', Object.keys(elements).length);
     };
 
     // Execute render immediately since we've already checked for SVG
@@ -216,7 +195,6 @@ function createElementSVG(element: CanvasElement, isSelected: boolean): SVGEleme
       mainElement = createShapeElement(element);
       break;
     default:
-      console.warn(`Unknown element type: ${element.type}`);
       return null;
   }
 
@@ -376,7 +354,6 @@ function createSvgShapeElement(element: CanvasElement): SVGElement | null {
 
     return shapeElement;
   } catch (error) {
-    console.warn('Failed to generate SVG shape', error);
     return null;
   }
 }

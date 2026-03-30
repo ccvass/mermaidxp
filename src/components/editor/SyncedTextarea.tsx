@@ -36,8 +36,6 @@ export const SyncedTextarea: React.FC<SyncedTextareaProps> = ({
   // Handle undo/redo history changes
   useEffect(() => {
     if (historyIndex !== lastHistoryIndex) {
-      console.log('🔄 SyncedTextarea: History index changed from', lastHistoryIndex, 'to', historyIndex);
-      console.log('🔄 SyncedTextarea: Syncing value from props');
       setInternalValue(value);
       setLastHistoryIndex(historyIndex);
     }

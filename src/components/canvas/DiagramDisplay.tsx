@@ -102,25 +102,7 @@ export const DiagramDisplay: React.FC = () => {
 
   // Initialize Mermaid
   useEffect(() => {
-    if (window.mermaid) {
-      window.mermaid.initialize({
-        startOnLoad: false,
-        theme: theme === 'dark' ? 'dark' : 'default',
-        securityLevel: 'loose',
-        logLevel: 'error', // Only show errors, not debug info
-        fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
-        flowchart: {
-          useMaxWidth: false, // Important for drag and drop
-          htmlLabels: true,
-        },
-        sequence: {
-          useMaxWidth: false,
-        },
-        gantt: {
-          useMaxWidth: false,
-        },
-      });
-    }
+    // Mermaid initialization is handled by MermaidService — do not duplicate here
   }, [theme]);
 
   // Trigger render when code or theme changes
@@ -190,7 +172,6 @@ export const DiagramDisplay: React.FC = () => {
               originalParent.removeChild(svgElement);
             }
           } catch (elementError) {
-            console.warn('Error detaching custom element:', elementError);
           }
         });
       } catch (extractError) {
@@ -279,7 +260,6 @@ export const DiagramDisplay: React.FC = () => {
                 element.getBoundingClientRect();
               }
             } catch (error) {
-              console.warn('Error re-inserting custom element:', error);
             }
           });
 
@@ -325,13 +305,6 @@ export const DiagramDisplay: React.FC = () => {
             // Always center new diagrams (removed isInitialState check)
             if (diagramBounds.width > 0 && diagramBounds.height > 0) {
               dispatch(fitToViewport({ diagramBounds, viewportBounds }));
-              console.log(
-                '✅ Auto-centered diagram:',
-                `${diagramBounds.width}x${diagramBounds.height}`,
-                `at (${diagramBounds.x}, ${diagramBounds.y})`,
-                'in viewport',
-                `${viewportBounds.width}x${viewportBounds.height}`
-              );
             }
           }
         }, 100);

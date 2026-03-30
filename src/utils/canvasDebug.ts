@@ -54,7 +54,6 @@ export function logCanvasDebug(zoom: any, pan: any, context: string = 'Canvas'):
 
   if (debug.errors.length > 0) {
     console.group(`🐛 ${context} Debug Info`);
-    console.warn('Errors found:', debug.errors);
     console.groupEnd();
   }
 }

@@ -4,9 +4,7 @@
  */
 
 export default {
-  async fetch(request: Request, env: any): Promise<Response> {
-    // For now, just serve assets (React app)
-    // You can add API endpoints here later if needed
+  async fetch(_request: Request, _env: Record<string, string>): Promise<Response> {
     return new Response('Worker ready', { status: 200 });
   },
 };

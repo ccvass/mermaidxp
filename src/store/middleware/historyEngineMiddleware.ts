@@ -104,7 +104,6 @@ export const historyEngineMiddleware: Middleware = (store) => {
 
       if (currentIds.length !== lastIds.length || currentIds.join(',') !== lastIds.join(',')) {
         // Element added/removed - definitely need snapshot
-        console.log('✅ Snapshot needed - element count/IDs changed');
       } else {
         // Same elements exist, check if any properties changed
         let hasChanges = false;
@@ -137,7 +136,6 @@ export const historyEngineMiddleware: Middleware = (store) => {
         }
 
         if (!hasChanges) {
-          console.log('⏭️ SKIP snapshot - no actual changes to elements');
           return;
         }
       }
@@ -155,19 +153,12 @@ export const historyEngineMiddleware: Middleware = (store) => {
       return;
     }
 
-    console.log('🔄 STARTING RESTORE from snapshot:', {
-      timestamp: present.meta.timestamp,
-      description: present.meta.description,
-      elementsCount: Object.keys(present.canvasElements?.elements || {}).length,
-    });
-
     store.dispatch(setIsRestoring(true));
 
     // Apply in a microtask to ensure reducers settled
     Promise.resolve().then(() => {
       const snap = store.getState().historyEngine.present || present;
 
-      console.log('🔄 Restoring elements:', Object.keys(snap.canvasElements?.elements || {}).length, 'elements');
 
       // Restore diagram state (CODE ONLY - don't restore pan/zoom to avoid moving diagram)
       store.dispatch(applyMermaidCode(snap.mermaidCode));
@@ -180,37 +171,14 @@ export const historyEngineMiddleware: Middleware = (store) => {
       if (snap.canvasElements) {
         const elementsToRestore = snap.canvasElements.elements;
         const elementIds = Object.keys(elementsToRestore);
-        console.log('🔄 Dispatching setAllElements with:', elementsToRestore);
 
         // Log first element details for debugging
         if (elementIds.length > 0) {
-          const firstEl = elementsToRestore[elementIds[0]];
-          console.log('🔍 First element BEFORE restore:', {
-            id: elementIds[0],
-            position: firstEl.position,
-            size: firstEl.size,
-          });
+          // Elements available for restore
         }
 
         store.dispatch(setAllElements(elementsToRestore));
         store.dispatch(setSelectedElements(snap.canvasElements.selectedElementIds));
-
-        // Verify restoration
-        const afterState = store.getState();
-        const afterCount = Object.keys(afterState.canvasElements.elements).length;
-        console.log('✅ RESTORE COMPLETE. Elements now:', afterCount);
-
-        // Verify first element after restore
-        if (elementIds.length > 0) {
-          const restoredEl = afterState.canvasElements.elements[elementIds[0]];
-          console.log('🔍 AFTER restore:', {
-            id: elementIds[0],
-            position: restoredEl?.position,
-            size: restoredEl?.size,
-          });
-        }
-      } else {
-        console.warn('⚠️ No canvasElements in snapshot');
       }
 
       store.dispatch(setIsRestoring(false));
@@ -223,7 +191,6 @@ export const historyEngineMiddleware: Middleware = (store) => {
     const state = store.getState();
     const enabled = state.historyEngine.featureEnabled;
     if (!enabled) {
-      console.warn('⚠️ historyEngine is DISABLED - action not captured:', action.type);
       return result;
     }
 
@@ -276,10 +243,8 @@ export const historyEngineMiddleware: Middleware = (store) => {
 
     // Move/Resize with coalescence
     if (type === moveElement.type || type === moveElements.type) {
-      console.log('🔥 MOVE ACTION DETECTED - will coalesce');
       if (moveTimer) clearTimeout(moveTimer);
       moveTimer = setTimeout(() => {
-        console.log('🔥 COMMITTING MOVE SNAPSHOT');
         commitNow('element', 'Element moved');
         moveTimer = null;
       }, ELEMENT_MOVE_COALESCE_MS);
@@ -287,10 +252,8 @@ export const historyEngineMiddleware: Middleware = (store) => {
     }
 
     if (type === resizeElement.type) {
-      console.log('🔥 RESIZE ACTION DETECTED - will coalesce');
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        console.log('🔥 COMMITTING RESIZE SNAPSHOT');
         commitNow('element', 'Element resized');
         resizeTimer = null;
       }, ELEMENT_RESIZE_COALESCE_MS);
@@ -318,12 +281,8 @@ export const historyEngineMiddleware: Middleware = (store) => {
 
     if (immediateActionMap[type]) {
       // For these actions, capture immediately for precise undo/redo
-      console.log('🔥 ELEMENT ACTION DETECTED:', type, '→', immediateActionMap[type]);
       setTimeout(() => {
-        console.log('🔥 COMMITTING SNAPSHOT for:', immediateActionMap[type]);
         commitNow('element', immediateActionMap[type]);
-        const newState = store.getState();
-        console.log('🔥 SNAPSHOT COMMITTED. Past length:', newState.historyEngine.past.length);
       }, 10); // Small delay to ensure state is updated
       return result;
     }

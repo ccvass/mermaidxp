@@ -37,7 +37,9 @@ const AppContent: React.FC = () => {
 
   // Make store available globally for debugging
   React.useEffect(() => {
-    (window as any).store = store;
+    if (import.meta.env.DEV) {
+      (window as any).store = store;
+    }
   }, []);
 
   // Collaboration system disabled
@@ -58,7 +60,6 @@ const AppContent: React.FC = () => {
     // Capture initial snapshot after a delay to ensure everything is initialized
     setTimeout(() => {
       dispatch(captureNow({ actionType: 'initial' }));
-      console.log('📸 Initial snapshot captured');
     }, 500);
   }, [dispatch]);
 

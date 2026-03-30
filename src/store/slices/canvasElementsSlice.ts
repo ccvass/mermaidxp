@@ -234,9 +234,7 @@ const canvasElementsSlice = createSlice({
 
     // Bulk operations for history restoration
     setAllElements: (state, action: PayloadAction<Record<string, CanvasElement>>) => {
-      console.log('📦 setAllElements called with:', Object.keys(action.payload).length, 'elements');
       state.elements = action.payload;
-      console.log('📦 State now has:', Object.keys(state.elements).length, 'elements');
     },
 
     setSelectedElements: (state, action: PayloadAction<string[]>) => {

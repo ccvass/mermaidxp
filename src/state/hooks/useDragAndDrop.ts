@@ -226,11 +226,6 @@ const extractMermaidNodeId = (svgNodeGroup: SVGGraphicsElement): string | null =
   if (svgId && !structuralOrStyleKeywords.has(svgId.toLowerCase()) && svgId.length > 0) {
     return svgId;
   }
-  console.warn(
-    'Could not reliably extract Mermaid Node ID from SVG element:',
-    svgId,
-    Array.from(svgNodeGroup.classList)
-  );
   return null;
 };
 

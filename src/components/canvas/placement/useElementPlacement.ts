@@ -80,7 +80,6 @@ export function useElementPlacement({
         if (attempts < maxAttempts) {
           setTimeout(tryPosition, 50);
         } else {
-          console.warn('Could not find element to position after', maxAttempts, 'attempts');
         }
 
         return false;

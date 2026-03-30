@@ -33,9 +33,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(user);
       setLoading(false);
       if (user) {
-        console.log('✅ User signed in:', user.email);
       } else {
-        console.log('❌ User signed out');
       }
     });
 

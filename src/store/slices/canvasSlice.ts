@@ -118,12 +118,6 @@ const canvasSlice = createSlice({
       const panX = (viewportBounds.width - scaledWidth) / 2 - scaledOffsetX;
       const panY = (viewportBounds.height - scaledHeight) / 2 - scaledOffsetY;
 
-      console.log('📐 fitToViewport calculated:', {
-        zoom: round2(newZoom),
-        pan: { x: Math.round(panX), y: Math.round(panY) },
-        offset: { x: Math.round(offsetX), y: Math.round(offsetY) },
-      });
-
       state.zoom = round2(newZoom);
       state.pan = { x: panX, y: panY };
     },

@@ -17,7 +17,6 @@ export const useAutoSaveHistory = (delay: number = 1000) => {
     // Initialize with current code if history is empty or different
     if (history.length <= 1 && mermaidCode && mermaidCode !== lastSavedCodeRef.current) {
       lastSavedCodeRef.current = mermaidCode;
-      console.log('🔄 Auto-save: Initialized history with current code');
     }
   }, [history.length, mermaidCode]);
 
@@ -36,7 +35,6 @@ export const useAutoSaveHistory = (delay: number = 1000) => {
           // Force save by dispatching setMermaidCode
           dispatch(setMermaidCode(mermaidCode));
           lastSavedCodeRef.current = mermaidCode;
-          console.log('💾 Auto-save: Saved code change to history');
         }
       }, delay);
     }
@@ -58,7 +56,6 @@ export const useAutoSaveHistory = (delay: number = 1000) => {
     if (mermaidCode && mermaidCode !== lastSavedCodeRef.current) {
       dispatch(setMermaidCode(mermaidCode));
       lastSavedCodeRef.current = mermaidCode;
-      console.log('💾 Manual save: Saved current code to history');
     }
   };
 

@@ -100,15 +100,9 @@ const slice = createSlice({
     },
     undo(state) {
       if (state.past.length === 0) {
-        console.warn('⚠️ UNDO: No past snapshots');
         return;
       }
       const prev = state.past.pop()!;
-      console.log('⬅️ UNDO: Moving to snapshot:', {
-        timestamp: prev.meta.timestamp,
-        description: prev.meta.description,
-        elementsCount: Object.keys(prev.canvasElements?.elements || {}).length,
-      });
       if (state.present) {
         state.future.unshift(state.present);
         if (state.future.length > state.maxSize) {
