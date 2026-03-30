@@ -19,10 +19,6 @@ const initialState: DiagramState = {
 export const renderDiagram = createAsyncThunk(
   'diagram/render',
   async ({ code, theme }: { code: string; theme: Theme }): Promise<MermaidRenderResult> => {
-    const validation = mermaidService.validateCode(code);
-    if (!validation.isValid) {
-      throw new Error(validation.error);
-    }
     return await mermaidService.render(code, theme);
   }
 );
@@ -87,8 +83,6 @@ const diagramSlice = createSlice({
       const idx = action.payload;
       if (idx >= 0 && idx < state.sheets.length) {
         state.activeSheetIndex = idx;
-        state.mermaidCode = state.sheets[idx].code;
-        state.renderResult = null;
       }
     },
     clearSheets: (state) => {
