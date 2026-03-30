@@ -38,7 +38,13 @@ class ExportService {
   ): Promise<void> {
     try {
       // Get SVG dimensions
-      const bbox = (svgElement as SVGGraphicsElement).getBBox();
+      let bbox: { width: number; height: number };
+      try {
+        bbox = (svgElement as SVGGraphicsElement).getBBox();
+      } catch {
+        const rect = svgElement.getBoundingClientRect();
+        bbox = { width: rect.width || 800, height: rect.height || 600 };
+      }
       const width = bbox.width * EXPORT_CONFIG.PNG.scale;
       const height = bbox.height * EXPORT_CONFIG.PNG.scale;
 
@@ -121,7 +127,13 @@ class ExportService {
       }
 
       // Get SVG dimensions
-      const bbox = (svgElement as SVGGraphicsElement).getBBox();
+      let bbox: { width: number; height: number };
+      try {
+        bbox = (svgElement as SVGGraphicsElement).getBBox();
+      } catch {
+        const rect = svgElement.getBoundingClientRect();
+        bbox = { width: rect.width || 800, height: rect.height || 600 };
+      }
       const svgWidth = bbox.width;
       const svgHeight = bbox.height;
 

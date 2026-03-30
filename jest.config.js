@@ -16,11 +16,13 @@ export default {
     '^@store/(.*)$': '<rootDir>/src/store/$1',
     '^.+/constants/api\\.constants$': '<rootDir>/src/constants/__mocks__/api.constants.ts',
     '^.+/constants/diagram\\.constants$': '<rootDir>/src/constants/__mocks__/diagram.constants.ts',
-    '^.+/services/validationService$': '<rootDir>/src/services/__mocks__/validationService.ts',
+    '^.*/services/validationService(\\.ts)?$': '<rootDir>/src/services/__mocks__/validationService.ts',
+    '^.*/services/exportService(\\.ts)?$': '<rootDir>/src/services/__mocks__/exportService.ts',
     '^.+/services/mermaidService$': '<rootDir>/src/services/__mocks__/mermaidService.ts',
     '^mermaid$': '<rootDir>/src/__mocks__/mermaid.ts',
     // Mapear módulos problemáticos a mocks
     '^@braintree/sanitize-url$': '<rootDir>/src/__mocks__/@braintree/sanitize-url.ts',
+    '^.+/config/firebase$': '<rootDir>/src/config/__mocks__/firebase.ts',
     '^debug$': '<rootDir>/src/__mocks__/debug.ts',
   },
 
@@ -51,7 +53,7 @@ export default {
 
   // Optimizar transformIgnorePatterns para incluir módulos problemáticos
   transformIgnorePatterns: [
-    'node_modules/(?!(mermaid|d3|d3-.*|dagre-d3|dagre|cytoscape|@braintree/sanitize-url|dayjs|debug)/)',
+    'node_modules/(?!(mermaid|d3|d3-.*|dagre-d3|dagre|cytoscape|@braintree/sanitize-url|dayjs|debug|firebase|@firebase)/)',
   ],
 
   extensionsToTreatAsEsm: ['.ts', '.tsx'],

@@ -22,7 +22,7 @@ import {
 } from '../../features/canvas/utils/toolbarDrag';
 import CollaborationManager from '../collaboration/CollaborationManager';
 import CollaborativeCursors from '../collaboration/CollaborativeCursors';
-// Collaboration imports disabled
+  // Collaboration imports disabled
 
 // Constants
 const CustomElementSelector = '.custom-text-group, .custom-image-group, .custom-svg-shape-group, .custom-icon-group';
@@ -49,7 +49,8 @@ export const DiagramDisplay: React.FC = () => {
   const { beginGroup, endGroup, captureNow } = useHistoryEngine();
   const { createElement, deleteSelectedElements, hasSelection } = useCanvasElements();
   // Collaboration disabled
-  const users: any[] = [];
+  // Collaboration disabled — stub values
+  const users = [] as never[];
   const sessionId: string | undefined = undefined;
   const isConnected = false;
   const isEnabled = false;
@@ -195,23 +196,11 @@ export const DiagramDisplay: React.FC = () => {
         svgElement.style.height = '100%';
         svgElement.style.overflow = 'visible'; // Allow content to be visible outside bounds
 
-        // Remove all tooltips from SVG elements (aggressive cleanup)
-        const elementsWithTitles = svgElement.querySelectorAll('title');
-        elementsWithTitles.forEach((title) => title.remove());
-
-        // Remove title attributes that create tooltips
-        const allElements = svgElement.querySelectorAll('*');
-        allElements.forEach((el) => {
-          el.removeAttribute('title');
-          el.removeAttribute('data-title');
-          el.removeAttribute('aria-label');
-          // Remove any tooltip-related attributes
-          if (el.hasAttribute('tooltip')) el.removeAttribute('tooltip');
-        });
-
-        // Disable tooltips on the SVG itself
+        // Disable native SVG tooltips via CSS instead of removing accessibility attributes
         svgElement.removeAttribute('title');
-        svgElement.style.pointerEvents = 'auto'; // Ensure interactions work but no tooltips
+        const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+        style.textContent = 'title { display: none; } [data-title] { pointer-events: auto; }';
+        svgElement.prepend(style);
 
         // Wrap content in a group (no transform — CSS transform on SVG handles zoom/pan)
         const transformGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -695,7 +684,7 @@ export const DiagramDisplay: React.FC = () => {
       {(activeDragInfo || isPanning) && (
         <DragIndicator
           isActive={!!activeDragInfo || isPanning}
-          elementId={activeDragInfo?.draggedElementId || (isPanning ? 'Canvas' : undefined)}
+          elementId={activeDragInfo && typeof activeDragInfo === 'object' ? activeDragInfo.draggedElementId : (isPanning ? 'Canvas' : undefined)}
         />
       )}
     </div>

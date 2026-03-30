@@ -1,82 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useCallback, useRef } from 'react';
 
-const DRAGGABLE_ELEMENT_CLASSES = [
-  'node',
-  'cluster',
-  'actor',
-  'erNode',
-  'section',
-  'task',
-  'note',
-  'requirement',
-  'element',
-  'commit',
-  'state',
-  'participant',
-  'pieCircle',
-  'pieSlice',
-  'lane',
-  'messageLine0',
-  'messageLine1',
-  'messageText',
-  'loop',
-  'box',
-  'sequence-number',
-  // Flowchart specific classes
-  'flowchart-node',
-  'flowchart-rect',
-  'flowchart-circle',
-  'flowchart-diamond',
-  'flowchart-ellipse',
-  'flowchart-odd',
-  'flowchart-rhombus',
-  // Generic node classes
-  'nodeLabel',
-  'nodeText',
-  'basic',
-  'rect',
-  'circle',
-  'diamond',
-  'odd',
-  'rhombus',
-  // Class diagram classes
-  'class',
-  'classBox',
-  'classTitle',
-  'classText',
-  // State diagram classes
-  'stateBox',
-  'stateText',
-  'statediagram-state',
-  // Sequence diagram classes
-  'actor-box',
-  'actor-text',
-  'activation',
-  // ER diagram classes
-  'entity',
-  'entityBox',
-  'entityLabel',
-  // Gantt classes
-  'taskText',
-  'taskRect',
-  'section',
-  // Git graph classes
-  'commit-id',
-  'commit-msg',
-  'commit-type',
-  // Journey classes
-  'journey-section',
-  'journey-task',
-  // Common Mermaid patterns
-  'label-container',
-  'label-text',
-  'labelBox',
-  'slice',
-  // Generated for sequence diagrams
-  'note-group',
-  'loop-group',
-];
+import { DRAGGABLE_ELEMENT_CLASSES } from '../../constants/diagram.constants';
 
 const getSVGTranslate = (element: SVGGraphicsElement): { x: number; y: number } => {
   const transform = element.getAttribute('transform');
@@ -230,11 +155,22 @@ const extractMermaidNodeId = (svgNodeGroup: SVGGraphicsElement): string | null =
 };
 
 export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | null>, zoom: number) => {
-  const [activeDragInfo, setActiveDragInfo] = useState<any | null>(null);
+  const [activeDragInfo, setActiveDragInfo] = useState<{
+    element: SVGGraphicsElement;
+    draggedElementId: string;
+    isCluster: boolean;
+    allMovedNodeIds: string[];
+    initialSvgTransform: { x: number; y: number };
+    initialMousePos: { x: number; y: number };
+  } | 'canvas' | null>(null);
   const canvasInitialPanRef = useRef<{ x: number; y: number } | null>(null);
   const hasLoggedOnce = useRef(false); // Prevent spam logging
   const canvasInitialMousePosRef = useRef<{ x: number; y: number } | null>(null);
-  const edgeInfoCacheRef = useRef<any[]>([]);
+  const edgeInfoCacheRef = useRef<Array<{
+    pathEl: SVGPathElement;
+    originalD: string;
+    connectedNodeIds: string[];
+  }>>([]);
 
   // Prevent concurrent executions of markDraggableElements
   let isMarking = false;

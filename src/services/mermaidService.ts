@@ -72,18 +72,11 @@ class MermaidService {
 
     // Check for basic Mermaid syntax
     const validDiagramTypes = [
-      'graph',
-      'flowchart',
-      'sequenceDiagram',
-      'classDiagram',
-      'stateDiagram',
-      'erDiagram',
-      'journey',
-      'gantt',
-      'pie',
-      'gitGraph',
-      'requirement',
-      'c4Context',
+      'graph', 'flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram',
+      'erDiagram', 'journey', 'gantt', 'pie', 'gitGraph', 'requirement',
+      'c4Context', 'c4Container', 'c4Component', 'c4Dynamic', 'c4Deployment',
+      'mindmap', 'timeline', 'sankey', 'xychart', 'block', 'packet',
+      'kanban', 'architecture', 'zenuml', 'quadrantChart',
     ];
 
     const firstLine = code.trim().split('\n')[0];

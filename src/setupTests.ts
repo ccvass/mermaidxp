@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import 'jest-fetch-mock/setupJest';
 
 // Mock window.mermaid
 const mockMermaid = {
@@ -55,3 +56,9 @@ beforeAll(() => {
 afterAll(() => {
   console.error = originalError;
 });
+
+// Ensure DOMParser is available (jsdom provides it but some tests reset it)
+if (typeof globalThis.DOMParser === 'undefined') {
+  const { JSDOM } = require('jsdom');
+  globalThis.DOMParser = new JSDOM().window.DOMParser;
+}

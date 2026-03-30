@@ -30,7 +30,10 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: true,
       rollupOptions: {
         output: {
-          manualChunks: undefined,
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-redux', '@reduxjs/toolkit'],
+            firebase: ['firebase/app', 'firebase/auth'],
+          },
         },
       },
     },

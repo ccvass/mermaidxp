@@ -368,10 +368,10 @@ function createShapeElement(element: CanvasElement): SVGElement {
   rect.setAttribute('y', '0');
   rect.setAttribute('width', element.size.width.toString());
   rect.setAttribute('height', element.size.height.toString());
-  rect.setAttribute('fill', '#ff0000'); // BRIGHT RED - IMPOSSIBLE TO MISS!
-  rect.setAttribute('stroke', '#000000'); // BLACK BORDER
-  rect.setAttribute('stroke-width', '4'); // THICK BORDER
-  rect.setAttribute('rx', '10'); // ROUNDED CORNERS
+  rect.setAttribute('fill', '#e2e8f0');
+  rect.setAttribute('stroke', '#94a3b8');
+  rect.setAttribute('stroke-width', '1');
+  rect.setAttribute('rx', '4');
 
   if (element.style?.opacity !== undefined) {
     rect.setAttribute('opacity', element.style.opacity.toString());

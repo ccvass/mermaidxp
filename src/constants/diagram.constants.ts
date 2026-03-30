@@ -36,18 +36,11 @@ export const VALIDATION_CONFIG = {
   MAX_CODE_LENGTH: 100000, // Maximum 100KB of code
   MAX_URLS: 10, // Maximum number of URLs allowed in code
   ALLOWED_DIAGRAM_TYPES: [
-    'graph',
-    'flowchart',
-    'sequenceDiagram',
-    'classDiagram',
-    'stateDiagram',
-    'erDiagram',
-    'journey',
-    'gantt',
-    'pie',
-    'gitgraph',
-    'requirement',
-    'c4Context',
+    'graph', 'flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram',
+    'erDiagram', 'journey', 'gantt', 'pie', 'gitgraph', 'requirement',
+    'c4Context', 'c4Container', 'c4Component', 'c4Dynamic', 'c4Deployment',
+    'mindmap', 'timeline', 'sankey', 'xychart', 'block', 'packet',
+    'kanban', 'architecture', 'zenuml', 'quadrantChart',
   ],
   BLOCKED_PATTERNS: [
     /<script/i,
@@ -120,4 +113,15 @@ export const DRAGGABLE_ELEMENT_CLASSES = [
   // Common Mermaid patterns
   'label-container',
   'label-text',
+  'labelBox',
+  'slice',
+  // Sequence diagram extras
+  'messageLine0',
+  'messageLine1',
+  'messageText',
+  'loop',
+  'box',
+  'sequence-number',
+  'note-group',
+  'loop-group',
 ];
