@@ -224,13 +224,9 @@ export const Header: FC<HeaderProps> = ({ title }) => {
       document.body.appendChild(container);
 
       if (format === 'pdf') {
-        const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-        const pdfW = pdf.internal.pageSize.getWidth();
-        const pdfH = pdf.internal.pageSize.getHeight();
-        const padding = 40;
+        let pdf: jsPDF | null = null;
 
         for (let i = 0; i < sheets.length; i++) {
-          if (i > 0) pdf.addPage();
           const result = await mermaidService.render(sheets[i].code, themeEnum);
           if (!result.svg) continue;
 
@@ -238,7 +234,13 @@ export const Header: FC<HeaderProps> = ({ title }) => {
           const svg = container.querySelector('svg');
           if (!svg) continue;
 
-          // SVG to canvas
+          // Get actual SVG dimensions
+          let svgW = svg.width.baseVal.value || svg.viewBox.baseVal.width || 800;
+          let svgH = svg.height.baseVal.value || svg.viewBox.baseVal.height || 600;
+          if (svgW < 10) svgW = 800;
+          if (svgH < 10) svgH = 600;
+
+          // Render SVG to high-res canvas preserving aspect ratio
           const svgStr = new XMLSerializer().serializeToString(svg);
           const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
           const img = await new Promise<HTMLImageElement>((res, rej) => {
@@ -248,26 +250,53 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             im.src = dataUrl;
           });
 
+          const scaleFactor = 4;
+          const cW = Math.max(svgW, 400) * scaleFactor;
+          const cH = Math.max(svgH, 300) * scaleFactor;
           const canvas = document.createElement('canvas');
-          canvas.width = img.width * 2 || 1600;
-          canvas.height = img.height * 2 || 1200;
+          canvas.width = cW;
+          canvas.height = cH;
           const ctx = canvas.getContext('2d')!;
           ctx.fillStyle = 'white';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          ctx.fillRect(0, 0, cW, cH);
+          ctx.drawImage(img, 0, 0, cW, cH);
 
-          const scale = Math.min((pdfW - 2 * padding) / canvas.width, (pdfH - 2 * padding) / canvas.height);
-          const w = canvas.width * scale;
-          const h = canvas.height * scale;
+          // Choose orientation based on diagram aspect ratio
+          const orientation = svgW >= svgH ? 'landscape' : 'portrait';
+
+          if (!pdf) {
+            pdf = new jsPDF({ orientation, unit: 'pt', format: 'a4' });
+          } else {
+            pdf.addPage('a4', orientation);
+          }
+
+          const pdfW = pdf.internal.pageSize.getWidth();
+          const pdfH = pdf.internal.pageSize.getHeight();
+          const padding = 30;
+          const maxW = pdfW - 2 * padding;
+          const maxH = pdfH - 2 * padding;
+
+          // Scale to fit while preserving aspect ratio
+          const imgRatio = cW / cH;
+          let w: number, h: number;
+          if (maxW / maxH > imgRatio) {
+            h = maxH;
+            w = h * imgRatio;
+          } else {
+            w = maxW;
+            h = w / imgRatio;
+          }
+
           const x = (pdfW - w) / 2;
           const y = (pdfH - h) / 2;
-
-          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, w, h);
+          pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', x, y, w, h);
         }
 
         document.body.removeChild(container);
-        pdf.save('diagrams.pdf');
-        dispatch(showNotification({ message: `Exported ${sheets.length} pages as PDF`, type: 'success' }));
+        if (pdf) {
+          pdf.save('diagrams.pdf');
+          dispatch(showNotification({ message: `Exported ${sheets.length} pages as PDF`, type: 'success' }));
+        }
       } else {
         for (let i = 0; i < sheets.length; i++) {
           const result = await mermaidService.render(sheets[i].code, themeEnum);
