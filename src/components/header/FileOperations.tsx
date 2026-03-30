@@ -156,17 +156,15 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
             dispatch(deleteElements(elementIds));
           }
 
-          // Check if MD file contains multiple mermaid blocks → sheets mode
+          // Check if MD file contains mermaid blocks → sheets mode
           const isMd = file.name.endsWith('.md');
           const sheets = isMd ? parseMdToSheets(content) : [];
 
-          if (sheets.length > 1) {
+          if (isMd && sheets.length >= 1) {
             dispatch(setSheets(sheets));
           } else {
             dispatch(clearSheets());
-            // If single mermaid block in MD, extract it; otherwise use raw content
-            const code = sheets.length === 1 ? sheets[0].code : content;
-            dispatch(setMermaidCode(code));
+            dispatch(setMermaidCode(content));
           }
 
           dispatch(captureNow({ actionType: `Opened file: ${file.name}` }));

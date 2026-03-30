@@ -81,9 +81,7 @@ const diagramSlice = createSlice({
     setSheets: (state, action: PayloadAction<{ title: string; code: string }[]>) => {
       state.sheets = action.payload;
       state.activeSheetIndex = 0;
-      if (action.payload.length > 0) {
-        state.mermaidCode = action.payload[0].code;
-      }
+      // Don't set mermaidCode here — SheetsView handles its own rendering
     },
     setActiveSheet: (state, action: PayloadAction<number>) => {
       const idx = action.payload;
