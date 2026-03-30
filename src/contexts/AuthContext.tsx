@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(user);
       setLoading(false);
       if (user) {
-      } else {
+        // user authenticated
       }
     });
 

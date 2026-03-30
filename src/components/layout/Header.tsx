@@ -160,7 +160,8 @@ export const Header: FC<HeaderProps> = ({ title }) => {
 
     try {
       // Find SVG in mermaid container
-      const svgElement: SVGElement | null = document.querySelector('#mermaid-container svg') || document.querySelector('.sheets-active-diagram svg');
+      const svgElement: SVGElement | null =
+        document.querySelector('#mermaid-container svg') || document.querySelector('.sheets-active-diagram svg');
 
       if (!svgElement) {
         dispatch(
@@ -212,7 +213,10 @@ export const Header: FC<HeaderProps> = ({ title }) => {
   };
 
   const handleExportAllPages = async (format: 'svg' | 'png' | 'pdf') => {
-    if (!user) { setShowLoginModal(true); return; }
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
     try {
       setShowExportMenu(false);
       dispatch(showNotification({ message: `Exporting ${sheets.length} pages...`, type: 'info' }));
@@ -314,7 +318,7 @@ export const Header: FC<HeaderProps> = ({ title }) => {
               const name = `${(i + 1).toString().padStart(2, '0')}-${sheets[i].title.replace(/[^a-zA-Z0-9]/g, '_')}`;
               if (format === 'svg') await exportService.exportSVG(svg as unknown as SVGElement, name);
               else await exportService.exportPNG(svg as unknown as SVGElement, name, 'white');
-              await new Promise(r => setTimeout(r, 300));
+              await new Promise((r) => setTimeout(r, 300));
             }
           }
         }

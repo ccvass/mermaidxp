@@ -79,8 +79,7 @@ export function useElementPlacement({
         attempts++;
         if (attempts < maxAttempts) {
           setTimeout(tryPosition, 50);
-        } else {
-        }
+        } // else: no-op
 
         return false;
       };

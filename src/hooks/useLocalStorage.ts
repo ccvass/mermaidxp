@@ -36,8 +36,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
 
       // We dispatch a custom event so every useLocalStorage hook are notified
       window.dispatchEvent(new Event('local-storage'));
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {

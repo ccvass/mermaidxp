@@ -105,7 +105,9 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     };
 
     render();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [code, theme]);
 
   if (error) {
@@ -119,12 +121,7 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     );
   }
 
-  return (
-    <div
-      ref={containerRef}
-      className="sheets-active-diagram flex items-center justify-center min-h-full p-8"
-    />
-  );
+  return <div ref={containerRef} className="sheets-active-diagram flex items-center justify-center min-h-full p-8" />;
 };
 
 export default SheetsView;

@@ -118,6 +118,7 @@ export function useOptimizedMermaidRenderer(): UseOptimizedMermaidRendererReturn
 
       // Log performance warning if render is slow
       if (avgRenderTime > 500) {
+        // slow render detected
       }
 
       // Report to performance monitoring service if needed

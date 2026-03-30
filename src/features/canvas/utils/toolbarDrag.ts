@@ -109,8 +109,7 @@ export function buildElementFromToolbarDrag(
           context.font = createFontString(payload);
           return context.measureText(payload.content || '').width;
         }
-      } catch (error) {
-      }
+      } catch (error) {}
     }
     return Math.max(payload.content.length, 1) * payload.fontSize * 0.6;
   };

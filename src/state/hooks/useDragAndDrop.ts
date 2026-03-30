@@ -155,22 +155,28 @@ const extractMermaidNodeId = (svgNodeGroup: SVGGraphicsElement): string | null =
 };
 
 export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | null>, zoom: number) => {
-  const [activeDragInfo, setActiveDragInfo] = useState<{
-    element: SVGGraphicsElement;
-    draggedElementId: string;
-    isCluster: boolean;
-    allMovedNodeIds: string[];
-    initialSvgTransform: { x: number; y: number };
-    initialMousePos: { x: number; y: number };
-  } | 'canvas' | null>(null);
+  const [activeDragInfo, setActiveDragInfo] = useState<
+    | {
+        element: SVGGraphicsElement;
+        draggedElementId: string;
+        isCluster: boolean;
+        allMovedNodeIds: string[];
+        initialSvgTransform: { x: number; y: number };
+        initialMousePos: { x: number; y: number };
+      }
+    | 'canvas'
+    | null
+  >(null);
   const canvasInitialPanRef = useRef<{ x: number; y: number } | null>(null);
   const hasLoggedOnce = useRef(false); // Prevent spam logging
   const canvasInitialMousePosRef = useRef<{ x: number; y: number } | null>(null);
-  const edgeInfoCacheRef = useRef<Array<{
-    pathEl: SVGPathElement;
-    originalD: string;
-    connectedNodeIds: string[];
-  }>>([]);
+  const edgeInfoCacheRef = useRef<
+    Array<{
+      pathEl: SVGPathElement;
+      originalD: string;
+      connectedNodeIds: string[];
+    }>
+  >([]);
 
   // Prevent concurrent executions of markDraggableElements
   let isMarking = false;

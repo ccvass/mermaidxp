@@ -99,8 +99,10 @@ export const historyEngineMiddleware: Middleware = (store) => {
       // Check if anything meaningful changed
       const codeChanged = state.diagram.mermaidCode !== lastSnapshot.mermaidCode;
       const zoomChanged = state.canvas.zoom !== lastSnapshot.canvas.zoom;
-      const panChanged = state.canvas.pan.x !== lastSnapshot.canvas.pan.x || state.canvas.pan.y !== lastSnapshot.canvas.pan.y;
-      const selectionChanged = JSON.stringify(state.canvas.selectedNodes) !== JSON.stringify(lastSnapshot.canvas.selectedNodes);
+      const panChanged =
+        state.canvas.pan.x !== lastSnapshot.canvas.pan.x || state.canvas.pan.y !== lastSnapshot.canvas.pan.y;
+      const selectionChanged =
+        JSON.stringify(state.canvas.selectedNodes) !== JSON.stringify(lastSnapshot.canvas.selectedNodes);
 
       let elementsChanged = false;
       if (lastSnapshot.canvasElements) {
@@ -114,8 +116,22 @@ export const historyEngineMiddleware: Middleware = (store) => {
           for (const id of currentIds) {
             const current = currentElements[id];
             const last = lastElements[id];
-            if (JSON.stringify({ position: current.position, size: current.size, rotation: current.rotation, content: current.content, style: current.style }) !==
-                JSON.stringify({ position: last.position, size: last.size, rotation: last.rotation, content: last.content, style: last.style })) {
+            if (
+              JSON.stringify({
+                position: current.position,
+                size: current.size,
+                rotation: current.rotation,
+                content: current.content,
+                style: current.style,
+              }) !==
+              JSON.stringify({
+                position: last.position,
+                size: last.size,
+                rotation: last.rotation,
+                content: last.content,
+                style: last.style,
+              })
+            ) {
               elementsChanged = true;
               break;
             }
@@ -147,7 +163,6 @@ export const historyEngineMiddleware: Middleware = (store) => {
     // Apply in a microtask to ensure reducers settled
     Promise.resolve().then(() => {
       const snap = store.getState().historyEngine.present || present;
-
 
       // Restore diagram state (CODE ONLY - don't restore pan/zoom to avoid moving diagram)
       store.dispatch(applyMermaidCode(snap.mermaidCode));

@@ -277,8 +277,7 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
     if (stored) {
       try {
         setRecentFiles(JSON.parse(stored));
-      } catch {
-      }
+      } catch {}
     }
   }, []);
 

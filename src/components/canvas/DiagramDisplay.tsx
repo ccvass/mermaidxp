@@ -22,7 +22,7 @@ import {
 } from '../../features/canvas/utils/toolbarDrag';
 import CollaborationManager from '../collaboration/CollaborationManager';
 import CollaborativeCursors from '../collaboration/CollaborativeCursors';
-  // Collaboration imports disabled
+// Collaboration imports disabled
 
 // Constants
 const CustomElementSelector = '.custom-text-group, .custom-image-group, .custom-svg-shape-group, .custom-icon-group';
@@ -172,8 +172,7 @@ export const DiagramDisplay: React.FC = () => {
             if (originalParent) {
               originalParent.removeChild(svgElement);
             }
-          } catch (elementError) {
-          }
+          } catch (elementError) {}
         });
       } catch (extractError) {
         console.error('Error during custom element extraction:', extractError);
@@ -248,8 +247,7 @@ export const DiagramDisplay: React.FC = () => {
               if (element.getBoundingClientRect) {
                 element.getBoundingClientRect();
               }
-            } catch (error) {
-            }
+            } catch (error) {}
           });
 
           // Clear the ref once done to avoid duplicates on subsequent renders
@@ -684,7 +682,13 @@ export const DiagramDisplay: React.FC = () => {
       {(activeDragInfo || isPanning) && (
         <DragIndicator
           isActive={!!activeDragInfo || isPanning}
-          elementId={activeDragInfo && typeof activeDragInfo === 'object' ? activeDragInfo.draggedElementId : (isPanning ? 'Canvas' : undefined)}
+          elementId={
+            activeDragInfo && typeof activeDragInfo === 'object'
+              ? activeDragInfo.draggedElementId
+              : isPanning
+                ? 'Canvas'
+                : undefined
+          }
         />
       )}
     </div>

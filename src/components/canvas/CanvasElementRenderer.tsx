@@ -75,8 +75,7 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
       // The SVG should be clean and DiagramDisplay will apply transforms when needed
 
       containerRef.current.appendChild(svgElement);
-    } else {
-    }
+    } // else: no-op
 
     const tryRender = () => {
       // Find the transform group (where mermaid content lives)
@@ -131,7 +130,6 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
           }
         }
       });
-
     };
 
     // Execute render immediately since we've already checked for SVG

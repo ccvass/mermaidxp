@@ -59,6 +59,7 @@ export default [
       'no-console': 'off',
       'no-debugger': 'warn',
       'no-unused-vars': 'off', // Use TypeScript version instead
+      'no-empty': ['error', { allowEmptyCatch: true }],
 
       // Prettier integration
       'prettier/prettier': 'error',

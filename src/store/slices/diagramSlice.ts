@@ -108,7 +108,17 @@ const diagramSlice = createSlice({
   },
 });
 
-export const { setMermaidCode, applyMermaidCode, appendMermaidCode, undo, redo, clearError, setRenderResult, setSheets, setActiveSheet, clearSheets } =
-  diagramSlice.actions;
+export const {
+  setMermaidCode,
+  applyMermaidCode,
+  appendMermaidCode,
+  undo,
+  redo,
+  clearError,
+  setRenderResult,
+  setSheets,
+  setActiveSheet,
+  clearSheets,
+} = diagramSlice.actions;
 
 export default diagramSlice.reducer;
