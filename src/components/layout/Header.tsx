@@ -259,8 +259,8 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             const svgStr = new XMLSerializer().serializeToString(svg);
             document.body.removeChild(wrapper);
 
-            // Render to canvas
-            const scale = 2;
+            // Render to canvas at 4x for sharp output
+            const scale = 4;
             const cW = Math.ceil(svgW * scale);
             const cH = Math.ceil(svgH * scale);
             const canvas = document.createElement('canvas');
