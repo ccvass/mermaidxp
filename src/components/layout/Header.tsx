@@ -220,7 +220,6 @@ export const Header: FC<HeaderProps> = ({ title }) => {
       const themeEnum = theme === 'dark' ? Theme.Dark : Theme.Light;
 
       if (format === 'pdf') {
-        const { svg2pdf } = await import('svg2pdf.js');
         let pdf: jsPDF | null = null;
         let exported = 0;
 
@@ -229,7 +228,7 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             const result = await mermaidService.render(sheets[i].code, themeEnum);
             if (!result.svg || result.error) continue;
 
-            // Render SVG in real DOM to get accurate dimensions
+            // Render in real DOM for accurate layout
             const wrapper = document.createElement('div');
             wrapper.style.cssText = 'position:absolute;left:-9999px;top:0;overflow:visible';
             wrapper.innerHTML = result.svg;
@@ -243,6 +242,32 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             const rect = svgEl.getBoundingClientRect();
             const svgW = Math.max(rect.width, 200);
             const svgH = Math.max(rect.height, 150);
+
+            // Set explicit dimensions and serialize
+            svgEl.setAttribute('width', String(Math.ceil(svgW)));
+            svgEl.setAttribute('height', String(Math.ceil(svgH)));
+            const svgStr = new XMLSerializer().serializeToString(svgEl);
+            document.body.removeChild(wrapper);
+
+            // High-res canvas (6x)
+            const scale = 6;
+            const cW = Math.ceil(svgW * scale);
+            const cH = Math.ceil(svgH * scale);
+            const canvas = document.createElement('canvas');
+            canvas.width = cW;
+            canvas.height = cH;
+            const ctx = canvas.getContext('2d')!;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, cW, cH);
+
+            // Use foreignObject trick: render SVG via Image
+            const b64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+            await new Promise<void>((resolve, reject) => {
+              const img = new Image();
+              img.onload = () => { ctx.drawImage(img, 0, 0, cW, cH); resolve(); };
+              img.onerror = () => reject(new Error('render'));
+              img.src = b64;
+            });
 
             // A4 page
             const orient = svgW >= svgH ? 'l' : 'p';
@@ -267,12 +292,11 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             pdf.setTextColor(30, 30, 30);
             pdf.text(sheets[i].title, pw / 2, m + 16, { align: 'center' });
 
-            // Vector SVG directly into PDF (no rasterization!)
-            await svg2pdf(svgEl, pdf, { x, y, width: w, height: h });
-
-            document.body.removeChild(wrapper);
+            // Add image WITHOUT compression for maximum quality
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage({ imageData: imgData, format: 'PNG', x, y, width: w, height: h, compression: 'NONE' });
             exported++;
-          } catch { /* skip */ }
+          } catch { /* skip failed page */ }
           await new Promise(r => setTimeout(r, 200));
         }
 
@@ -306,6 +330,7 @@ export const Header: FC<HeaderProps> = ({ title }) => {
       dispatch(showNotification({ message: 'Export failed', type: 'error' }));
     }
   };
+
 
 
   return (
