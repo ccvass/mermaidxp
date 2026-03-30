@@ -269,15 +269,38 @@ export const Header: FC<HeaderProps> = ({ title }) => {
               img.src = b64;
             });
 
-            // A4 page
-            const orient = svgW >= svgH ? 'l' : 'p';
-            if (!pdf) { pdf = new jsPDF({ orientation: orient, unit: 'pt', format: 'a4' }); }
-            else { pdf.addPage('a4', orient); }
+            // Page sizing: use A4 if diagram fits well, otherwise custom page size
+            const a4W = 841.89; // A4 landscape width in pt
+            const a4H = 595.28; // A4 landscape height in pt
+            const m = 36;
+            const tH = 28;
+
+            // Check if diagram would be too small on A4 (ratio < 0.35 means illegible)
+            const a4orient = svgW >= svgH ? 'l' : 'p';
+            const testPW = a4orient === 'l' ? a4W : a4H;
+            const testPH = a4orient === 'l' ? a4H : a4W;
+            const testRatio = Math.min((testPW - 2 * m) / svgW, (testPH - 2 * m - tH) / svgH);
+
+            let pageFormat: string | [number, number];
+            let orient: 'l' | 'p';
+
+            if (testRatio >= 0.35) {
+              // Fits well on A4
+              pageFormat = 'a4';
+              orient = a4orient;
+            } else {
+              // Too big for A4 — custom page sized to diagram
+              const targetW = svgW * 0.75 + 2 * m; // 75% of original + margins
+              const targetH = svgH * 0.75 + 2 * m + tH;
+              pageFormat = [Math.max(targetW, 200), Math.max(targetH, 200)];
+              orient = targetW >= targetH ? 'l' : 'p';
+            }
+
+            if (!pdf) { pdf = new jsPDF({ orientation: orient, unit: 'pt', format: pageFormat }); }
+            else { pdf.addPage(pageFormat, orient); }
 
             const pw = pdf.internal.pageSize.getWidth();
             const ph = pdf.internal.pageSize.getHeight();
-            const m = 36;
-            const tH = 28;
             const maxW = pw - 2 * m;
             const maxH = ph - 2 * m - tH;
             const ratio = Math.min(maxW / svgW, maxH / svgH);
