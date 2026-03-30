@@ -36,6 +36,7 @@ declare global {
 export const DiagramDisplay: React.FC = () => {
   const dispatch = useAppDispatch();
   const { mermaidCode, renderResult, isLoading, error } = useAppSelector((state) => state.diagram);
+  const sheetsActive = useAppSelector((state) => state.diagram.sheets.length > 0);
   const { theme } = useAppSelector((state) => state.ui);
   const { zoom, pan, interactionMode, placingElement } = useAppSelector((state) => state.canvas);
 
@@ -88,6 +89,7 @@ export const DiagramDisplay: React.FC = () => {
     }
 
     renderTimeoutRef.current = setTimeout(() => {
+      if (sheetsActive) return; // Don't render when in sheets mode
       if (mermaidCode.trim()) {
         const themeEnum = theme === 'dark' ? Theme.Dark : Theme.Light;
         dispatch(renderDiagram({ code: mermaidCode, theme: themeEnum }));
