@@ -27,6 +27,14 @@ export interface DiagramState {
   error: string | null;
   history: string[];
   historyIndex: number;
+  sheets: SheetData[];
+  activeSheetIndex: number;
+}
+
+export interface SheetData {
+  title: string;
+  code: string;
+  renderResult?: MermaidRenderResult | null;
 }
 
 export interface CanvasState {

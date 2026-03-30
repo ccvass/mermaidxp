@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { setMermaidCode } from '../../store/slices/diagramSlice';
+import { setMermaidCode, setSheets, clearSheets } from '../../store/slices/diagramSlice';
 import { showNotification } from '../../store/slices/uiSlice';
 import { captureNow } from '../../store/slices/historyEngineSlice';
 import { deleteElements } from '../../store/slices/canvasElementsSlice';
 import { useAuth } from '../../contexts/AuthContext';
+import { parseMdToSheets } from '../../utils/mdParser';
 import { LoginModal } from '../auth/LoginModal';
 
 interface FileOperationsProps {
@@ -155,7 +156,19 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
             dispatch(deleteElements(elementIds));
           }
 
-          dispatch(setMermaidCode(content));
+          // Check if MD file contains multiple mermaid blocks → sheets mode
+          const isMd = file.name.endsWith('.md');
+          const sheets = isMd ? parseMdToSheets(content) : [];
+
+          if (sheets.length > 1) {
+            dispatch(setSheets(sheets));
+          } else {
+            dispatch(clearSheets());
+            // If single mermaid block in MD, extract it; otherwise use raw content
+            const code = sheets.length === 1 ? sheets[0].code : content;
+            dispatch(setMermaidCode(code));
+          }
+
           dispatch(captureNow({ actionType: `Opened file: ${file.name}` }));
           dispatch(
             showNotification({

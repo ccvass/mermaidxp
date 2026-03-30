@@ -11,6 +11,8 @@ const initialState: DiagramState = {
   error: null,
   history: [DEFAULT_MERMAID_CODE],
   historyIndex: 0,
+  sheets: [],
+  activeSheetIndex: 0,
 };
 
 // Async thunk for rendering diagram
@@ -76,6 +78,25 @@ const diagramSlice = createSlice({
     setRenderResult: (state, action: PayloadAction<MermaidRenderResult | null>) => {
       state.renderResult = action.payload;
     },
+    setSheets: (state, action: PayloadAction<{ title: string; code: string }[]>) => {
+      state.sheets = action.payload;
+      state.activeSheetIndex = 0;
+      if (action.payload.length > 0) {
+        state.mermaidCode = action.payload[0].code;
+      }
+    },
+    setActiveSheet: (state, action: PayloadAction<number>) => {
+      const idx = action.payload;
+      if (idx >= 0 && idx < state.sheets.length) {
+        state.activeSheetIndex = idx;
+        state.mermaidCode = state.sheets[idx].code;
+        state.renderResult = null;
+      }
+    },
+    clearSheets: (state) => {
+      state.sheets = [];
+      state.activeSheetIndex = 0;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -95,7 +116,7 @@ const diagramSlice = createSlice({
   },
 });
 
-export const { setMermaidCode, applyMermaidCode, appendMermaidCode, undo, redo, clearError, setRenderResult } =
+export const { setMermaidCode, applyMermaidCode, appendMermaidCode, undo, redo, clearError, setRenderResult, setSheets, setActiveSheet, clearSheets } =
   diagramSlice.actions;
 
 export default diagramSlice.reducer;
