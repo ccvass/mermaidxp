@@ -234,13 +234,23 @@ export const Header: FC<HeaderProps> = ({ title }) => {
           const svg = container.querySelector('svg');
           if (!svg) continue;
 
-          // Get actual SVG dimensions
-          let svgW = svg.width.baseVal.value || svg.viewBox.baseVal.width || 800;
-          let svgH = svg.height.baseVal.value || svg.viewBox.baseVal.height || 600;
-          if (svgW < 10) svgW = 800;
-          if (svgH < 10) svgH = 600;
+          // Get actual SVG dimensions — must be in visible DOM for getBBox
+          container.style.position = 'fixed';
+          container.style.left = '0';
+          container.style.top = '0';
+          container.style.opacity = '0';
+          container.style.pointerEvents = 'none';
+          container.style.zIndex = '-1';
+          const bbox = (svg as unknown as SVGGraphicsElement).getBBox();
+          let svgW = bbox.width || 800;
+          let svgH = bbox.height || 600;
+          // Also check viewBox as fallback
+          if (svgW < 50) svgW = svg.viewBox?.baseVal?.width || 800;
+          if (svgH < 50) svgH = svg.viewBox?.baseVal?.height || 600;
 
           // Render SVG to high-res canvas preserving aspect ratio
+          svg.setAttribute('width', String(svgW));
+          svg.setAttribute('height', String(svgH));
           const svgStr = new XMLSerializer().serializeToString(svg);
           const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
           const img = await new Promise<HTMLImageElement>((res, rej) => {
