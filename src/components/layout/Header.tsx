@@ -336,21 +336,6 @@ export const Header: FC<HeaderProps> = ({ title }) => {
     }
   };
 
-              const name = `${(i + 1).toString().padStart(2, '0')}-${sheets[i].title.replace(/[^a-zA-Z0-9]/g, '_')}`;
-              if (format === 'svg') await exportService.exportSVG(svg as unknown as SVGElement, name);
-              else await exportService.exportPNG(svg as unknown as SVGElement, name, 'white');
-              await new Promise((r) => setTimeout(r, 300));
-            }
-          }
-        }
-        document.body.removeChild(div);
-        dispatch(showNotification({ message: `Exported ${sheets.length} pages`, type: 'success' }));
-      }
-    } catch {
-      dispatch(showNotification({ message: 'Export failed', type: 'error' }));
-    }
-  };
-
 
   return (
     <>
