@@ -122,7 +122,7 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
   return (
     <div
       ref={containerRef}
-      className="flex items-center justify-center min-h-full p-8"
+      className="sheets-active-diagram flex items-center justify-center min-h-full p-8"
     />
   );
 };

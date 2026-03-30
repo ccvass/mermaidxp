@@ -4,6 +4,8 @@ import { toggleTheme, toggleSidebar, showNotification } from '../../store/slices
 import FileOperations from '../header/FileOperations';
 import CollaborationPanel from '../collaboration/CollaborationPanel';
 import { exportService } from '../../services/exportService';
+import { mermaidService } from '../../services/mermaidService';
+import { Theme } from '../../types/ui.types';
 import { UserMenu } from '../auth/UserMenu';
 import { LoginModal } from '../auth/LoginModal';
 import { useAuth } from '../../contexts/AuthContext';
@@ -121,6 +123,7 @@ const DownloadIcon = (props: SVGProps<SVGSVGElement>) => (
 export const Header: FC<HeaderProps> = ({ title }) => {
   const dispatch = useAppDispatch();
   const { theme, isSidebarVisible } = useAppSelector((state) => state.ui);
+  const sheets = useAppSelector((state) => state.diagram.sheets);
   const [showCollabPanel, setShowCollabPanel] = React.useState(false);
   const [showExportMenu, setShowExportMenu] = React.useState(false);
   const [showLoginModal, setShowLoginModal] = React.useState(false);
@@ -141,7 +144,7 @@ export const Header: FC<HeaderProps> = ({ title }) => {
   const sidebarTitle = isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar';
   const themeTitle = theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme';
 
-  const handleExport = async (format: 'svg' | 'png' | 'jpeg') => {
+  const handleExport = async (format: 'svg' | 'png' | 'pdf') => {
     // Require authentication for export
     if (!user) {
       setShowLoginModal(true);
@@ -156,7 +159,7 @@ export const Header: FC<HeaderProps> = ({ title }) => {
 
     try {
       // Find SVG in mermaid container
-      const svgElement: SVGElement | null = document.querySelector('#mermaid-container svg');
+      const svgElement: SVGElement | null = document.querySelector('#mermaid-container svg') || document.querySelector('.sheets-active-diagram svg');
 
       if (!svgElement) {
         dispatch(
@@ -184,67 +187,14 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             type: 'success',
           })
         );
-      } else if (format === 'jpeg') {
-        // For JPEG, convert SVG to data URL to avoid CORS issues
-        const svgString = new XMLSerializer().serializeToString(svgElement);
-        const bbox = (svgElement as SVGGraphicsElement).getBBox();
-        const width = Math.ceil(bbox.width * 2);
-        const height = Math.ceil(bbox.height * 2);
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) {
-          throw new Error('Failed to get canvas context');
-        }
-
-        // White background for JPEG
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, width, height);
-
-        // Use data URL instead of blob to avoid CORS
-        const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
-        const img = new Image();
-
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, width, height);
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'diagram.jpeg';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-
-                dispatch(
-                  showNotification({
-                    message: 'Diagram exported as JPEG',
-                    type: 'success',
-                  })
-                );
-              }
-            },
-            'image/jpeg',
-            0.95
-          );
-        };
-
-        img.onerror = () => {
-          dispatch(
-            showNotification({
-              message: 'Failed to export JPEG',
-              type: 'error',
-            })
-          );
-        };
-
-        img.src = svgDataUrl;
+      } else if (format === 'pdf') {
+        await exportService.exportPDF(svgElement, 'diagram');
+        dispatch(
+          showNotification({
+            message: 'Diagram exported as PDF',
+            type: 'success',
+          })
+        );
       }
 
       setShowExportMenu(false);
@@ -257,6 +207,38 @@ export const Header: FC<HeaderProps> = ({ title }) => {
           type: 'error',
         })
       );
+    }
+  };
+
+  const handleExportAllPages = async (format: 'svg' | 'png') => {
+    if (!user) { setShowLoginModal(true); return; }
+    try {
+      setShowExportMenu(false);
+      dispatch(showNotification({ message: `Exporting ${sheets.length} pages as ${format.toUpperCase()}...`, type: 'info' }));
+
+      const themeEnum = theme === 'dark' ? Theme.Dark : Theme.Light;
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      document.body.appendChild(container);
+
+      for (let i = 0; i < sheets.length; i++) {
+        const result = await mermaidService.render(sheets[i].code, themeEnum);
+        if (result.svg) {
+          container.innerHTML = result.svg;
+          const svg = container.querySelector('svg');
+          if (svg) {
+            const name = `${(i + 1).toString().padStart(2, '0')}-${sheets[i].title.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            if (format === 'svg') await exportService.exportSVG(svg as unknown as SVGElement, name);
+            else await exportService.exportPNG(svg as unknown as SVGElement, name, 'white');
+            await new Promise(r => setTimeout(r, 300));
+          }
+        }
+      }
+      document.body.removeChild(container);
+      dispatch(showNotification({ message: `Exported ${sheets.length} pages`, type: 'success' }));
+    } catch (error) {
+      dispatch(showNotification({ message: 'Export failed', type: 'error' }));
     }
   };
 
@@ -314,11 +296,29 @@ export const Header: FC<HeaderProps> = ({ title }) => {
                       🖼️ Export as PNG
                     </button>
                     <button
-                      onClick={() => handleExport('jpeg')}
+                      onClick={() => handleExport('pdf')}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
-                      📸 Export as JPEG
+                      📑 Export as PDF
                     </button>
+                    {sheets.length > 1 && (
+                      <>
+                        <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                        <div className="px-4 py-1 text-xs text-gray-400">All pages ({sheets.length})</div>
+                        <button
+                          onClick={() => handleExportAllPages('svg')}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          📄 All pages as SVG
+                        </button>
+                        <button
+                          onClick={() => handleExportAllPages('png')}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          🖼️ All pages as PNG
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </>

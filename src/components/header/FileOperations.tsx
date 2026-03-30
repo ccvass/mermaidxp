@@ -120,6 +120,7 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
         dispatch(deleteElements(elementIds));
       }
 
+      dispatch(clearSheets());
       dispatch(setMermaidCode(newCode));
       dispatch(captureNow({ actionType: 'New document created' }));
       dispatch(
