@@ -273,8 +273,9 @@ export const Header: FC<HeaderProps> = ({ title }) => {
           const pdfW = pdf.internal.pageSize.getWidth();
           const pdfH = pdf.internal.pageSize.getHeight();
           const padding = 30;
+          const titleSpace = 25;
           const maxW = pdfW - 2 * padding;
-          const maxH = pdfH - 2 * padding;
+          const maxH = pdfH - 2 * padding - titleSpace;
 
           // Scale to fit while preserving aspect ratio
           const imgRatio = cW / cH;
@@ -288,8 +289,13 @@ export const Header: FC<HeaderProps> = ({ title }) => {
           }
 
           const x = (pdfW - w) / 2;
-          const y = (pdfH - h) / 2;
+          const y = padding + 20; // leave room for title at top
           pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', x, y, w, h);
+
+          // Add title at top of page
+          pdf.setFontSize(14);
+          pdf.setTextColor(50, 50, 50);
+          pdf.text(sheets[i].title, pdfW / 2, padding, { align: 'center' });
         }
 
         document.body.removeChild(container);
