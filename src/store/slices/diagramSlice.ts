@@ -18,7 +18,11 @@ const initialState: DiagramState = {
 // Async thunk for rendering diagram
 export const renderDiagram = createAsyncThunk(
   'diagram/render',
-  async ({ code, theme }: { code: string; theme: Theme }): Promise<MermaidRenderResult> => {
+  async ({ code, theme }: { code: string; theme: Theme }, { getState }): Promise<MermaidRenderResult> => {
+    const state = getState() as { diagram: DiagramState };
+    if (state.diagram.sheets.length > 0) {
+      return { svg: '', error: null };
+    }
     return await mermaidService.render(code, theme);
   }
 );
