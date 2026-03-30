@@ -228,28 +228,41 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             const result = await mermaidService.render(sheets[i].code, themeEnum);
             if (!result.svg || result.error) continue;
 
-            // Parse SVG to get Mermaid's own dimensions
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(result.svg, 'image/svg+xml');
-            const svg = doc.querySelector('svg');
-            if (!svg) continue;
+            // Insert SVG into a visible (but off-screen) container to get real rendered size
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'position:absolute;left:-9999px;top:0;width:auto;height:auto;overflow:visible';
+            wrapper.innerHTML = result.svg;
+            document.body.appendChild(wrapper);
+            const svg = wrapper.querySelector('svg')!;
 
-            // Read Mermaid's width/height (it sets these)
-            const attrW = parseFloat(svg.getAttribute('width') || '0');
-            const attrH = parseFloat(svg.getAttribute('height') || '0');
-            const vb = svg.getAttribute('viewBox')?.split(' ').map(Number) || [];
-            const svgW = attrW > 100 ? attrW : (vb[2] || 1200);
-            const svgH = attrH > 100 ? attrH : (vb[3] || 800);
+            // Remove max-width constraints that Mermaid adds
+            svg.style.maxWidth = 'none';
+            svg.style.width = 'auto';
+            svg.style.height = 'auto';
+            svg.removeAttribute('style');
 
-            // Ensure SVG has explicit dimensions for Image rendering
-            svg.setAttribute('width', String(svgW));
-            svg.setAttribute('height', String(svgH));
+            // Wait a frame for browser to layout
+            await new Promise(r => requestAnimationFrame(r));
+            await new Promise(r => setTimeout(r, 50));
+
+            // Get the REAL rendered size
+            const rect = svg.getBoundingClientRect();
+            const svgW = Math.max(rect.width, 200);
+            const svgH = Math.max(rect.height, 150);
+
+            // Set explicit size and serialize
+            svg.setAttribute('width', String(Math.ceil(svgW)));
+            svg.setAttribute('height', String(Math.ceil(svgH)));
+            if (!svg.getAttribute('viewBox')) {
+              svg.setAttribute('viewBox', `0 0 ${Math.ceil(svgW)} ${Math.ceil(svgH)}`);
+            }
             const svgStr = new XMLSerializer().serializeToString(svg);
+            document.body.removeChild(wrapper);
 
-            // Render to canvas at 2x for quality
+            // Render to canvas
             const scale = 2;
-            const cW = Math.round(svgW * scale);
-            const cH = Math.round(svgH * scale);
+            const cW = Math.ceil(svgW * scale);
+            const cH = Math.ceil(svgH * scale);
             const canvas = document.createElement('canvas');
             canvas.width = cW;
             canvas.height = cH;
@@ -257,59 +270,50 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, cW, cH);
 
-            // Load SVG as image
-            const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+            const b64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
             await new Promise<void>((resolve, reject) => {
               const img = new Image();
               img.onload = () => { ctx.drawImage(img, 0, 0, cW, cH); resolve(); };
-              img.onerror = () => reject(new Error('render fail'));
-              img.src = dataUrl;
+              img.onerror = () => reject(new Error('img'));
+              img.src = b64;
             });
 
-            // PDF page: use A4 landscape/portrait, scale diagram to fit
+            // A4 page, orientation based on aspect ratio
             const orient = svgW >= svgH ? 'l' : 'p';
             if (!pdf) { pdf = new jsPDF({ orientation: orient, unit: 'pt', format: 'a4' }); }
             else { pdf.addPage('a4', orient); }
 
             const pw = pdf.internal.pageSize.getWidth();
             const ph = pdf.internal.pageSize.getHeight();
-            const margin = 40;
-            const titleH = 30;
-            const maxW = pw - 2 * margin;
-            const maxH = ph - 2 * margin - titleH;
-
-            // Scale to fit preserving aspect ratio
+            const m = 36;
+            const tH = 28;
+            const maxW = pw - 2 * m;
+            const maxH = ph - 2 * m - tH;
             const ratio = Math.min(maxW / svgW, maxH / svgH);
             const w = svgW * ratio;
             const h = svgH * ratio;
             const x = (pw - w) / 2;
-            const y = margin + titleH + (maxH - h) / 2;
+            const y = m + tH + (maxH - h) / 2;
 
-            // Title
-            pdf.setFontSize(14);
+            pdf.setFontSize(13);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(30, 30, 30);
-            pdf.text(sheets[i].title, pw / 2, margin + 18, { align: 'center' });
-
-            // Diagram
-            const imgData = canvas.toDataURL('image/png');
-            pdf.addImage(imgData, 'PNG', x, y, w, h);
+            pdf.text(sheets[i].title, pw / 2, m + 16, { align: 'center' });
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, w, h);
             exported++;
-          } catch {
-            // skip failed page
-          }
-          await new Promise((r) => setTimeout(r, 150));
+          } catch { /* skip */ }
+          await new Promise(r => setTimeout(r, 200));
         }
 
         if (pdf && exported > 0) {
           pdf.save('diagrams.pdf');
           dispatch(showNotification({ message: `Exported ${exported}/${sheets.length} pages as PDF`, type: 'success' }));
         } else {
-          dispatch(showNotification({ message: 'PDF export failed — no diagrams rendered', type: 'error' }));
+          dispatch(showNotification({ message: 'PDF export failed', type: 'error' }));
         }
       } else {
         const div = document.createElement('div');
-        div.style.cssText = 'position:fixed;left:0;top:0;opacity:0;pointer-events:none;z-index:-1';
+        div.style.cssText = 'position:absolute;left:-9999px;top:0';
         document.body.appendChild(div);
         for (let i = 0; i < sheets.length; i++) {
           const result = await mermaidService.render(sheets[i].code, themeEnum);
@@ -317,6 +321,21 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             div.innerHTML = result.svg;
             const svg = div.querySelector('svg');
             if (svg) {
+              const name = `${(i + 1).toString().padStart(2, '0')}-${sheets[i].title.replace(/[^a-zA-Z0-9]/g, '_')}`;
+              if (format === 'svg') await exportService.exportSVG(svg as unknown as SVGElement, name);
+              else await exportService.exportPNG(svg as unknown as SVGElement, name, 'white');
+              await new Promise(r => setTimeout(r, 300));
+            }
+          }
+        }
+        document.body.removeChild(div);
+        dispatch(showNotification({ message: `Exported ${sheets.length} pages`, type: 'success' }));
+      }
+    } catch {
+      dispatch(showNotification({ message: 'Export failed', type: 'error' }));
+    }
+  };
+
               const name = `${(i + 1).toString().padStart(2, '0')}-${sheets[i].title.replace(/[^a-zA-Z0-9]/g, '_')}`;
               if (format === 'svg') await exportService.exportSVG(svg as unknown as SVGElement, name);
               else await exportService.exportPNG(svg as unknown as SVGElement, name, 'white');
