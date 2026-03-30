@@ -1,0 +1,49 @@
+# Sincronización a GitLab.com + GitLab Duo + Security Scanning Enterprise
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/DAST.gitlab-ci.yml
+  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: Security/SAST-IaC.gitlab-ci.yml
+  - template: Code-Quality.gitlab-ci.yml
+  - local: .gitlab-ci-create-issues.yml
+
+variables:
+  GITLAB_FEATURES: "duo_code_suggestions"
+  SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, node_modules"
+  # DAST Configuration
+  DAST_WEBSITE: "${CI_ENVIRONMENT_URL}"
+  DAST_FULL_SCAN_ENABLED: "false"
+  # API Fuzzing Configuration
+  FUZZAPI_TARGET_URL: "${CI_ENVIRONMENT_URL}/api"
+  # IaC Scanning
+  SAST_IAC_ENABLED: "true"
+
+.sync_template:
+  stage: .post
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client git
+    - eval $(ssh-agent -s)
+    - echo "$GITLAB_COM_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+  script:
+    - |
+      GITLAB_CLOUD_PATH="allwiya/${CI_PROJECT_PATH}"
+      if ! git remote | grep -q gitlab-cloud; then
+        git remote add gitlab-cloud "git@gitlab.com:${GITLAB_CLOUD_PATH}.git"
+      fi
+      git fetch --unshallow || true
+      git push gitlab-cloud HEAD:${CI_COMMIT_REF_NAME} --force || true
+      git push gitlab-cloud --tags --force || true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "integration"'
+      when: on_success
+    - when: never
+  allow_failure: true
+
+sync_to_gitlab_cloud:
+  extends: .sync_template

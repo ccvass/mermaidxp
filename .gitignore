@@ -21,6 +21,9 @@ dist-ssr
 wrangler.jsonc
 .wrangler/
 
+# Remote configuration (contains deployment secrets)
+REMOTE.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

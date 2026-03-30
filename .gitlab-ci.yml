@@ -12,7 +12,7 @@ mirror_to_cloud:
     - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
   script:
     - git remote add gitlab-cloud $(git remote get-url origin | sed 's/scovil.labtau.com/gitlab.com/g' | sed 's|ccvass/|allwiya/ccvass/|') || true
-    - git push gitlab-cloud HEAD:master --force
+    - git push gitlab-cloud HEAD:main --force
   only:
-    - master
+    - main
   allow_failure: true
