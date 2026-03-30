@@ -261,41 +261,32 @@ export const Header: FC<HeaderProps> = ({ title }) => {
           ctx.fillRect(0, 0, cW, cH);
           ctx.drawImage(img, 0, 0, cW, cH);
 
-          // Choose orientation based on diagram aspect ratio
-          const orientation = svgW >= svgH ? 'landscape' : 'portrait';
+          // Create page sized to diagram to preserve aspect ratio perfectly
+          const ptW = (svgW / 96) * 72 + 60;
+          const ptH = (svgH / 96) * 72 + 80;
+          const pageFormat: [number, number] = [Math.max(ptW, 200), Math.max(ptH, 200)];
+          const orientation = ptW >= ptH ? 'landscape' : 'portrait';
 
           if (!pdf) {
-            pdf = new jsPDF({ orientation, unit: 'pt', format: 'a4' });
+            pdf = new jsPDF({ orientation, unit: 'pt', format: pageFormat });
           } else {
-            pdf.addPage('a4', orientation);
+            pdf.addPage(pageFormat, orientation);
           }
 
           const pdfW = pdf.internal.pageSize.getWidth();
           const pdfH = pdf.internal.pageSize.getHeight();
           const padding = 30;
-          const titleSpace = 25;
-          const maxW = pdfW - 2 * padding;
-          const maxH = pdfH - 2 * padding - titleSpace;
+          const titleH = 25;
+          const w = pdfW - 2 * padding;
+          const h = w * (cH / cW);
+          const x = padding;
+          const y = padding + titleH;
 
-          // Scale to fit while preserving aspect ratio
-          const imgRatio = cW / cH;
-          let w: number, h: number;
-          if (maxW / maxH > imgRatio) {
-            h = maxH;
-            w = h * imgRatio;
-          } else {
-            w = maxW;
-            h = w / imgRatio;
-          }
-
-          const x = (pdfW - w) / 2;
-          const y = padding + 20; // leave room for title at top
           pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', x, y, w, h);
 
-          // Add title at top of page
-          pdf.setFontSize(14);
+          pdf.setFontSize(12);
           pdf.setTextColor(50, 50, 50);
-          pdf.text(sheets[i].title, pdfW / 2, padding, { align: 'center' });
+          pdf.text(sheets[i].title, pdfW / 2, padding + 10, { align: 'center' });
         }
 
         document.body.removeChild(container);
