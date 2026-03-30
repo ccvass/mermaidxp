@@ -123,8 +123,8 @@ export const DiagramDisplay: React.FC = () => {
       return;
     }
 
-    // Content check to prevent infinite loop (only based on SVG content, not zoom/pan)
-    const currentContent = `${renderResult.svg.length}`;
+    // Content check to prevent infinite loop (hash-based dedup)
+    const currentContent = renderResult.svg.slice(0, 500);
     if (lastRenderRef.current === currentContent) {
       return;
     }
@@ -213,9 +213,9 @@ export const DiagramDisplay: React.FC = () => {
         svgElement.removeAttribute('title');
         svgElement.style.pointerEvents = 'auto'; // Ensure interactions work but no tooltips
 
-        // Apply transformations
+        // Wrap content in a group (no transform — CSS transform on SVG handles zoom/pan)
         const transformGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        transformGroup.setAttribute('transform', `translate(${pan.x}, ${pan.y}) scale(${zoom})`);
+        transformGroup.setAttribute('data-diagram-content', 'true');
 
         // Move content to transform group
         while (svgElement.firstChild) {

@@ -6,28 +6,23 @@ import { mermaidLoader } from './lazyMermaidLoader';
 class MermaidService {
   private initialized = false;
   private renderCount = 0;
+  private lastTheme: Theme | null = null;
 
   async initialize(theme: Theme = Theme.Light): Promise<void> {
-    // Ensure Mermaid is loaded
     await mermaidLoader.load();
-
     if (!window.mermaid) {
       throw new Error('Mermaid library not loaded');
     }
-
     const config = theme === Theme.Light ? MERMAID_CONFIG_LIGHT : MERMAID_CONFIG_DARK;
     window.mermaid.initialize(config);
     this.initialized = true;
+    this.lastTheme = theme;
   }
 
   async render(code: string, theme: Theme = Theme.Light): Promise<MermaidRenderResult> {
-    if (!this.initialized) {
+    if (!this.initialized || this.lastTheme !== theme) {
       await this.initialize(theme);
     }
-
-    // Update theme if needed
-    const config = theme === Theme.Light ? MERMAID_CONFIG_LIGHT : MERMAID_CONFIG_DARK;
-    window.mermaid.initialize(config);
 
     try {
       // Generate unique ID for this render

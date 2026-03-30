@@ -92,52 +92,41 @@ export const historyEngineMiddleware: Middleware = (store) => {
     const state = store.getState();
 
     // CRITICAL FIX: Don't snapshot if elements haven't actually changed
-    const currentElements = state.canvasElements.elements;
+    const currentElements = state.canvasElements?.elements || {};
     const lastSnapshot = state.historyEngine.present;
 
-    if (lastSnapshot?.canvasElements) {
-      const lastElements = lastSnapshot.canvasElements.elements;
+    if (lastSnapshot) {
+      // Check if anything meaningful changed
+      const codeChanged = state.diagram.mermaidCode !== lastSnapshot.mermaidCode;
+      const zoomChanged = state.canvas.zoom !== lastSnapshot.canvas.zoom;
+      const panChanged = state.canvas.pan.x !== lastSnapshot.canvas.pan.x || state.canvas.pan.y !== lastSnapshot.canvas.pan.y;
+      const selectionChanged = JSON.stringify(state.canvas.selectedNodes) !== JSON.stringify(lastSnapshot.canvas.selectedNodes);
 
-      // Compare element IDs first (fast check)
-      const currentIds = Object.keys(currentElements).sort();
-      const lastIds = Object.keys(lastElements).sort();
+      let elementsChanged = false;
+      if (lastSnapshot.canvasElements) {
+        const lastElements = lastSnapshot.canvasElements.elements;
+        const currentIds = Object.keys(currentElements).sort();
+        const lastIds = Object.keys(lastElements).sort();
 
-      if (currentIds.length !== lastIds.length || currentIds.join(',') !== lastIds.join(',')) {
-        // Element added/removed - definitely need snapshot
-      } else {
-        // Same elements exist, check if any properties changed
-        let hasChanges = false;
-
-        for (const id of currentIds) {
-          const current = currentElements[id];
-          const last = lastElements[id];
-
-          // Compare meaningful properties (skip metadata timestamps)
-          const currentRelevant = {
-            position: current.position,
-            size: current.size,
-            rotation: current.rotation,
-            content: current.content,
-            style: current.style,
-          };
-
-          const lastRelevant = {
-            position: last.position,
-            size: last.size,
-            rotation: last.rotation,
-            content: last.content,
-            style: last.style,
-          };
-
-          if (JSON.stringify(currentRelevant) !== JSON.stringify(lastRelevant)) {
-            hasChanges = true;
-            break;
+        if (currentIds.length !== lastIds.length || currentIds.join(',') !== lastIds.join(',')) {
+          elementsChanged = true;
+        } else {
+          for (const id of currentIds) {
+            const current = currentElements[id];
+            const last = lastElements[id];
+            if (JSON.stringify({ position: current.position, size: current.size, rotation: current.rotation, content: current.content, style: current.style }) !==
+                JSON.stringify({ position: last.position, size: last.size, rotation: last.rotation, content: last.content, style: last.style })) {
+              elementsChanged = true;
+              break;
+            }
           }
         }
+      } else {
+        elementsChanged = Object.keys(currentElements).length > 0;
+      }
 
-        if (!hasChanges) {
-          return;
-        }
+      if (!codeChanged && !zoomChanged && !panChanged && !selectionChanged && !elementsChanged) {
+        return;
       }
     }
 

@@ -41,7 +41,7 @@ export const FILE_CONFIG = {
 
 // Web Service Configuration
 export const WEB_SERVICE_CONFIG = {
-  BASE_URL: import.meta.env.VITE_WEB_SERVICE_URL || 'http://localhost:3001',
+  BASE_URL: import.meta.env.VITE_WEB_SERVICE_URL || (import.meta.env.DEV ? 'http://localhost:3001' : ''),
   ENDPOINTS: {
     HEALTH: '/health',
     RECEIVE: '/api/diagram/receive',

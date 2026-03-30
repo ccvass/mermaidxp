@@ -73,7 +73,9 @@ class LazyMermaidLoader {
 
       // Create script element
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js';
+      script.integrity = 'sha384-R63zfMfSwJF4xCR11wXii+QUsbiBIdiDzDbtxia72oGWfkT7WHJfmD/I/eeHPJyT';
+      script.crossOrigin = 'anonymous';
       script.async = true;
 
       script.onload = () => {
