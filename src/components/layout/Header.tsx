@@ -220,6 +220,7 @@ export const Header: FC<HeaderProps> = ({ title }) => {
       const themeEnum = theme === 'dark' ? Theme.Dark : Theme.Light;
 
       if (format === 'pdf') {
+        const { svg2pdf } = await import('svg2pdf.js');
         let pdf: jsPDF | null = null;
         let exported = 0;
 
@@ -228,57 +229,22 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             const result = await mermaidService.render(sheets[i].code, themeEnum);
             if (!result.svg || result.error) continue;
 
-            // Insert SVG into a visible (but off-screen) container to get real rendered size
+            // Render SVG in real DOM to get accurate dimensions
             const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'position:absolute;left:-9999px;top:0;width:auto;height:auto;overflow:visible';
+            wrapper.style.cssText = 'position:absolute;left:-9999px;top:0;overflow:visible';
             wrapper.innerHTML = result.svg;
             document.body.appendChild(wrapper);
-            const svg = wrapper.querySelector('svg')!;
+            const svgEl = wrapper.querySelector('svg')!;
+            svgEl.style.maxWidth = 'none';
 
-            // Remove max-width constraints that Mermaid adds
-            svg.style.maxWidth = 'none';
-            svg.style.width = 'auto';
-            svg.style.height = 'auto';
-            svg.removeAttribute('style');
-
-            // Wait a frame for browser to layout
             await new Promise(r => requestAnimationFrame(r));
-            await new Promise(r => setTimeout(r, 50));
+            await new Promise(r => setTimeout(r, 100));
 
-            // Get the REAL rendered size
-            const rect = svg.getBoundingClientRect();
+            const rect = svgEl.getBoundingClientRect();
             const svgW = Math.max(rect.width, 200);
             const svgH = Math.max(rect.height, 150);
 
-            // Set explicit size and serialize
-            svg.setAttribute('width', String(Math.ceil(svgW)));
-            svg.setAttribute('height', String(Math.ceil(svgH)));
-            if (!svg.getAttribute('viewBox')) {
-              svg.setAttribute('viewBox', `0 0 ${Math.ceil(svgW)} ${Math.ceil(svgH)}`);
-            }
-            const svgStr = new XMLSerializer().serializeToString(svg);
-            document.body.removeChild(wrapper);
-
-            // Render to canvas at 8x for crisp output
-            const scale = 8;
-            const cW = Math.ceil(svgW * scale);
-            const cH = Math.ceil(svgH * scale);
-            const canvas = document.createElement('canvas');
-            canvas.width = cW;
-            canvas.height = cH;
-            const ctx = canvas.getContext('2d')!;
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, cW, cH);
-
-            const b64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-            await new Promise<void>((resolve, reject) => {
-              const img = new Image();
-              img.onload = () => { ctx.drawImage(img, 0, 0, cW, cH); resolve(); };
-              img.onerror = () => reject(new Error('img'));
-              img.src = b64;
-            });
-
-            // A4 page, orientation based on aspect ratio
+            // A4 page
             const orient = svgW >= svgH ? 'l' : 'p';
             if (!pdf) { pdf = new jsPDF({ orientation: orient, unit: 'pt', format: 'a4' }); }
             else { pdf.addPage('a4', orient); }
@@ -295,11 +261,16 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             const x = (pw - w) / 2;
             const y = m + tH + (maxH - h) / 2;
 
+            // Title
             pdf.setFontSize(13);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(30, 30, 30);
             pdf.text(sheets[i].title, pw / 2, m + 16, { align: 'center' });
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, w, h);
+
+            // Vector SVG directly into PDF (no rasterization!)
+            await svg2pdf(svgEl, pdf, { x, y, width: w, height: h });
+
+            document.body.removeChild(wrapper);
             exported++;
           } catch { /* skip */ }
           await new Promise(r => setTimeout(r, 200));
