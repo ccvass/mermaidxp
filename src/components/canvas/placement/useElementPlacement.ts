@@ -111,9 +111,6 @@ export function useElementPlacement({
         const svgElement = containerRef.current.querySelector('svg');
         if (!svgElement) return;
 
-        const parent = getTargetParent(svgElement as unknown as SVGElement);
-        console.error('🟢 addTextToSVG called', { textContent, clickX, clickY, parentTag: parent.tagName, parentClass: parent.getAttribute('class') });
-
         const textGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         textGroup.setAttribute('class', 'custom-text-group');
         textGroup.setAttribute('data-id', nodeId);
@@ -1094,7 +1091,6 @@ export function useElementPlacement({
       const diagramX = (x - pan.x) / zoom;
       const diagramY = (y - pan.y) / zoom;
 
-      console.error('🟢 handleCanvasClick fired', { type: (placingElement as Record<string, unknown>).type, diagramX, diagramY });
       handleElementPlacement(placingElement as Record<string, unknown>, x, y, diagramX, diagramY);
     },
     [placingElement, activeDragInfo, pan, zoom, handleElementPlacement, containerRef]
