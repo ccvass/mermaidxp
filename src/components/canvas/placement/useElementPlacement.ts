@@ -1016,6 +1016,7 @@ export function useElementPlacement({
 
             if (iconContent) {
               addIconToSVG(iconContent, screenX, screenY, nodeId);
+              dispatch(setPlacingElement(null));
               return;
             }
             break;
