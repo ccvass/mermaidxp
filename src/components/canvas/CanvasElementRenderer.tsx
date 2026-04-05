@@ -78,8 +78,8 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
     } // else: no-op
 
     const tryRender = () => {
-      // Find the transform group (where mermaid content lives)
-      const mermaidTransformGroup = svgElement.querySelector('g[transform]');
+      // Find the diagram content group (stable container created by DiagramDisplay)
+      const diagramContentGroup = svgElement.querySelector('g[data-diagram-content]');
 
       // Find or create the custom elements container
       let customElementsLayer = svgElement.querySelector('g[data-custom-elements-layer]');
@@ -88,11 +88,10 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
         customElementsLayer.setAttribute('data-custom-elements-layer', 'true');
         customElementsLayer.setAttribute('class', 'custom-elements-layer');
 
-        // If there's a transform group, append to it so elements inherit the transform
-        if (mermaidTransformGroup) {
-          mermaidTransformGroup.appendChild(customElementsLayer);
+        // Append to diagram content group if available, otherwise to SVG root
+        if (diagramContentGroup) {
+          diagramContentGroup.appendChild(customElementsLayer);
         } else {
-          // Otherwise append directly to SVG
           svgElement.appendChild(customElementsLayer);
         }
       }
