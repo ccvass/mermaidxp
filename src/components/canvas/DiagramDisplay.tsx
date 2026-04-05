@@ -133,12 +133,6 @@ export const DiagramDisplay: React.FC = () => {
       return;
     }
 
-    // DEBUG: track when container is wiped
-    const iconsBefore = containerRef.current.querySelectorAll('.custom-icon-group').length;
-    if (iconsBefore > 0) {
-      console.error('🔴 DIAGRAM RE-RENDER WIPING', iconsBefore, 'icons. Trigger:', new Error().stack?.split('\n').slice(1, 5).join(' | '));
-    }
-
     isExecutingRef.current = true;
     lastRenderRef.current = currentContent;
 

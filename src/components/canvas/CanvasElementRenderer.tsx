@@ -50,12 +50,6 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
 
   // Render elements in the SVG
   useEffect(() => {
-    // DEBUG: track when this effect runs
-    const iconCount = containerRef.current?.querySelectorAll('.custom-icon-group').length || 0;
-    if (iconCount > 0) {
-      console.error('🟠 CanvasElementRenderer useEffect running with', iconCount, 'icons in DOM. elements:', Object.keys(elements).length, 'renderVersion:', renderVersion);
-    }
-
     // CRITICAL: Don't render while restoring - let cleanup happen first
     if (isRestoring) {
       return;

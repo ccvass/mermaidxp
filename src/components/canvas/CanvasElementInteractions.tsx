@@ -32,6 +32,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
     draggedElementId: string | null;
     startPosition: { x: number; y: number };
     startElementPosition: { x: number; y: number };
+    lastPosition: { x: number; y: number };
     isResizing: boolean;
     resizeHandle: string | null;
     startSize: { width: number; height: number };
@@ -40,6 +41,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
     draggedElementId: null,
     startPosition: { x: 0, y: 0 },
     startElementPosition: { x: 0, y: 0 },
+    lastPosition: { x: 0, y: 0 },
     isResizing: false,
     resizeHandle: null,
     startSize: { width: 0, height: 0 },
@@ -111,6 +113,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
             draggedElementId: elementId,
             startPosition: screenToCanvas(e.clientX, e.clientY),
             startElementPosition: element.position,
+          lastPosition: { x: 0, y: 0 },
             isResizing: true,
             resizeHandle: handleType,
             startSize: element.size,
@@ -125,29 +128,38 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
 
       // Regular element click/drag
       if (interactionMode === 'drag') {
+        const pos = screenToCanvas(e.clientX, e.clientY);
         dragStateRef.current = {
           isDragging: true,
           draggedElementId: elementId,
-          startPosition: screenToCanvas(e.clientX, e.clientY),
+          startPosition: pos,
           startElementPosition: element.position,
+          lastPosition: pos,
           isResizing: false,
           resizeHandle: null,
           startSize: element.size,
         };
       } else {
         // In pan mode, just select element to show handles
+        const pos = screenToCanvas(e.clientX, e.clientY);
         dragStateRef.current = {
           isDragging: false,
           draggedElementId: elementId,
-          startPosition: screenToCanvas(e.clientX, e.clientY),
+          startPosition: pos,
           startElementPosition: element.position,
+          lastPosition: pos,
           isResizing: false,
           resizeHandle: null,
           startSize: element.size,
         };
       }
 
-      // Select element if not already selected
+      // Select element — clear previous selection unless Shift is held
+      if (!e.shiftKey) {
+        if (!selectedElementIds.includes(elementId)) {
+          clearElementSelection();
+        }
+      }
       if (!selectedElementIds.includes(elementId)) {
         selectElementById(elementId);
       }
@@ -219,6 +231,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
             draggedElementId: elementId,
             startPosition: screenToCanvas(ev.clientX, ev.clientY),
             startElementPosition: element.position,
+          lastPosition: { x: 0, y: 0 },
             isResizing: true,
             resizeHandle: handle.position,
             startSize: element.size,
@@ -239,6 +252,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
             draggedElementId: elementId,
             startPosition: screenToCanvas(clientX, clientY),
             startElementPosition: element.position,
+          lastPosition: { x: 0, y: 0 },
             isResizing: true,
             resizeHandle: handle.position,
             startSize: element.size,
@@ -306,6 +320,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
               draggedElementId: null,
               startPosition: { x: 0, y: 0 },
               startElementPosition: { x: 0, y: 0 },
+              lastPosition: { x: 0, y: 0 },
               isResizing: false,
               resizeHandle: null,
               startSize: { width: 0, height: 0 },
@@ -353,6 +368,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
             draggedElementId: elementId,
             startPosition: screenToCanvas(ev.clientX, ev.clientY),
             startElementPosition: element.position,
+          lastPosition: { x: 0, y: 0 },
             isResizing: true,
             resizeHandle: handle.position,
             startSize: element.size,
@@ -473,10 +489,13 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
       } else if (dragState.isDragging) {
         // Handle dragging
         if (selectedElementIds.includes(dragState.draggedElementId) && selectedElementIds.length > 1) {
-          // Move all selected elements
-          moveSelectedElements({ dx: deltaX, dy: deltaY });
+          // Move all selected elements — use INCREMENTAL delta to avoid cumulative drift
+          const incrDx = currentPosition.x - dragState.lastPosition.x;
+          const incrDy = currentPosition.y - dragState.lastPosition.y;
+          moveSelectedElements({ dx: incrDx, dy: incrDy });
+          dragStateRef.current.lastPosition = currentPosition;
         } else {
-          // Move single element
+          // Move single element — absolute position (correct)
           const newPosition = {
             x: dragState.startElementPosition.x + deltaX,
             y: dragState.startElementPosition.y + deltaY,
@@ -503,6 +522,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
       draggedElementId: null,
       startPosition: { x: 0, y: 0 },
       startElementPosition: { x: 0, y: 0 },
+      lastPosition: { x: 0, y: 0 },
       isResizing: false,
       resizeHandle: null,
       startSize: { width: 0, height: 0 },
@@ -573,6 +593,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
           draggedElementId: null,
           startPosition: { x: 0, y: 0 },
           startElementPosition: { x: 0, y: 0 },
+          lastPosition: { x: 0, y: 0 },
           isResizing: false,
           resizeHandle: null,
           startSize: { width: 0, height: 0 },
