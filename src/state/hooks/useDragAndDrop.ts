@@ -207,7 +207,8 @@ export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | n
             id.includes('edge') ||
             id.includes('marker') ||
             id.includes('arrow') ||
-            classes.some((cls) => cls.includes('edge') || cls.includes('marker'))
+            classes.some((cls) => cls.includes('edge') || cls.includes('marker')) ||
+            classes.some((cls) => cls.startsWith('custom-'))
           ) {
             return;
           }
