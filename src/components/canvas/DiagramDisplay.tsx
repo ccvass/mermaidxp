@@ -643,7 +643,8 @@ export const DiagramDisplay: React.FC = () => {
           // Add CSS to make SVG elements not block pan events
           onMouseDownCapture={(e) => {
             // In pan mode, only force pan if not over custom elements/handles
-            if (interactionMode === 'pan') {
+            // CRITICAL: Don't intercept clicks when placing an element
+            if (interactionMode === 'pan' && !placingElement) {
               const target = e.target as Element;
               const overCustom = !!target.closest(
                 '.custom-text-group, .custom-image-group, .custom-svg-shape-group, .custom-icon-group, .resize-handle'
