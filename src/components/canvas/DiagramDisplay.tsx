@@ -629,7 +629,7 @@ export const DiagramDisplay: React.FC = () => {
                     : 'cursor-grab'
           }`}
           id="mermaid-container"
-          onMouseDown={handleMouseDown}
+          onMouseDown={placingElement ? undefined : handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
