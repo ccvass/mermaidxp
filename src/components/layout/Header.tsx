@@ -193,11 +193,12 @@ export const Header: FC<HeaderProps> = ({ title }) => {
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title="Export Diagram"
               aria-label="Export Diagram"
             >
               <DownloadIcon />
+              <span className="text-xs ml-1 hidden sm:inline">Export</span>
             </button>
 
             {showExportMenu && (
@@ -257,22 +258,24 @@ export const Header: FC<HeaderProps> = ({ title }) => {
 
           <button
             onClick={handleToggleCollaboration}
-            className={`p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+            className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
               showCollabPanel ? 'bg-blue-100 dark:bg-blue-900' : ''
             }`}
             title="Live Collaboration (Toggle Panel)"
             aria-label="Live Collaboration"
           >
             <UsersIcon />
+            <span className="text-xs ml-1 hidden sm:inline">Collab</span>
           </button>
 
           <button
             onClick={handleToggleTheme}
-            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             title={themeTitle}
             aria-label={themeTitle}
           >
             {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+            <span className="text-xs ml-1 hidden sm:inline">Theme</span>
           </button>
 
           <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />

@@ -1,0 +1,13 @@
+- generic [ref=e3]:
+  - document [ref=e153]:
+    - generic [ref=e156]:
+      - generic [ref=e163]:
+        - generic [ref=e167]: "Yes"
+        - generic [ref=e171]: "No"
+      - generic [ref=e172]:
+        - generic [ref=e177]: Start
+        - generic [ref=e182]: Decision
+        - generic [ref=e187]: Action 1
+        - generic [ref=e192]: Action 2
+        - generic [ref=e197]: End
+  - generic [ref=e202]: Presentation mode toggled. Press ESC to exit.

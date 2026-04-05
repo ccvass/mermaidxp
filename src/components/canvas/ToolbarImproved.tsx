@@ -322,10 +322,10 @@ export const ToolbarImproved: React.FC = () => {
             {/* Interaction Mode */}
             <ToolbarButton
               onClick={toggleInteractionModeHandler}
-              label={interactionMode === 'drag' ? 'Drag Mode' : 'Pan Mode'}
+              label={interactionMode === 'drag' ? '✋ Drag' : '🖐 Pan'}
               title={`Current: ${interactionMode === 'drag' ? 'Drag elements' : 'Pan canvas'} (Click to switch)`}
               isActive={interactionMode === 'drag'}
-              variant={interactionMode === 'drag' ? 'success' : 'primary'}
+              variant={interactionMode === 'drag' ? 'success' : 'default'}
             >
               {interactionMode === 'drag' ? <DragIcon size={18} /> : <PanIcon size={18} />}
             </ToolbarButton>
