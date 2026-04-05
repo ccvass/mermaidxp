@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
+import { logger } from '../utils/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -45,7 +46,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
-      console.error('Error signing in with Google:', error);
+      logger.error('Error signing in with Google:', 'AuthContext', error instanceof Error ? error : undefined);
       throw error;
     } finally {
       setLoading(false);
@@ -57,7 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       await firebaseSignOut(auth);
     } catch (error) {
-      console.error('Error signing out:', error);
+      logger.error('Error signing out:', 'AuthContext', error instanceof Error ? error : undefined);
       throw error;
     } finally {
       setLoading(false);

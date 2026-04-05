@@ -3,40 +3,42 @@ import { setMermaidCode } from '../slices/diagramSlice';
 import { setZoom, setPan } from '../slices/canvasSlice';
 
 // Global WebSocket client reference
-let wsClient: any = null;
+let wsClient: unknown = null;
 
-export const setWebSocketClient = (client: any) => {
+export const setWebSocketClient = (client: unknown) => {
   wsClient = client;
 };
 
-export const collaborationMiddleware: Middleware = () => (next) => (action: any) => {
+export const collaborationMiddleware: Middleware = () => (next) => (action: unknown) => {
   const result = next(action);
 
   // Only broadcast if WebSocket is connected and we have a room
-  if (!wsClient || !wsClient.isConnected || !wsClient.currentRoomId) {
+  const ws = wsClient as Record<string, unknown> | null;
+  if (!ws || !ws.isConnected || !ws.currentRoomId) {
     return result;
   }
 
+  const act = action as { type: string; payload: unknown };
   // Broadcast diagram code changes
-  if (action.type === setMermaidCode.type) {
-    wsClient.sendDiagramUpdate('mermaid_code', {
+  if (act.type === setMermaidCode.type) {
+    (ws.sendDiagramUpdate as (t: string, d: unknown) => void)('mermaid_code', {
       type: 'mermaid_code',
-      code: action.payload,
+      code: act.payload,
     });
   }
 
   // Broadcast canvas state changes
-  if (action.type === setZoom.type) {
-    wsClient.sendDiagramUpdate('canvas_state', {
+  if (act.type === setZoom.type) {
+    (ws.sendDiagramUpdate as (t: string, d: unknown) => void)('canvas_state', {
       type: 'canvas_state',
-      state: { zoom: action.payload },
+      state: { zoom: act.payload },
     });
   }
 
-  if (action.type === setPan.type) {
-    wsClient.sendDiagramUpdate('canvas_state', {
+  if (act.type === setPan.type) {
+    (ws.sendDiagramUpdate as (t: string, d: unknown) => void)('canvas_state', {
       type: 'canvas_state',
-      state: { pan: action.payload },
+      state: { pan: act.payload },
     });
   }
 

@@ -6,6 +6,7 @@ import { debounce } from '../../../utils/helpers/debounce';
 import { UI_CONFIG } from '../../../constants/ui.constants';
 import { MermaidRenderResult } from '../../../types/diagram.types';
 import { Theme } from '../../../types/ui.types';
+import { logger } from '../../../utils/logger';
 
 interface UseOptimizedMermaidRendererReturn {
   isRendering: boolean;
@@ -63,7 +64,7 @@ export function useOptimizedMermaidRenderer(): UseOptimizedMermaidRendererReturn
 
       // Cancel any pending render
       if (renderPromiseRef.current) {
-        // TODO: Implement cancellation logic if needed
+        // Mermaid render API does not support cancellation — let it complete
       }
 
       // Update refs
@@ -85,7 +86,7 @@ export function useOptimizedMermaidRenderer(): UseOptimizedMermaidRendererReturn
       setRenderCount(renderCountRef.current);
       setLastRenderTime(renderTime);
     } catch (error) {
-      console.error('Render error:', error);
+      logger.error('Render error:', 'useOptimizedMermaidRenderer', error instanceof Error ? error : undefined);
     } finally {
       renderPromiseRef.current = null;
     }

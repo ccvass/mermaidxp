@@ -29,6 +29,7 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 600,
       cssCodeSplit: true,
       rollupOptions: {
+        external: ['html2canvas'],
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-redux', '@reduxjs/toolkit'],

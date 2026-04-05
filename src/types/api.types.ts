@@ -41,7 +41,7 @@ export interface ExportOptions {
 // WebSocket Message Types
 export interface WebSocketMessage {
   type: 'diagram_update' | 'diagram_receive' | 'export_complete' | 'error' | 'heartbeat';
-  payload: any;
+  payload: unknown;
   timestamp: string;
   id?: string;
 }

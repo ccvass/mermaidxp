@@ -1,5 +1,6 @@
 import { EXPORT_CONFIG } from '../constants/api.constants';
 import { validationService } from './validationService';
+import { logger } from '../utils/logger';
 
 class ExportService {
   async exportSVG(svgElement: SVGElement, filename: string = 'diagram'): Promise<void> {
@@ -26,7 +27,7 @@ class ExportService {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error exporting SVG:', error);
+      logger.error('Error exporting SVG:', 'exportService', error instanceof Error ? error : undefined);
       throw new Error('Failed to export SVG');
     }
   }
@@ -113,7 +114,7 @@ class ExportService {
         img.src = svgDataUrl;
       });
     } catch (error) {
-      console.error('Error exporting PNG:', error);
+      logger.error('Error exporting PNG:', 'exportService', error instanceof Error ? error : undefined);
       throw new Error('Failed to export PNG');
     }
   }
@@ -211,7 +212,7 @@ class ExportService {
         img.src = svgUrl;
       });
     } catch (error) {
-      console.error('Error exporting PDF:', error);
+      logger.error('Error exporting PDF:', 'exportService', error instanceof Error ? error : undefined);
       throw new Error('Failed to export PDF');
     }
   }
@@ -221,7 +222,7 @@ class ExportService {
       const svgString = new XMLSerializer().serializeToString(svgElement);
       await navigator.clipboard.writeText(svgString);
     } catch (error) {
-      console.error('Error copying to clipboard:', error);
+      logger.error('Error copying to clipboard:', 'exportService', error instanceof Error ? error : undefined);
       throw new Error('Failed to copy to clipboard');
     }
   }

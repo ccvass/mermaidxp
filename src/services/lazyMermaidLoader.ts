@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 /**
  * Lazy Mermaid Loader
  * Dynamically loads Mermaid library only when needed
@@ -86,7 +87,7 @@ class LazyMermaidLoader {
 
       script.onerror = () => {
         const error = new Error('Failed to load Mermaid library from CDN');
-        console.error('❌ Mermaid loading error:', error);
+        logger.error('❌ Mermaid loading error:', 'lazyMermaidLoader', error instanceof Error ? error : undefined);
         this.status.error = error;
         this.status.loading = false;
         reject(error);

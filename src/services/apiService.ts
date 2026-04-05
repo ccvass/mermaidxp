@@ -46,7 +46,7 @@ class ApiService {
     }
   }
 
-  async loadDiagram(id: string): Promise<{ mermaidCode: string; metadata?: any }> {
+  async loadDiagram(id: string): Promise<{ mermaidCode: string; metadata?: Record<string, unknown> }> {
     const requestId = `load-diagram-${id}`;
 
     // Cancel any pending load request for this ID

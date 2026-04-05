@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { logger } from '../../utils/logger';
 
 export const UserMenu: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -25,7 +26,7 @@ export const UserMenu: React.FC = () => {
       await signOut();
       setIsOpen(false);
     } catch (error) {
-      console.error('Error signing out:', error);
+      logger.error('Error signing out:', 'UserMenu', error instanceof Error ? error : undefined);
     }
   };
 

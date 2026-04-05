@@ -37,7 +37,7 @@ export interface UndoRedoActions {
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
-  addToHistory: (state: any) => void;
+  addToHistory: (state: unknown) => void;
   clearHistory: () => void;
 }
 
@@ -84,7 +84,7 @@ export interface FileInfo {
 export interface FileOperations {
   open: (file: File) => Promise<FileInfo>;
   save: (content: string, filename: string) => void;
-  export: (format: string, options?: any) => Promise<Blob>;
+  export: (format: string, options?: Record<string, unknown>) => Promise<Blob>;
 }
 
 // API response types
@@ -109,7 +109,7 @@ export interface CollaborationState {
     userId: string;
     timestamp: number;
     type: 'edit' | 'move' | 'delete';
-    data: any;
+    data: unknown;
   }>;
 }
 
@@ -141,8 +141,8 @@ export interface UseDragAndDropReturn {
   isDragging: boolean;
   dragRef: React.RefObject<HTMLElement>;
   dropRef: React.RefObject<HTMLElement>;
-  draggedItem: any;
-  handleDragStart: (item: any) => void;
+  draggedItem: unknown;
+  handleDragStart: (item: unknown) => void;
   handleDragEnd: () => void;
   handleDrop: (targetId: string) => void;
 }

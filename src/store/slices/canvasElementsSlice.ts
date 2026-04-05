@@ -9,7 +9,7 @@ export interface CanvasElement {
   rotation?: number;
   content?: string; // For text and icons
   imageUrl?: string; // For images
-  shapeData?: any; // For shapes
+  shapeData?: Record<string, unknown>; // For shapes
   style?: {
     color?: string;
     backgroundColor?: string;

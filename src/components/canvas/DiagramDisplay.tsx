@@ -22,6 +22,7 @@ import {
 } from '../../features/canvas/utils/toolbarDrag';
 import CollaborationManager from '../collaboration/CollaborationManager';
 import CollaborativeCursors from '../collaboration/CollaborativeCursors';
+import { logger } from '../../utils/logger';
 // Collaboration imports disabled
 
 // Constants
@@ -29,7 +30,7 @@ const CustomElementSelector = '.custom-text-group, .custom-image-group, .custom-
 
 declare global {
   interface Window {
-    mermaid: any;
+    mermaid: Record<string, unknown>;
   }
 }
 
@@ -168,8 +169,6 @@ export const DiagramDisplay: React.FC = () => {
               nextSibling,
             });
 
-            // console.log(`Extracting custom element:`, svgElement.getAttribute('data-type'), svgElement.getAttribute('data-id'));
-
             // Detach from DOM (but preserve in extractedElementsRef for re-insertion)
             if (originalParent) {
               originalParent.removeChild(svgElement);
@@ -177,7 +176,7 @@ export const DiagramDisplay: React.FC = () => {
           } catch (elementError) {}
         });
       } catch (extractError) {
-        console.error('Error during custom element extraction:', extractError);
+        logger.error('Error during custom element extraction:', 'DiagramDisplay', extractError instanceof Error ? extractError : undefined);
       }
 
       // Clear remaining content
@@ -311,7 +310,7 @@ export const DiagramDisplay: React.FC = () => {
         isExecutingRef.current = false;
       }
     } catch (err) {
-      console.error('Error rendering diagram:', err);
+      logger.error('Error rendering diagram:', 'DiagramDisplay', err instanceof Error ? err : undefined);
       dispatch(
         showNotification({
           message: 'Error rendering diagram',
@@ -531,7 +530,7 @@ export const DiagramDisplay: React.FC = () => {
             );
           }
         } catch (deleteError) {
-          console.error('Error handling delete key:', deleteError);
+          logger.error('Error handling delete key:', 'DiagramDisplay', deleteError instanceof Error ? deleteError : undefined);
           dispatch(
             showNotification({
               message: 'Error deleting elements',

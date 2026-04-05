@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setMermaidCode } from '../../store/slices/diagramSlice';
 import { SyncedTextarea } from './SyncedTextarea';
 import { useHistoryEngine } from '../../hooks/useHistoryEngine';
-import { DiagramSamples } from './DiagramSamples';
+const DiagramSamples = lazy(() =>
+  import('./DiagramSamples').then((m) => ({ default: m.DiagramSamples }))
+);
 
 export const CodeEditor: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -92,7 +94,9 @@ graph TD
       </div>
 
       {/* Diagram Samples Gallery */}
-      <DiagramSamples />
+      <Suspense fallback={null}>
+        <DiagramSamples />
+      </Suspense>
     </div>
   );
 };

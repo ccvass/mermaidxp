@@ -12,7 +12,7 @@ export const clamp = (value: number, min: number, max: number): number => {
 };
 
 // Utility function to check if a value is empty
-export const isEmpty = (value: any): boolean => {
+export const isEmpty = (value: unknown): boolean => {
   if (value == null) return true;
   if (typeof value === 'string' || Array.isArray(value)) return value.length === 0;
   if (typeof value === 'object') return Object.keys(value).length === 0;
@@ -24,7 +24,7 @@ export const deepClone = <T>(obj: T): T => {
   if (obj === null || typeof obj !== 'object') return obj;
   if (obj instanceof Date) return new Date(obj.getTime()) as any;
   if (obj instanceof Array) {
-    const clonedArr: any[] = [];
+    const clonedArr: unknown[] = [];
     obj.forEach((element) => {
       clonedArr.push(deepClone(element));
     });

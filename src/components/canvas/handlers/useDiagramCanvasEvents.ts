@@ -15,7 +15,7 @@ export interface UseDiagramCanvasEventsParams {
   };
   // Drag handlers and state
   drag: {
-    activeDragInfo: any;
+    activeDragInfo: unknown;
     handleDragMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
     handleDragMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
     handleDragMouseUp: () => void;

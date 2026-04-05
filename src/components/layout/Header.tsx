@@ -3,10 +3,7 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { toggleTheme, toggleSidebar, showNotification } from '../../store/slices/uiSlice';
 import FileOperations from '../header/FileOperations';
 import CollaborationPanel from '../collaboration/CollaborationPanel';
-import { exportService } from '../../services/exportService';
-import { mermaidService } from '../../services/mermaidService';
-import { Theme } from '../../types/ui.types';
-import { jsPDF } from 'jspdf';
+import { exportSingleDiagram, exportAllPages } from '../header/ExportController';
 import { UserMenu } from '../auth/UserMenu';
 import { LoginModal } from '../auth/LoginModal';
 import { useAuth } from '../../contexts/AuthContext';
@@ -145,216 +142,27 @@ export const Header: FC<HeaderProps> = ({ title }) => {
   const sidebarTitle = isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar';
   const themeTitle = theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme';
 
+  const notify = (msg: string, type: 'info' | 'success' | 'error' | 'warning') =>
+    dispatch(showNotification({ message: msg, type }));
+
   const handleExport = async (format: 'svg' | 'png' | 'pdf') => {
-    // Require authentication for export
     if (!user) {
       setShowLoginModal(true);
-      dispatch(
-        showNotification({
-          message: 'You must sign in to export diagrams',
-          type: 'warning',
-        })
-      );
+      notify('You must sign in to export diagrams', 'warning');
       return;
     }
-
-    try {
-      // Find SVG in mermaid container
-      const svgElement: SVGElement | null =
-        document.querySelector('#mermaid-container svg') || document.querySelector('.sheets-active-diagram svg');
-
-      if (!svgElement) {
-        dispatch(
-          showNotification({
-            message: 'No diagram found. Please render a diagram first.',
-            type: 'error',
-          })
-        );
-        return;
-      }
-
-      if (format === 'svg') {
-        await exportService.exportSVG(svgElement, 'diagram');
-        dispatch(
-          showNotification({
-            message: 'Diagram exported as SVG',
-            type: 'success',
-          })
-        );
-      } else if (format === 'png') {
-        await exportService.exportPNG(svgElement, 'diagram', 'white');
-        dispatch(
-          showNotification({
-            message: 'Diagram exported as PNG',
-            type: 'success',
-          })
-        );
-      } else if (format === 'pdf') {
-        await exportService.exportPDF(svgElement, 'diagram');
-        dispatch(
-          showNotification({
-            message: 'Diagram exported as PDF',
-            type: 'success',
-          })
-        );
-      }
-
-      setShowExportMenu(false);
-    } catch (error) {
-      console.error('Export error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to export diagram';
-      dispatch(
-        showNotification({
-          message: `Export failed: ${errorMessage}`,
-          type: 'error',
-        })
-      );
-    }
+    setShowExportMenu(false);
+    await exportSingleDiagram(format, notify);
   };
 
   const handleExportAllPages = async (format: 'svg' | 'png' | 'pdf') => {
-    if (!user) { setShowLoginModal(true); return; }
-    try {
-      setShowExportMenu(false);
-      dispatch(showNotification({ message: `Rendering ${sheets.length} diagrams...`, type: 'info' }));
-      const themeEnum = theme === 'dark' ? Theme.Dark : Theme.Light;
-
-      if (format === 'pdf') {
-        let pdf: jsPDF | null = null;
-        let exported = 0;
-
-        for (let i = 0; i < sheets.length; i++) {
-          try {
-            const result = await mermaidService.render(sheets[i].code, themeEnum);
-            if (!result.svg || result.error) continue;
-
-            // Render in real DOM for accurate layout
-            const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'position:absolute;left:-9999px;top:0;overflow:visible';
-            wrapper.innerHTML = result.svg;
-            document.body.appendChild(wrapper);
-            const svgEl = wrapper.querySelector('svg')!;
-            svgEl.style.maxWidth = 'none';
-
-            await new Promise(r => requestAnimationFrame(r));
-            await new Promise(r => setTimeout(r, 100));
-
-            const rect = svgEl.getBoundingClientRect();
-            const svgW = Math.max(rect.width, 200);
-            const svgH = Math.max(rect.height, 150);
-
-            // Set explicit dimensions and serialize
-            svgEl.setAttribute('width', String(Math.ceil(svgW)));
-            svgEl.setAttribute('height', String(Math.ceil(svgH)));
-            const svgStr = new XMLSerializer().serializeToString(svgEl);
-            document.body.removeChild(wrapper);
-
-            // High-res canvas (6x)
-            const scale = 6;
-            const cW = Math.ceil(svgW * scale);
-            const cH = Math.ceil(svgH * scale);
-            const canvas = document.createElement('canvas');
-            canvas.width = cW;
-            canvas.height = cH;
-            const ctx = canvas.getContext('2d')!;
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, cW, cH);
-
-            // Use foreignObject trick: render SVG via Image
-            const b64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-            await new Promise<void>((resolve, reject) => {
-              const img = new Image();
-              img.onload = () => { ctx.drawImage(img, 0, 0, cW, cH); resolve(); };
-              img.onerror = () => reject(new Error('render'));
-              img.src = b64;
-            });
-
-            // Page sizing: use A4 if diagram fits well, otherwise custom page size
-            const a4W = 841.89; // A4 landscape width in pt
-            const a4H = 595.28; // A4 landscape height in pt
-            const m = 36;
-            const tH = 28;
-
-            // Check if diagram would be too small on A4 (ratio < 0.35 means illegible)
-            const a4orient = svgW >= svgH ? 'l' : 'p';
-            const testPW = a4orient === 'l' ? a4W : a4H;
-            const testPH = a4orient === 'l' ? a4H : a4W;
-            const testRatio = Math.min((testPW - 2 * m) / svgW, (testPH - 2 * m - tH) / svgH);
-
-            let pageFormat: string | [number, number];
-            let orient: 'l' | 'p';
-
-            if (testRatio >= 0.35) {
-              // Fits well on A4
-              pageFormat = 'a4';
-              orient = a4orient;
-            } else {
-              // Too big for A4 — custom page sized to diagram
-              const targetW = svgW * 0.75 + 2 * m; // 75% of original + margins
-              const targetH = svgH * 0.75 + 2 * m + tH;
-              pageFormat = [Math.max(targetW, 200), Math.max(targetH, 200)];
-              orient = targetW >= targetH ? 'l' : 'p';
-            }
-
-            if (!pdf) { pdf = new jsPDF({ orientation: orient, unit: 'pt', format: pageFormat }); }
-            else { pdf.addPage(pageFormat, orient); }
-
-            const pw = pdf.internal.pageSize.getWidth();
-            const ph = pdf.internal.pageSize.getHeight();
-            const maxW = pw - 2 * m;
-            const maxH = ph - 2 * m - tH;
-            const ratio = Math.min(maxW / svgW, maxH / svgH);
-            const w = svgW * ratio;
-            const h = svgH * ratio;
-            const x = (pw - w) / 2;
-            const y = m + tH + (maxH - h) / 2;
-
-            // Title
-            pdf.setFontSize(13);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(30, 30, 30);
-            pdf.text(sheets[i].title, pw / 2, m + 16, { align: 'center' });
-
-            // Add image WITHOUT compression for maximum quality
-            const imgData = canvas.toDataURL('image/png');
-            pdf.addImage({ imageData: imgData, format: 'PNG', x, y, width: w, height: h, compression: 'NONE' });
-            exported++;
-          } catch { /* skip failed page */ }
-          await new Promise(r => setTimeout(r, 200));
-        }
-
-        if (pdf && exported > 0) {
-          pdf.save('diagrams.pdf');
-          dispatch(showNotification({ message: `Exported ${exported}/${sheets.length} pages as PDF`, type: 'success' }));
-        } else {
-          dispatch(showNotification({ message: 'PDF export failed', type: 'error' }));
-        }
-      } else {
-        const div = document.createElement('div');
-        div.style.cssText = 'position:absolute;left:-9999px;top:0';
-        document.body.appendChild(div);
-        for (let i = 0; i < sheets.length; i++) {
-          const result = await mermaidService.render(sheets[i].code, themeEnum);
-          if (result.svg) {
-            div.innerHTML = result.svg;
-            const svg = div.querySelector('svg');
-            if (svg) {
-              const name = `${(i + 1).toString().padStart(2, '0')}-${sheets[i].title.replace(/[^a-zA-Z0-9]/g, '_')}`;
-              if (format === 'svg') await exportService.exportSVG(svg as unknown as SVGElement, name);
-              else await exportService.exportPNG(svg as unknown as SVGElement, name, 'white');
-              await new Promise(r => setTimeout(r, 300));
-            }
-          }
-        }
-        document.body.removeChild(div);
-        dispatch(showNotification({ message: `Exported ${sheets.length} pages`, type: 'success' }));
-      }
-    } catch {
-      dispatch(showNotification({ message: 'Export failed', type: 'error' }));
+    if (!user) {
+      setShowLoginModal(true);
+      return;
     }
+    setShowExportMenu(false);
+    await exportAllPages(sheets, format, theme, notify);
   };
-
-
 
   return (
     <>

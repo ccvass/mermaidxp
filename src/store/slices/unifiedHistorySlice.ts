@@ -23,7 +23,7 @@ export interface CustomElementState {
   width?: number;
   height?: number;
   content?: string; // Para texto o URL de imagen
-  style?: any; // Estilos adicionales
+  style?: Record<string, unknown>; // Estilos adicionales
 }
 
 export interface UnifiedHistoryState {

@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { useCleanupEffect } from './useCleanupEffect';
+import { logger } from '../utils/logger';
 
 /**
  * Safe Undo/Redo implementation that doesn't conflict with pan/drag operations
@@ -73,7 +74,7 @@ export const useUndoRedoSafe = (maxHistorySize: number = 50) => {
       }));
       return true;
     } catch (error) {
-      console.error('Undo operation failed:', error);
+      logger.error('Undo operation failed:', 'useUndoRedoSafe', error instanceof Error ? error : undefined);
       return false;
     } finally {
       // Reset flag after a delay to prevent conflicts
@@ -100,7 +101,7 @@ export const useUndoRedoSafe = (maxHistorySize: number = 50) => {
       }));
       return true;
     } catch (error) {
-      console.error('Redo operation failed:', error);
+      logger.error('Redo operation failed:', 'useUndoRedoSafe', error instanceof Error ? error : undefined);
       return false;
     } finally {
       // Reset flag after a delay to prevent conflicts

@@ -2,6 +2,7 @@ import { MermaidRenderResult } from '../types/diagram.types';
 import { MERMAID_CONFIG_LIGHT, MERMAID_CONFIG_DARK } from '../constants/diagram.constants';
 import { Theme } from '../types/ui.types';
 import { mermaidLoader } from './lazyMermaidLoader';
+import { logger } from '../utils/logger';
 
 class MermaidService {
   private initialized = false;
@@ -13,8 +14,9 @@ class MermaidService {
     if (!window.mermaid) {
       throw new Error('Mermaid library not loaded');
     }
+    const m = window.mermaid as Record<string, unknown>;
     const config = theme === Theme.Light ? MERMAID_CONFIG_LIGHT : MERMAID_CONFIG_DARK;
-    window.mermaid.initialize(config);
+    (m.initialize as (c: Record<string, unknown>) => void)(config);
     this.initialized = true;
     this.lastTheme = theme;
   }
@@ -28,21 +30,21 @@ class MermaidService {
       // Generate unique ID for this render
       const graphId = `mermaid-graph-${++this.renderCount}`;
 
-      // Clear any previous error state
-      if (window.mermaid.parseError) {
-        window.mermaid.parseError = undefined;
+      const m = window.mermaid as Record<string, unknown>;
+      if (m.parseError) {
+        m.parseError = undefined;
       }
 
       // Render the diagram
-      const { svg, bindFunctions } = await window.mermaid.render(graphId, code);
+      const { svg, bindFunctions } = await (m.render as (id: string, code: string) => Promise<{ svg: string; bindFunctions?: unknown }>)(graphId, code);
 
       return {
         svg,
-        bindFunctions,
+        bindFunctions: bindFunctions as ((element: Element) => void) | undefined,
         error: null,
       };
     } catch (error) {
-      console.error('Mermaid rendering error:', error);
+      logger.error('Mermaid rendering error:', 'mermaidService', error instanceof Error ? error : undefined);
 
       // Extract error message
       let errorMessage = 'Failed to render diagram';

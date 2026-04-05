@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { logger } from '../../utils/logger';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       onClose();
     } catch (err) {
       setError('Error signing in. Please try again.');
-      console.error(err);
+      logger.error('Sign in error', 'LoginModal', err instanceof Error ? err : undefined);
     } finally {
       setIsLoading(false);
     }

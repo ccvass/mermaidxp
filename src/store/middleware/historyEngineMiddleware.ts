@@ -27,6 +27,7 @@ import {
   updateElementContent,
 } from '../slices/canvasElementsSlice';
 import type { RootState } from '..';
+import { logger } from '../../utils/logger';
 
 // Config
 const TEXT_COALESCE_MS = 700;
@@ -63,10 +64,10 @@ const hashState = (
 };
 
 export const historyEngineMiddleware: Middleware = (store) => {
-  let textTimer: any = null;
-  let canvasTimer: any = null;
-  let moveTimer: any = null;
-  let resizeTimer: any = null;
+  let textTimer: ReturnType<typeof setTimeout> | null = null;
+  let canvasTimer: ReturnType<typeof setTimeout> | null = null;
+  let moveTimer: ReturnType<typeof setTimeout> | null = null;
+  let resizeTimer: ReturnType<typeof setTimeout> | null = null;
   let pendingTextHash: string | null = null;
 
   const makeSnapshot = (state: RootState, actionType?: string, description?: string) => {
@@ -154,7 +155,7 @@ export const historyEngineMiddleware: Middleware = (store) => {
     const state = store.getState();
     const present = state.historyEngine.present;
     if (!present) {
-      console.error('❌ RESTORE FAILED: No present snapshot');
+      logger.error('❌ RESTORE FAILED: No present snapshot', 'historyEngineMiddleware');
       return;
     }
 
@@ -189,7 +190,7 @@ export const historyEngineMiddleware: Middleware = (store) => {
     });
   };
 
-  return (next) => (action: any) => {
+  return (next) => (action: unknown) => {
     const result = next(action);
 
     const state = store.getState();
@@ -202,18 +203,18 @@ export const historyEngineMiddleware: Middleware = (store) => {
     if (state.historyEngine.isRestoring) return result;
 
     // Handle explicit capture
-    if ((action as any).type === captureNow.type) {
-      commitNow(action.payload?.actionType);
+    if (((action as { type: string; payload?: { actionType?: string } })).type === captureNow.type) {
+      commitNow(((action as { type: string; payload?: { actionType?: string } }).payload)?.actionType);
       return result;
     }
 
     // Handle undo/redo apply
-    if ((action as any).type === undoAction.type || (action as any).type === redoAction.type) {
+    if (((action as { type: string; payload?: { actionType?: string } })).type === undoAction.type || ((action as { type: string; payload?: { actionType?: string } })).type === redoAction.type) {
       handleApplySnapshot();
       return result;
     }
 
-    const type: string = (action as any).type;
+    const type: string = ((action as { type: string; payload?: { actionType?: string } })).type;
 
     // Coalescing for text edits
     if (type === setMermaidCode.type) {

@@ -2,15 +2,16 @@ import React, { useCallback } from 'react';
 import { setPlacingElement } from '../../../store/slices/canvasSlice';
 import { setMermaidCode } from '../../../store/slices/diagramSlice';
 import { showNotification } from '../../../store/slices/uiSlice';
+import { logger } from '../../../utils/logger';
 
 export interface UseElementPlacementParams {
   containerRef: React.RefObject<HTMLDivElement | null>;
   pan: { x: number; y: number };
   zoom: number;
   mermaidCode: string;
-  placingElement: any;
-  activeDragInfo: any;
-  dispatch: (action: any) => void;
+  placingElement: unknown;
+  activeDragInfo: unknown;
+  dispatch: (action: unknown) => void;
 }
 
 export function useElementPlacement({
@@ -90,9 +91,9 @@ export function useElementPlacement({
   );
 
   const handleElementPlacement = useCallback(
-    async (element: any, screenX: number, screenY: number, diagramX: number, diagramY: number) => {
+    async (element: Record<string, unknown>, screenX: number, screenY: number, diagramX: number, diagramY: number) => {
       if (!element) return;
-      const addTextToSVG = (textContent: string, textStyle: any, clickX: number, clickY: number, nodeId: string) => {
+      const addTextToSVG = (textContent: string, textStyle: Record<string, unknown>, clickX: number, clickY: number, nodeId: string) => {
         if (!containerRef.current) return;
 
         const svgElement = containerRef.current.querySelector('svg');
@@ -103,7 +104,7 @@ export function useElementPlacement({
         textGroup.setAttribute('data-id', nodeId);
         textGroup.setAttribute('data-type', 'text');
 
-        let currentFontSize = textStyle.fontSize;
+        let currentFontSize = Number(textStyle.fontSize || 16);
         const getTextDimensions = (fontSize: number) => ({
           width: textContent.length * (fontSize * 0.6),
           height: fontSize,
@@ -114,17 +115,17 @@ export function useElementPlacement({
         textElement.setAttribute('y', clickY.toString());
         textElement.setAttribute('text-anchor', 'middle');
         textElement.setAttribute('dominant-baseline', 'middle');
-        textElement.setAttribute('font-size', currentFontSize.toString());
-        textElement.setAttribute('fill', textStyle.color);
-        textElement.setAttribute('font-weight', textStyle.fontWeight);
-        textElement.setAttribute('font-style', textStyle.fontStyle);
-        textElement.setAttribute('text-decoration', textStyle.textDecoration);
+        textElement.setAttribute('font-size', String(currentFontSize));
+        textElement.setAttribute('fill', String(textStyle.color || ''));
+        textElement.setAttribute('font-weight', String(textStyle.fontWeight || ''));
+        textElement.setAttribute('font-style', String(textStyle.fontStyle || ''));
+        textElement.setAttribute('text-decoration', String(textStyle.textDecoration || ''));
         textElement.setAttribute('cursor', 'move');
         textElement.setAttribute('class', 'placed-text');
         textElement.textContent = textContent;
 
         let backgroundRect: SVGElement | null = null;
-        if (textStyle.backgroundColor !== 'transparent') {
+        if (String(textStyle.backgroundColor || 'transparent') !== 'transparent') {
           backgroundRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           updateBackgroundRect();
           backgroundRect.setAttribute('class', 'text-background');
@@ -133,23 +134,25 @@ export function useElementPlacement({
 
         function updateBackgroundRect() {
           if (!backgroundRect) return;
-          const dims = getTextDimensions(currentFontSize);
-          backgroundRect.setAttribute('x', (clickX - dims.width / 2 - textStyle.padding).toString());
-          backgroundRect.setAttribute('y', (clickY - dims.height / 2 - textStyle.padding).toString());
-          backgroundRect.setAttribute('width', (dims.width + textStyle.padding * 2).toString());
-          backgroundRect.setAttribute('height', (dims.height + textStyle.padding * 2).toString());
-          backgroundRect.setAttribute('fill', textStyle.backgroundColor);
-          backgroundRect.setAttribute('rx', textStyle.borderRadius.toString());
-          backgroundRect.setAttribute('ry', textStyle.borderRadius.toString());
+          const dims = getTextDimensions(Number(currentFontSize));
+          const pad = Number(Number(textStyle.padding || 0) || 0);
+          backgroundRect.setAttribute('x', (clickX - dims.width / 2 - pad).toString());
+          backgroundRect.setAttribute('y', (clickY - dims.height / 2 - pad).toString());
+          backgroundRect.setAttribute('width', (dims.width + pad * 2).toString());
+          backgroundRect.setAttribute('height', (dims.height + pad * 2).toString());
+          backgroundRect.setAttribute('fill', String(String(textStyle.backgroundColor || 'transparent') || ''));
+          backgroundRect.setAttribute('rx', String(Number(textStyle.borderRadius || 0) || 0));
+          backgroundRect.setAttribute('ry', String(Number(textStyle.borderRadius || 0) || 0));
         }
 
         const selectionRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         const updateSelectionRect = () => {
-          const dims = getTextDimensions(currentFontSize);
-          selectionRect.setAttribute('x', (clickX - dims.width / 2 - textStyle.padding - 2).toString());
-          selectionRect.setAttribute('y', (clickY - dims.height / 2 - textStyle.padding - 2).toString());
-          selectionRect.setAttribute('width', (dims.width + textStyle.padding * 2 + 4).toString());
-          selectionRect.setAttribute('height', (dims.height + textStyle.padding * 2 + 4).toString());
+          const dims = getTextDimensions(Number(currentFontSize));
+          const pad = Number(Number(textStyle.padding || 0) || 0);
+          selectionRect.setAttribute('x', (clickX - dims.width / 2 - pad - 2).toString());
+          selectionRect.setAttribute('y', (clickY - dims.height / 2 - pad - 2).toString());
+          selectionRect.setAttribute('width', (dims.width + pad * 2 + 4).toString());
+          selectionRect.setAttribute('height', (dims.height + pad * 2 + 4).toString());
         };
 
         updateSelectionRect();
@@ -171,10 +174,10 @@ export function useElementPlacement({
 
         const updateHandlePositions = () => {
           const dims = getTextDimensions(currentFontSize);
-          const rectX = clickX - dims.width / 2 - textStyle.padding - 2;
-          const rectY = clickY - dims.height / 2 - textStyle.padding - 2;
-          const rectWidth = dims.width + textStyle.padding * 2 + 4;
-          const rectHeight = dims.height + textStyle.padding * 2 + 4;
+          const rectX = clickX - dims.width / 2 - Number(textStyle.padding || 0) - 2;
+          const rectY = clickY - dims.height / 2 - Number(textStyle.padding || 0) - 2;
+          const rectWidth = dims.width + Number(textStyle.padding || 0) * 2 + 4;
+          const rectHeight = dims.height + Number(textStyle.padding || 0) * 2 + 4;
 
           const positions = [
             { x: rectX - handleSize / 2, y: rectY - handleSize / 2 },
@@ -533,7 +536,7 @@ export function useElementPlacement({
       };
 
       const addSVGShapeToCanvas = (
-        shapeDef: any,
+        shapeDef: Record<string, unknown>,
         clickX: number,
         clickY: number,
         nodeId: string,
@@ -616,9 +619,9 @@ export function useElementPlacement({
             shapeElement.setAttribute('height', height.toString());
         }
 
-        shapeElement.setAttribute('fill', shapeDef.fill || '#e1f5fe');
-        shapeElement.setAttribute('stroke', shapeDef.stroke || '#0277bd');
-        shapeElement.setAttribute('stroke-width', shapeDef.strokeWidth || '2');
+        shapeElement.setAttribute('fill', String(shapeDef.fill || '#e1f5fe'));
+        shapeElement.setAttribute('stroke', String(shapeDef.stroke || '#0277bd'));
+        shapeElement.setAttribute('stroke-width', String(shapeDef.strokeWidth || '2'));
         shapeElement.setAttribute('cursor', 'move');
         shapeElement.setAttribute('class', 'placed-svg-shape');
 
@@ -907,12 +910,13 @@ export function useElementPlacement({
         switch (element.type) {
           case 'shape':
             if (element.shapeDefinition) {
+              const def = element.shapeDefinition as Record<string, unknown>;
               const shapeName = await promptForText(
                 'Shape Text',
-                `Enter text for the ${element.shapeDefinition.name}:`
+                `Enter text for the ${def.name}:`
               );
               if (shapeName) {
-                newNodeCode = `\n    ${element.shapeDefinition.syntax(nodeId, shapeName)}`;
+                newNodeCode = `\n    ${(def.syntax as (id: string, name: string) => string)(nodeId, shapeName)}`;
               }
             } else {
               const shapeName = await promptForText('Shape Text', 'Enter text for the shape:');
@@ -929,10 +933,11 @@ export function useElementPlacement({
             let height = 80;
 
             if (element.imageDefinition) {
-              imageUrl = element.imageDefinition.url;
-              altText = element.imageDefinition.altText || 'Image';
-              width = element.imageDefinition.width || 80;
-              height = element.imageDefinition.height || 80;
+              const imgDef = element.imageDefinition as Record<string, unknown>;
+              imageUrl = String(imgDef.url || '');
+              altText = String(imgDef.altText || 'Image');
+              width = Number(imgDef.width || 80);
+              height = Number(imgDef.height || 80);
             } else {
               imageUrl = (await promptForText('Image URL', 'Enter the image URL:')) || '';
               if (imageUrl) {
@@ -950,7 +955,7 @@ export function useElementPlacement({
 
           case 'svg-shape': {
             if (element.svgShapeDefinition) {
-              const shapeDef = element.svgShapeDefinition;
+              const shapeDef = element.svgShapeDefinition as Record<string, unknown>;
               addSVGShapeToCanvas(shapeDef, screenX, screenY, nodeId);
               dispatch(setPlacingElement(null));
               return;
@@ -974,17 +979,17 @@ export function useElementPlacement({
             };
 
             if (element.textDefinition) {
-              const textDef = element.textDefinition;
-              textContent = textDef.content;
+              const textDef = element.textDefinition as Record<string, unknown>;
+              textContent = String(textDef.content || '');
               textStyle = {
-                fontSize: textDef.fontSize,
-                color: textDef.color,
-                fontWeight: textDef.fontWeight,
-                fontStyle: textDef.fontStyle,
-                textDecoration: textDef.textDecoration,
-                backgroundColor: textDef.backgroundColor,
-                padding: textDef.padding,
-                borderRadius: textDef.borderRadius,
+                fontSize: Number(textDef.fontSize || 16),
+                color: String(textDef.color || '#000'),
+                fontWeight: (textDef.fontWeight || 'normal') as 'normal' | 'bold',
+                fontStyle: (textDef.fontStyle || 'normal') as 'normal' | 'italic',
+                textDecoration: (textDef.textDecoration || 'none') as 'none' | 'underline',
+                backgroundColor: String(textDef.backgroundColor || 'transparent'),
+                padding: Number(textDef.padding || 4),
+                borderRadius: Number(textDef.borderRadius || 0),
               };
             } else {
               textContent = (await promptForText('Text Content', 'Enter the text content:')) || '';
@@ -1001,7 +1006,7 @@ export function useElementPlacement({
           case 'icon': {
             let iconContent = '';
             if (element.iconContent) {
-              iconContent = element.iconContent;
+              iconContent = String(element.iconContent);
             } else {
               iconContent = (await promptForText('Icon/Emoji', 'Enter an emoji or Unicode character:')) || '';
             }
@@ -1039,15 +1044,15 @@ export function useElementPlacement({
 
           dispatch(
             showNotification({
-              message: `${element.type === 'shape' ? element.shapeDefinition?.name || 'Shape' : element.type} added successfully`,
-              type: 'success',
-            } as any)
+              message: `${element.type === 'shape' ? String((element.shapeDefinition as Record<string, unknown>)?.name || 'Shape') : String(element.type)} added successfully`,
+              type: 'success' as const,
+            })
           );
         }
 
         dispatch(setPlacingElement(null));
       } catch (error) {
-        console.error('Element placement error:', error);
+        logger.error('Element placement error:', 'useElementPlacement', error instanceof Error ? error : undefined);
         dispatch(
           showNotification({
             message: `Failed to add ${element && element.type ? element.type : 'element'}`,
@@ -1076,7 +1081,7 @@ export function useElementPlacement({
       const diagramX = (x - pan.x) / zoom;
       const diagramY = (y - pan.y) / zoom;
 
-      handleElementPlacement(placingElement, x, y, diagramX, diagramY);
+      handleElementPlacement(placingElement as Record<string, unknown>, x, y, diagramX, diagramY);
     },
     [placingElement, activeDragInfo, pan, zoom, handleElementPlacement, containerRef]
   );

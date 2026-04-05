@@ -3,6 +3,7 @@ import { RootState } from './index';
 // Local DeepPartial helper for TS
 type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
 import { DEFAULT_MERMAID_CODE } from '../constants/diagram.constants';
+import { logger } from '../utils/logger';
 
 const STORAGE_KEY = 'mermaidViewerState';
 
@@ -10,35 +11,38 @@ const STORAGE_KEY = 'mermaidViewerState';
  * Validates the structure of the persisted state
  * CRITICAL: interactionMode validation prevents zoom issues during drag/drop
  */
-const isValidPersistedState = (state: any): state is PersistedState => {
+const isValidPersistedState = (state: unknown): state is PersistedState => {
   if (!state || typeof state !== 'object') return false;
+  const s = state as Record<string, Record<string, unknown>>;
 
   // Validate diagram
-  if (!state.diagram || typeof state.diagram !== 'object') return false;
-  if (typeof state.diagram.mermaidCode !== 'string') return false;
+  if (!s.diagram || typeof s.diagram !== 'object') return false;
+  if (typeof s.diagram.mermaidCode !== 'string') return false;
 
   // Validate ui
-  if (!state.ui || typeof state.ui !== 'object') return false;
-  if (state.ui.theme !== 'light' && state.ui.theme !== 'dark') return false;
+  if (!s.ui || typeof s.ui !== 'object') return false;
+  if (s.ui.theme !== 'light' && s.ui.theme !== 'dark') return false;
 
   // Validate canvas
-  if (!state.canvas || typeof state.canvas !== 'object') return false;
-  if (typeof state.canvas.zoom !== 'number') return false;
+  if (!s.canvas || typeof s.canvas !== 'object') return false;
+  if (typeof s.canvas.zoom !== 'number') return false;
   if (
-    !state.canvas.pan ||
-    typeof state.canvas.pan !== 'object' ||
-    typeof state.canvas.pan.x !== 'number' ||
-    typeof state.canvas.pan.y !== 'number'
+    !s.canvas.pan ||
+    typeof s.canvas.pan !== 'object'
   ) {
+    return false;
+  }
+  const pan = s.canvas.pan as Record<string, unknown>;
+  if (typeof pan.x !== 'number' || typeof pan.y !== 'number') {
     return false;
   }
   // CRITICAL: Validate interactionMode to prevent zoom issues
   // When interactionMode is undefined, DiagramDisplay.tsx triggers unwanted zoom changes
   // during drag/drop operations via the "zoom back check" useEffect
   if (
-    state.canvas.interactionMode &&
-    state.canvas.interactionMode !== 'pan' &&
-    state.canvas.interactionMode !== 'drag'
+    s.canvas.interactionMode &&
+    s.canvas.interactionMode !== 'pan' &&
+    s.canvas.interactionMode !== 'drag'
   ) {
     return false;
   }
@@ -88,7 +92,7 @@ export const loadPersistedState = (): DeepPartial<RootState> | undefined => {
       },
     };
   } catch (error) {
-    console.error('Failed to load persisted state:', error);
+    logger.error('Failed to load persisted state:', 'loadPersistedState', error instanceof Error ? error : undefined);
     // If there's an error, remove the corrupted data
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -107,6 +111,6 @@ export const clearPersistedState = (): void => {
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (error) {
-    console.error('Failed to clear persisted state:', error);
+    logger.error('Failed to clear persisted state:', 'loadPersistedState', error instanceof Error ? error : undefined);
   }
 };

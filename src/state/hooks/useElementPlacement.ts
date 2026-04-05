@@ -3,7 +3,7 @@ import { ShapeDefinition } from '../../types/shapes.types';
 
 export interface PlacingElementInfo {
   type: 'shape' | 'text' | 'icon' | 'image' | null;
-  definition?: any;
+  definition?: unknown;
 }
 
 export const useElementPlacement = (onAppendCode: (code: string) => void, onCancelElementPlacement: () => void) => {

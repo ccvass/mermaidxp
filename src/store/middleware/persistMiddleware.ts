@@ -1,5 +1,6 @@
 import { Middleware } from '@reduxjs/toolkit';
 import { RootState } from '../index';
+import { logger } from '../../utils/logger';
 
 // Define the structure of persisted state
 // CRITICAL: interactionMode MUST be persisted to prevent zoom issues during drag/drop
@@ -74,7 +75,7 @@ const persistState = (state: RootState) => {
       const persistedState = extractPersistedState(state);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedState));
     } catch (error) {
-      console.error('Failed to persist state to localStorage:', error);
+      logger.error('Failed to persist state to localStorage:', 'persistMiddleware', error instanceof Error ? error : undefined);
     }
   }, DEBOUNCE_DELAY);
 };
@@ -82,12 +83,12 @@ const persistState = (state: RootState) => {
 /**
  * Redux middleware that persists specific state changes to localStorage
  */
-export const persistMiddleware: Middleware<{}, RootState> = (store) => (next) => (action: any) => {
+export const persistMiddleware: Middleware<{}, RootState> = (store) => (next) => (action: unknown) => {
   // Let the action pass through first
   const result = next(action);
 
   // Check if this action should trigger persistence
-  if (PERSISTED_ACTIONS.includes(action.type)) {
+  if (PERSISTED_ACTIONS.includes((action as { type: string }).type)) {
     persistState(store.getState());
   }
 

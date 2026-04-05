@@ -318,7 +318,7 @@ export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | n
         element.setAttribute('transform', `translate(${newTransformX}, ${newTransformY})`);
 
         edgeInfoCacheRef.current.forEach((cachedEdge) => {
-          const isConnected = cachedEdge.connectedNodeIds.some((id: any) => allMovedNodeIds.includes(id));
+          const isConnected = cachedEdge.connectedNodeIds.some((id: string) => allMovedNodeIds.includes(id));
           if (isConnected) {
             let finalD = cachedEdge.originalD;
             let pathWasModified = false;
@@ -328,10 +328,10 @@ export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | n
             if (
               parentGroup &&
               cachedEdge.connectedNodeIds.some(
-                (id: any) => allMovedNodeIds.includes(id) && parentGroup.classList.contains(`LS-${id}`)
+                (id: string) => allMovedNodeIds.includes(id) && parentGroup.classList.contains(`LS-${id}`)
               )
             ) {
-              finalD = finalD.replace(/^M\s*([\d.eE+-]+)\s*[, ]?\s*([\d.eE+-]+)/, (_match: any, p1: any, p2: any) => {
+              finalD = finalD.replace(/^M\s*([\d.eE+-]+)\s*[, ]?\s*([\d.eE+-]+)/, (_match: string, p1: string, p2: string) => {
                 return `M ${parseFloat(p1) + dxMouse} ${parseFloat(p2) + dyMouse}`;
               });
               pathWasModified = true;

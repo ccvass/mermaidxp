@@ -8,7 +8,7 @@ export const initUnifiedResize = (containerId: string) => {
   let startY = 0;
   let activeElement: SVGElement | null = null;
   let activeGroup: SVGElement | null = null;
-  let initialData: any = {};
+  let initialData: Record<string, unknown> = {};
 
   const svgElement = container.querySelector('svg');
   if (!svgElement) return;
@@ -82,7 +82,7 @@ export const initUnifiedResize = (containerId: string) => {
       const isIcon = activeElement.classList.contains('icon-text');
       const minSize = isIcon ? 12 : 8;
       const maxSize = isIcon ? 96 : 72;
-      const newFontSize = Math.max(minSize, Math.min(maxSize, initialData.fontSize + fontSizeChange));
+      const newFontSize = Math.max(minSize, Math.min(maxSize, Number(initialData.fontSize || 0) + fontSizeChange));
 
       activeElement.setAttribute('font-size', newFontSize.toString());
 
@@ -112,25 +112,25 @@ export const initUnifiedResize = (containerId: string) => {
         }
       });
     } else if (activeElement.classList.contains('placed-image')) {
-      let newWidth = initialData.width;
-      let newHeight = initialData.height;
+      let newWidth = Number(initialData.width || 0);
+      let newHeight = Number(initialData.height || 0);
 
       switch (resizeHandle) {
         case 'se':
-          newWidth = Math.max(20, initialData.width + deltaX);
-          newHeight = Math.max(20, initialData.height + deltaY);
+          newWidth = Math.max(20, Number(initialData.width || 0) + deltaX);
+          newHeight = Math.max(20, Number(initialData.height || 0) + deltaY);
           break;
         case 'sw':
-          newWidth = Math.max(20, initialData.width - deltaX);
-          newHeight = Math.max(20, initialData.height + deltaY);
+          newWidth = Math.max(20, Number(initialData.width || 0) - deltaX);
+          newHeight = Math.max(20, Number(initialData.height || 0) + deltaY);
           break;
         case 'ne':
-          newWidth = Math.max(20, initialData.width + deltaX);
-          newHeight = Math.max(20, initialData.height - deltaY);
+          newWidth = Math.max(20, Number(initialData.width || 0) + deltaX);
+          newHeight = Math.max(20, Number(initialData.height || 0) - deltaY);
           break;
         case 'nw':
-          newWidth = Math.max(20, initialData.width - deltaX);
-          newHeight = Math.max(20, initialData.height - deltaY);
+          newWidth = Math.max(20, Number(initialData.width || 0) - deltaX);
+          newHeight = Math.max(20, Number(initialData.height || 0) - deltaY);
           break;
       }
 

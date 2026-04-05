@@ -81,9 +81,13 @@ const ToolbarButton = memo(
           flex items-center justify-center
           border border-gray-200 dark:border-gray-600
           shadow-sm hover:shadow-md
+          gap-1.5
         `}
         >
           {children}
+          {label && size !== 'sm' && (
+            <span className="text-xs font-medium hidden sm:inline">{label}</span>
+          )}
         </button>
       );
     }
@@ -93,7 +97,9 @@ const ToolbarButton = memo(
 ToolbarButton.displayName = 'ToolbarButton';
 
 // Toolbar Separator
-const ToolbarSeparator = () => <div className="h-8 w-px bg-gray-300 dark:bg-gray-600 mx-1" />;
+const ToolbarSeparator = () => (
+  <div className="h-10 w-px bg-gray-300 dark:bg-gray-500 mx-2" />
+);
 
 // Presentation Icon
 const PresentationIcon = ({ size = 20 }: { size?: number }) => (
@@ -102,7 +108,7 @@ const PresentationIcon = ({ size = 20 }: { size?: number }) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2"
+      d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
     />
   </svg>
 );
@@ -339,7 +345,7 @@ export const ToolbarImproved: React.FC = () => {
                 <ZoomOutIcon size={16} />
               </ToolbarButton>
 
-              <span className="px-2 min-w-[60px] text-center text-sm font-medium text-gray-600 dark:text-gray-400">
+              <span className="px-3 min-w-[65px] text-center text-sm font-bold text-gray-700 dark:text-gray-200 tabular-nums">
                 {Math.round(zoom * 100)}%
               </span>
 

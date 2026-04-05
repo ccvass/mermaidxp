@@ -305,15 +305,16 @@ function createIconElement(element: CanvasElement): SVGElement {
 }
 
 function createSvgShapeElement(element: CanvasElement): SVGElement | null {
-  const rawShapeData = element.shapeData || {};
+  const rawShapeData = (element.shapeData || {}) as Record<string, unknown>;
+  const svgDef = rawShapeData.svgShapeDefinition as Record<string, unknown> | undefined;
   const shapeId =
     rawShapeData.shapeId ||
     rawShapeData.shapeName ||
     rawShapeData.id ||
-    rawShapeData.svgShapeDefinition?.id ||
-    rawShapeData.svgShapeDefinition?.shapeId;
+    svgDef?.id ||
+    svgDef?.shapeId;
 
-  const definition = shapeId ? SHAPE_DEFINITION_MAP.get(shapeId) : undefined;
+  const definition = shapeId ? SHAPE_DEFINITION_MAP.get(String(shapeId)) : undefined;
   if (!definition) {
     return null;
   }

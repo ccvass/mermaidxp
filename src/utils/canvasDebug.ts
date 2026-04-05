@@ -13,7 +13,7 @@ export interface CanvasDebugInfo {
 /**
  * Valida y proporciona información de debugging sobre el estado del canvas
  */
-export function debugCanvasState(zoom: any, pan: any): CanvasDebugInfo {
+export function debugCanvasState(zoom: number, pan: { x: number; y: number }): CanvasDebugInfo {
   const errors: string[] = [];
 
   // Validar zoom
@@ -47,10 +47,10 @@ export function debugCanvasState(zoom: any, pan: any): CanvasDebugInfo {
 /**
  * Log información de debugging del canvas
  */
-export function logCanvasDebug(zoom: any, pan: any, context: string = 'Canvas'): void {
+export function logCanvasDebug(zoom: number, pan: { x: number; y: number }, context: string = 'Canvas'): void {
   if (process.env.NODE_ENV !== 'development') return;
 
-  const debug = debugCanvasState(zoom, pan);
+  const debug = debugCanvasState(zoom as number, pan as { x: number; y: number });
 
   if (debug.errors.length > 0) {
     console.group(`🐛 ${context} Debug Info`);
@@ -61,11 +61,11 @@ export function logCanvasDebug(zoom: any, pan: any, context: string = 'Canvas'):
 /**
  * Sanitiza los valores del canvas para uso seguro
  */
-export function sanitizeCanvasValues(zoom: any, pan: any): { zoom: number; pan: { x: number; y: number } } {
-  const debug = debugCanvasState(zoom, pan);
+export function sanitizeCanvasValues(zoom: unknown, pan: unknown): { zoom: number; pan: { x: number; y: number } } {
+  const debug = debugCanvasState(zoom as number, pan as { x: number; y: number });
 
   if (debug.errors.length > 0) {
-    logCanvasDebug(zoom, pan, 'Sanitize');
+    logCanvasDebug(zoom as number, pan as { x: number; y: number }, 'Sanitize');
   }
 
   return {

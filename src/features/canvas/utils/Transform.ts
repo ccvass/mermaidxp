@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 /**
  * Transform utility for handling canvas transformations
  * Supports uniform scaling and translation
@@ -83,7 +84,7 @@ export class Transform {
       element.style.transform = transformString;
       element.style.transformOrigin = '0 0';
     } catch (error) {
-      console.error('Error applying transform to element:', error);
+      logger.error('Error applying transform to element:', 'Transform', error instanceof Error ? error : undefined);
     }
   }
 
@@ -158,7 +159,7 @@ export class Transform {
         }
       }
     } catch (error) {
-      console.error('Error applying SVG transform:', error);
+      logger.error('Error applying SVG transform:', 'Transform', error instanceof Error ? error : undefined);
       // Fallback: apply transform directly to the element
       try {
         const transformString = `translate(${this.translateX}, ${this.translateY}) scale(${this.scaleX})`;
@@ -170,7 +171,7 @@ export class Transform {
           element.style.visibility = 'visible';
         }
       } catch (fallbackError) {
-        console.error('Error applying fallback SVG transform:', fallbackError);
+        logger.error('Error applying fallback SVG transform:', 'Transform', fallbackError instanceof Error ? fallbackError : undefined);
       }
     }
   }
@@ -192,7 +193,7 @@ export class Transform {
       ctx.translate(this.translateX, this.translateY);
       ctx.scale(this.scaleX, this.scaleX);
     } catch (error) {
-      console.error('Error applying canvas transform:', error);
+      logger.error('Error applying canvas transform:', 'Transform', error instanceof Error ? error : undefined);
     }
   }
 
@@ -209,7 +210,7 @@ export class Transform {
       const transformValue = `translate(${this.translateX}, ${this.translateY}) scale(${this.scaleX})`;
       element.setAttribute('transform', transformValue);
     } catch (error) {
-      console.error('Error applying SVG transform:', error);
+      logger.error('Error applying SVG transform:', 'Transform', error instanceof Error ? error : undefined);
     }
   }
 

@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import WebSocketService from '../../services/webSocketService';
 import { setMermaidCode } from '../../store/slices/diagramSlice';
 import { showNotification } from '../../store/slices/uiSlice';
+import { logger } from '../../utils/logger';
 
 interface CollaborationUser {
   id: string;
@@ -79,7 +80,7 @@ export const CollaborationManager: React.FC<CollaborationManagerProps> = ({
       // Connect to WebSocket (disabled service; no options)
       await webSocketService.connect();
     } catch (error) {
-      console.error('Failed to initialize collaboration:', error);
+      logger.error('Failed to initialize collaboration:', 'CollaborationManager', error instanceof Error ? error : undefined);
       dispatch(
         showNotification({
           type: 'error',
@@ -90,25 +91,27 @@ export const CollaborationManager: React.FC<CollaborationManagerProps> = ({
   }, [enabled, sessionId, userName, generateUserColor, dispatch]);
 
   // Handle collaboration messages
-  const handleCollaborationMessage = useCallback((message: any) => {
-    switch (message.type) {
+  const handleCollaborationMessage = useCallback((message: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const msg = message as { type: string; payload: any };
+    switch (msg.type) {
       case 'collaboration_user_joined':
-        handleUserJoined(message.payload);
+        handleUserJoined(msg.payload);
         break;
       case 'collaboration_user_left':
-        handleUserLeft(message.payload);
+        handleUserLeft(msg.payload);
         break;
       case 'collaboration_code_change':
-        handleCodeChange(message.payload);
+        handleCodeChange(msg.payload);
         break;
       case 'collaboration_cursor_move':
-        handleCursorMove(message.payload);
+        handleCursorMove(msg.payload);
         break;
       case 'collaboration_selection_change':
-        handleSelectionChange(message.payload);
+        handleSelectionChange(msg.payload);
         break;
       case 'collaboration_session_state':
-        handleSessionState(message.payload);
+        handleSessionState(msg.payload);
         break;
       default:
     }

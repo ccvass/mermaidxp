@@ -1,4 +1,5 @@
 import { Transform } from './Transform';
+import { logger } from '../../../utils/logger';
 
 /**
  * Apply canvas transformation to an element
@@ -39,7 +40,7 @@ export function applyCanvasTransform(
       transform.applyToElement(element as HTMLElement);
     }
   } catch (error) {
-    console.error('Error in applyCanvasTransform:', error);
+    logger.error('Error in applyCanvasTransform:', 'canvasTransform', error instanceof Error ? error : undefined);
     // Aplicar transformación por defecto en caso de error
     try {
       const defaultTransform = new Transform(1, 0, 0);
@@ -49,7 +50,7 @@ export function applyCanvasTransform(
         defaultTransform.applyToElement(element as HTMLElement);
       }
     } catch (fallbackError) {
-      console.error('Error applying fallback transform:', fallbackError);
+      logger.error('Error applying fallback transform:', 'canvasTransform', fallbackError instanceof Error ? fallbackError : undefined);
     }
   }
 }
@@ -78,7 +79,7 @@ export function applyCanvasTransformLegacy(element: HTMLElement | SVGElement, tr
     // Apply the transform
     transform.applySVGGroup(svgRoot);
   } catch (error) {
-    console.error('Error in applyCanvasTransformLegacy:', error);
+    logger.error('Error in applyCanvasTransformLegacy:', 'canvasTransform', error instanceof Error ? error : undefined);
   }
 }
 
