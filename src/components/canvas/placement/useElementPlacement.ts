@@ -1085,11 +1085,29 @@ export function useElementPlacement({
       if (activeDragInfo) return;
 
       const rect = containerRef.current.getBoundingClientRect();
-      const x = (e as React.MouseEvent).clientX - rect.left;
-      const y = (e as React.MouseEvent).clientY - rect.top;
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-      const diagramX = (x - pan.x) / zoom;
-      const diagramY = (y - pan.y) / zoom;
+      // Use SVG's getScreenCTM to accurately convert screen → SVG coordinates
+      let diagramX = (x - pan.x) / zoom;
+      let diagramY = (y - pan.y) / zoom;
+      try {
+        const svg = containerRef.current.querySelector('svg') as SVGSVGElement | null;
+        const layer = svg?.querySelector('g[data-custom-elements-layer]') as SVGGElement | null;
+        if (svg && layer) {
+          const pt = svg.createSVGPoint();
+          pt.x = e.clientX;
+          pt.y = e.clientY;
+          const ctm = layer.getScreenCTM();
+          if (ctm) {
+            const svgPt = pt.matrixTransform(ctm.inverse());
+            diagramX = svgPt.x;
+            diagramY = svgPt.y;
+          }
+        }
+      } catch {
+        // fallback to manual math above
+      }
 
       handleElementPlacement(placingElement as Record<string, unknown>, x, y, diagramX, diagramY);
     },
