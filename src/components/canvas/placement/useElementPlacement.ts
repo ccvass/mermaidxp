@@ -93,6 +93,12 @@ export function useElementPlacement({
   const handleElementPlacement = useCallback(
     async (element: Record<string, unknown>, _screenX: number, _screenY: number, diagramX: number, diagramY: number) => {
       if (!element) return;
+
+      // Helper: get the custom-elements-layer (or SVG root as fallback)
+      const getTargetParent = (svg: SVGElement): SVGElement => {
+        return (svg.querySelector('g[data-custom-elements-layer]') as SVGElement) || svg;
+      };
+
       const addTextToSVG = (
         textContent: string,
         textStyle: Record<string, unknown>,
@@ -310,7 +316,7 @@ export function useElementPlacement({
         textGroup.style.visibility = 'visible';
         textGroup.style.display = 'block';
 
-        svgElement.appendChild(textGroup);
+        getTargetParent(svgElement).appendChild(textGroup);
       };
 
       const addImageToSVG = (
@@ -538,7 +544,7 @@ export function useElementPlacement({
         imageGroup.style.visibility = 'visible';
         imageGroup.style.display = 'block';
 
-        svgElement.appendChild(imageGroup);
+        getTargetParent(svgElement).appendChild(imageGroup);
       };
 
       const addSVGShapeToCanvas = (
@@ -696,7 +702,7 @@ export function useElementPlacement({
         shapeGroup.style.display = 'block';
 
         const svgRoot = containerRef.current.querySelector('svg');
-        svgRoot?.appendChild(shapeGroup);
+        getTargetParent(svgRoot!).appendChild(shapeGroup);
 
         updateSelectionAndHandles();
 
@@ -906,7 +912,7 @@ export function useElementPlacement({
         iconGroup.style.visibility = 'visible';
         iconGroup.style.display = 'block';
 
-        svgElement.appendChild(iconGroup);
+        getTargetParent(svgElement).appendChild(iconGroup);
       };
 
       try {
