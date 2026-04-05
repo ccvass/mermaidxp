@@ -34,3 +34,6 @@ REMOTE.md
 *.njsproj
 *.sln
 *.sw?
+
+# TODO lists
+todo/
