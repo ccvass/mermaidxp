@@ -242,8 +242,7 @@ export const DiagramDisplay: React.FC = () => {
                 }
               });
 
-              // Remove any transform attribute from the element itself since it will inherit from transformGroup
-              element.removeAttribute('transform');
+              // Preserve transform attribute — it contains the element's position after drag/move
 
               // Append each preserved element to the transform group so it inherits the same transform
               transformGroup.appendChild(element);
