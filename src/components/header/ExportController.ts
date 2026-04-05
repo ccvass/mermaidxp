@@ -35,12 +35,7 @@ export async function exportSingleDiagram(format: 'svg' | 'png' | 'pdf', notify:
   }
 }
 
-export async function exportAllPages(
-  sheets: Sheet[],
-  format: 'svg' | 'png' | 'pdf',
-  theme: string,
-  notify: NotifyFn,
-) {
+export async function exportAllPages(sheets: Sheet[], format: 'svg' | 'png' | 'pdf', theme: string, notify: NotifyFn) {
   const themeEnum = theme === 'dark' ? Theme.Dark : Theme.Light;
   notify(`Rendering ${sheets.length} diagrams...`, 'info');
 
@@ -97,12 +92,18 @@ async function exportAllAsPdf(sheets: Sheet[], themeEnum: Theme, notify: NotifyF
       const b64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
       await new Promise<void>((resolve, reject) => {
         const img = new Image();
-        img.onload = () => { ctx.drawImage(img, 0, 0, cW, cH); resolve(); };
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, cW, cH);
+          resolve();
+        };
         img.onerror = () => reject(new Error('render'));
         img.src = b64;
       });
 
-      const a4W = 841.89, a4H = 595.28, m = 36, tH = 28;
+      const a4W = 841.89,
+        a4H = 595.28,
+        m = 36,
+        tH = 28;
       const a4orient = svgW >= svgH ? 'l' : 'p';
       const testPW = a4orient === 'l' ? a4W : a4H;
       const testPH = a4orient === 'l' ? a4H : a4W;
@@ -145,7 +146,9 @@ async function exportAllAsPdf(sheets: Sheet[], themeEnum: Theme, notify: NotifyF
       const imgData = canvas.toDataURL('image/png');
       pdf.addImage({ imageData: imgData, format: 'PNG', x, y, width: w, height: h, compression: 'NONE' });
       exported++;
-    } catch { /* skip failed page */ }
+    } catch {
+      /* skip failed page */
+    }
     await new Promise((r) => setTimeout(r, 200));
   }
 

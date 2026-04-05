@@ -85,9 +85,7 @@ const ToolbarButton = memo(
         `}
         >
           {children}
-          {label && size !== 'sm' && (
-            <span className="text-xs font-medium hidden sm:inline">{label}</span>
-          )}
+          {label && size !== 'sm' && <span className="text-xs font-medium hidden sm:inline">{label}</span>}
         </button>
       );
     }
@@ -97,9 +95,7 @@ const ToolbarButton = memo(
 ToolbarButton.displayName = 'ToolbarButton';
 
 // Toolbar Separator
-const ToolbarSeparator = () => (
-  <div className="h-10 w-px bg-gray-300 dark:bg-gray-500 mx-2" />
-);
+const ToolbarSeparator = () => <div className="h-10 w-px bg-gray-300 dark:bg-gray-500 mx-2" />;
 
 // Presentation Icon
 const PresentationIcon = ({ size = 20 }: { size?: number }) => (

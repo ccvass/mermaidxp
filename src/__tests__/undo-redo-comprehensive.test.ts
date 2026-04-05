@@ -555,7 +555,6 @@ describe('Undo/Redo System - Comprehensive Tests', () => {
 
     it('should deduplicate identical snapshots', async () => {
       const code = 'Same code';
-      const initialPast = store.getState().historyEngine.past.length;
 
       // Set same code multiple times
       store.dispatch(setMermaidCode(code));

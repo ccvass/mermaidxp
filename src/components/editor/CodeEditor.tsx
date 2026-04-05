@@ -3,9 +3,7 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setMermaidCode } from '../../store/slices/diagramSlice';
 import { SyncedTextarea } from './SyncedTextarea';
 import { useHistoryEngine } from '../../hooks/useHistoryEngine';
-const DiagramSamples = lazy(() =>
-  import('./DiagramSamples').then((m) => ({ default: m.DiagramSamples }))
-);
+const DiagramSamples = lazy(() => import('./DiagramSamples').then((m) => ({ default: m.DiagramSamples })));
 
 export const CodeEditor: React.FC = () => {
   const dispatch = useAppDispatch();

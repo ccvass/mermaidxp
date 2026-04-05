@@ -75,7 +75,11 @@ const persistState = (state: RootState) => {
       const persistedState = extractPersistedState(state);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedState));
     } catch (error) {
-      logger.error('Failed to persist state to localStorage:', 'persistMiddleware', error instanceof Error ? error : undefined);
+      logger.error(
+        'Failed to persist state to localStorage:',
+        'persistMiddleware',
+        error instanceof Error ? error : undefined
+      );
     }
   }, DEBOUNCE_DELAY);
 };

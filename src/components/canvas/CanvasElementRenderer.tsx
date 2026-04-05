@@ -307,12 +307,7 @@ function createIconElement(element: CanvasElement): SVGElement {
 function createSvgShapeElement(element: CanvasElement): SVGElement | null {
   const rawShapeData = (element.shapeData || {}) as Record<string, unknown>;
   const svgDef = rawShapeData.svgShapeDefinition as Record<string, unknown> | undefined;
-  const shapeId =
-    rawShapeData.shapeId ||
-    rawShapeData.shapeName ||
-    rawShapeData.id ||
-    svgDef?.id ||
-    svgDef?.shapeId;
+  const shapeId = rawShapeData.shapeId || rawShapeData.shapeName || rawShapeData.id || svgDef?.id || svgDef?.shapeId;
 
   const definition = shapeId ? SHAPE_DEFINITION_MAP.get(String(shapeId)) : undefined;
   if (!definition) {
@@ -352,7 +347,7 @@ function createSvgShapeElement(element: CanvasElement): SVGElement | null {
     shapeElement.setAttribute('pointer-events', 'auto');
 
     return shapeElement;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

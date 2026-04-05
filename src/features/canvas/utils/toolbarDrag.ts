@@ -52,7 +52,7 @@ export function applyToolbarDragData(dataTransfer: DataTransfer | null, data: To
   try {
     dataTransfer.effectAllowed = 'copy';
     dataTransfer.setData(CANVAS_DRAG_DATA_TYPE, JSON.stringify(data));
-  } catch (error) {
+  } catch {
     // Silently ignore failures (e.g. unsupported formats)
   }
 }
@@ -68,7 +68,7 @@ export function extractToolbarDragData(dataTransfer: DataTransfer | null): Toolb
     const raw = dataTransfer.getData(CANVAS_DRAG_DATA_TYPE);
     if (!raw) return null;
     return JSON.parse(raw) as ToolbarDragData;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -109,7 +109,7 @@ export function buildElementFromToolbarDrag(
           context.font = createFontString(payload);
           return context.measureText(payload.content || '').width;
         }
-      } catch (error) {}
+      } catch {}
     }
     return Math.max(payload.content.length, 1) * payload.fontSize * 0.6;
   };

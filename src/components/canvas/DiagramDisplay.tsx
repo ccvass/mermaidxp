@@ -173,10 +173,14 @@ export const DiagramDisplay: React.FC = () => {
             if (originalParent) {
               originalParent.removeChild(svgElement);
             }
-          } catch (elementError) {}
+          } catch {}
         });
       } catch (extractError) {
-        logger.error('Error during custom element extraction:', 'DiagramDisplay', extractError instanceof Error ? extractError : undefined);
+        logger.error(
+          'Error during custom element extraction:',
+          'DiagramDisplay',
+          extractError instanceof Error ? extractError : undefined
+        );
       }
 
       // Clear remaining content
@@ -248,7 +252,7 @@ export const DiagramDisplay: React.FC = () => {
               if (element.getBoundingClientRect) {
                 element.getBoundingClientRect();
               }
-            } catch (error) {}
+            } catch {}
           });
 
           // Clear the ref once done to avoid duplicates on subsequent renders
@@ -274,7 +278,7 @@ export const DiagramDisplay: React.FC = () => {
                 width: bbox.width,
                 height: bbox.height,
               };
-            } catch (error) {
+            } catch {
               // Fallback to getBoundingClientRect if getBBox fails
               const svgRect = svgElement.getBoundingClientRect();
               diagramBounds = {
@@ -530,7 +534,11 @@ export const DiagramDisplay: React.FC = () => {
             );
           }
         } catch (deleteError) {
-          logger.error('Error handling delete key:', 'DiagramDisplay', deleteError instanceof Error ? deleteError : undefined);
+          logger.error(
+            'Error handling delete key:',
+            'DiagramDisplay',
+            deleteError instanceof Error ? deleteError : undefined
+          );
           dispatch(
             showNotification({
               message: 'Error deleting elements',

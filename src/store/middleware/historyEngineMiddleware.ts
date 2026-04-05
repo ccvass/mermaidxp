@@ -203,18 +203,21 @@ export const historyEngineMiddleware: Middleware = (store) => {
     if (state.historyEngine.isRestoring) return result;
 
     // Handle explicit capture
-    if (((action as { type: string; payload?: { actionType?: string } })).type === captureNow.type) {
-      commitNow(((action as { type: string; payload?: { actionType?: string } }).payload)?.actionType);
+    if ((action as { type: string; payload?: { actionType?: string } }).type === captureNow.type) {
+      commitNow((action as { type: string; payload?: { actionType?: string } }).payload?.actionType);
       return result;
     }
 
     // Handle undo/redo apply
-    if (((action as { type: string; payload?: { actionType?: string } })).type === undoAction.type || ((action as { type: string; payload?: { actionType?: string } })).type === redoAction.type) {
+    if (
+      (action as { type: string; payload?: { actionType?: string } }).type === undoAction.type ||
+      (action as { type: string; payload?: { actionType?: string } }).type === redoAction.type
+    ) {
       handleApplySnapshot();
       return result;
     }
 
-    const type: string = ((action as { type: string; payload?: { actionType?: string } })).type;
+    const type: string = (action as { type: string; payload?: { actionType?: string } }).type;
 
     // Coalescing for text edits
     if (type === setMermaidCode.type) {

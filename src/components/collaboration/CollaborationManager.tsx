@@ -80,7 +80,11 @@ export const CollaborationManager: React.FC<CollaborationManagerProps> = ({
       // Connect to WebSocket (disabled service; no options)
       await webSocketService.connect();
     } catch (error) {
-      logger.error('Failed to initialize collaboration:', 'CollaborationManager', error instanceof Error ? error : undefined);
+      logger.error(
+        'Failed to initialize collaboration:',
+        'CollaborationManager',
+        error instanceof Error ? error : undefined
+      );
       dispatch(
         showNotification({
           type: 'error',
@@ -92,7 +96,6 @@ export const CollaborationManager: React.FC<CollaborationManagerProps> = ({
 
   // Handle collaboration messages
   const handleCollaborationMessage = useCallback((message: unknown) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const msg = message as { type: string; payload: any };
     switch (msg.type) {
       case 'collaboration_user_joined':

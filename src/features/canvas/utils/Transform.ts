@@ -171,7 +171,11 @@ export class Transform {
           element.style.visibility = 'visible';
         }
       } catch (fallbackError) {
-        logger.error('Error applying fallback SVG transform:', 'Transform', fallbackError instanceof Error ? fallbackError : undefined);
+        logger.error(
+          'Error applying fallback SVG transform:',
+          'Transform',
+          fallbackError instanceof Error ? fallbackError : undefined
+        );
       }
     }
   }

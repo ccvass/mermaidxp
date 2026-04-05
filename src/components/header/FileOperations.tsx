@@ -164,10 +164,12 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
           if (isMd && sheets.length >= 1) {
             dispatch(setSheets(sheets));
           } else if (isMd && sheets.length === 0) {
-            dispatch(showNotification({
-              message: 'No mermaid diagrams found in this markdown file.',
-              type: 'warning',
-            }));
+            dispatch(
+              showNotification({
+                message: 'No mermaid diagrams found in this markdown file.',
+                type: 'warning',
+              })
+            );
             return;
           } else {
             dispatch(clearSheets());

@@ -331,9 +331,12 @@ export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | n
                 (id: string) => allMovedNodeIds.includes(id) && parentGroup.classList.contains(`LS-${id}`)
               )
             ) {
-              finalD = finalD.replace(/^M\s*([\d.eE+-]+)\s*[, ]?\s*([\d.eE+-]+)/, (_match: string, p1: string, p2: string) => {
-                return `M ${parseFloat(p1) + dxMouse} ${parseFloat(p2) + dyMouse}`;
-              });
+              finalD = finalD.replace(
+                /^M\s*([\d.eE+-]+)\s*[, ]?\s*([\d.eE+-]+)/,
+                (_match: string, p1: string, p2: string) => {
+                  return `M ${parseFloat(p1) + dxMouse} ${parseFloat(p2) + dyMouse}`;
+                }
+              );
               pathWasModified = true;
             }
 

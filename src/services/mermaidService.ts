@@ -36,7 +36,9 @@ class MermaidService {
       }
 
       // Render the diagram
-      const { svg, bindFunctions } = await (m.render as (id: string, code: string) => Promise<{ svg: string; bindFunctions?: unknown }>)(graphId, code);
+      const { svg, bindFunctions } = await (
+        m.render as (id: string, code: string) => Promise<{ svg: string; bindFunctions?: unknown }>
+      )(graphId, code);
 
       return {
         svg,

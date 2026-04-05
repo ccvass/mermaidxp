@@ -26,10 +26,7 @@ const isValidPersistedState = (state: unknown): state is PersistedState => {
   // Validate canvas
   if (!s.canvas || typeof s.canvas !== 'object') return false;
   if (typeof s.canvas.zoom !== 'number') return false;
-  if (
-    !s.canvas.pan ||
-    typeof s.canvas.pan !== 'object'
-  ) {
+  if (!s.canvas.pan || typeof s.canvas.pan !== 'object') {
     return false;
   }
   const pan = s.canvas.pan as Record<string, unknown>;
@@ -39,11 +36,7 @@ const isValidPersistedState = (state: unknown): state is PersistedState => {
   // CRITICAL: Validate interactionMode to prevent zoom issues
   // When interactionMode is undefined, DiagramDisplay.tsx triggers unwanted zoom changes
   // during drag/drop operations via the "zoom back check" useEffect
-  if (
-    s.canvas.interactionMode &&
-    s.canvas.interactionMode !== 'pan' &&
-    s.canvas.interactionMode !== 'drag'
-  ) {
+  if (s.canvas.interactionMode && s.canvas.interactionMode !== 'pan' && s.canvas.interactionMode !== 'drag') {
     return false;
   }
 

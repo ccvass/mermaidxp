@@ -93,7 +93,13 @@ export function useElementPlacement({
   const handleElementPlacement = useCallback(
     async (element: Record<string, unknown>, screenX: number, screenY: number, diagramX: number, diagramY: number) => {
       if (!element) return;
-      const addTextToSVG = (textContent: string, textStyle: Record<string, unknown>, clickX: number, clickY: number, nodeId: string) => {
+      const addTextToSVG = (
+        textContent: string,
+        textStyle: Record<string, unknown>,
+        clickX: number,
+        clickY: number,
+        nodeId: string
+      ) => {
         if (!containerRef.current) return;
 
         const svgElement = containerRef.current.querySelector('svg');
@@ -911,10 +917,7 @@ export function useElementPlacement({
           case 'shape':
             if (element.shapeDefinition) {
               const def = element.shapeDefinition as Record<string, unknown>;
-              const shapeName = await promptForText(
-                'Shape Text',
-                `Enter text for the ${def.name}:`
-              );
+              const shapeName = await promptForText('Shape Text', `Enter text for the ${def.name}:`);
               if (shapeName) {
                 newNodeCode = `\n    ${(def.syntax as (id: string, name: string) => string)(nodeId, shapeName)}`;
               }

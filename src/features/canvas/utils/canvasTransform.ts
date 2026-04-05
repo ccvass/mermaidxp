@@ -50,7 +50,11 @@ export function applyCanvasTransform(
         defaultTransform.applyToElement(element as HTMLElement);
       }
     } catch (fallbackError) {
-      logger.error('Error applying fallback transform:', 'canvasTransform', fallbackError instanceof Error ? fallbackError : undefined);
+      logger.error(
+        'Error applying fallback transform:',
+        'canvasTransform',
+        fallbackError instanceof Error ? fallbackError : undefined
+      );
     }
   }
 }
@@ -133,7 +137,7 @@ export function getSVGBounds(element: SVGElement): { width: number; height: numb
       x: bbox.x || 0,
       y: bbox.y || 0,
     };
-  } catch (error) {
+  } catch {
     return { width: 400, height: 300, x: 0, y: 0 };
   }
 }
