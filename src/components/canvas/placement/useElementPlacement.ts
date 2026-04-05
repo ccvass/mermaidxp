@@ -91,7 +91,7 @@ export function useElementPlacement({
   );
 
   const handleElementPlacement = useCallback(
-    async (element: Record<string, unknown>, screenX: number, screenY: number, diagramX: number, diagramY: number) => {
+    async (element: Record<string, unknown>, _screenX: number, _screenY: number, diagramX: number, diagramY: number) => {
       if (!element) return;
       const addTextToSVG = (
         textContent: string,
@@ -949,7 +949,7 @@ export function useElementPlacement({
             }
 
             if (imageUrl) {
-              addImageToSVG(imageUrl, altText, screenX, screenY, nodeId, width, height);
+              addImageToSVG(imageUrl, altText, diagramX, diagramY, nodeId, width, height);
               dispatch(setPlacingElement(null));
               return;
             }
@@ -959,7 +959,7 @@ export function useElementPlacement({
           case 'svg-shape': {
             if (element.svgShapeDefinition) {
               const shapeDef = element.svgShapeDefinition as Record<string, unknown>;
-              addSVGShapeToCanvas(shapeDef, screenX, screenY, nodeId);
+              addSVGShapeToCanvas(shapeDef, diagramX, diagramY, nodeId);
               dispatch(setPlacingElement(null));
               return;
             } else {
@@ -999,7 +999,7 @@ export function useElementPlacement({
             }
 
             if (textContent) {
-              addTextToSVG(textContent, textStyle, screenX, screenY, nodeId);
+              addTextToSVG(textContent, textStyle, diagramX, diagramY, nodeId);
               dispatch(setPlacingElement(null));
               return;
             }
@@ -1015,7 +1015,7 @@ export function useElementPlacement({
             }
 
             if (iconContent) {
-              addIconToSVG(iconContent, screenX, screenY, nodeId);
+              addIconToSVG(iconContent, diagramX, diagramY, nodeId);
               dispatch(setPlacingElement(null));
               return;
             }
