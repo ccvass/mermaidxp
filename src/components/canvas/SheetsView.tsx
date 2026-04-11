@@ -75,6 +75,7 @@ export const SheetsView: React.FC = () => {
 const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const zoom = useAppSelector((s) => s.canvas.zoom);
 
   useEffect(() => {
     if (!code || !containerRef.current) return;
@@ -121,7 +122,7 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     );
   }
 
-  return <div ref={containerRef} className="sheets-active-diagram flex items-center justify-center min-h-full p-8" />;
+  return <div ref={containerRef} className="sheets-active-diagram flex items-center justify-center min-h-full p-8" style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} />;
 };
 
 export default SheetsView;
