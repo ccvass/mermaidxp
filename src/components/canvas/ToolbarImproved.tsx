@@ -142,14 +142,29 @@ export const ToolbarImproved: React.FC = () => {
   };
 
   const handleFitToScreen = () => {
-    const container = document.getElementById('mermaid-container');
-    const svg = container?.querySelector('svg');
+    // Try normal DiagramDisplay container first
+    let container: HTMLElement | null = document.getElementById('mermaid-container');
+    let svg = container?.querySelector('svg') as SVGSVGElement | null;
+    let isSheets = false;
+
+    // Fallback to sheets mode
+    if (!svg) {
+      const sheetsContainer = document.querySelector('.sheets-active-diagram');
+      svg = sheetsContainer?.querySelector('svg') as SVGSVGElement | null;
+      container = sheetsContainer?.closest('.overflow-auto') as HTMLElement | null;
+      isSheets = true;
+    }
+
     if (container && svg) {
       const containerRect = container.getBoundingClientRect();
+      // Use natural SVG size (divide by current zoom to undo scaling)
       const svgRect = svg.getBoundingClientRect();
+      const currentZoom = isSheets ? zoom : zoom;
+      const naturalWidth = svgRect.width / currentZoom;
+      const naturalHeight = svgRect.height / currentZoom;
       dispatch(
         fitToViewport({
-          diagramBounds: { width: svgRect.width, height: svgRect.height },
+          diagramBounds: { width: naturalWidth, height: naturalHeight },
           viewportBounds: { width: containerRect.width, height: containerRect.height },
         })
       );
