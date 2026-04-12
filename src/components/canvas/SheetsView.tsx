@@ -125,28 +125,20 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     const wrapper = wrapperRef.current;
     if (!svg || !wrapper) return;
 
-    // Get natural SVG size from attributes or viewBox
-    let natW = 0, natH = 0;
+    // Get natural SVG size from viewBox (most reliable)
     const vb = svg.viewBox?.baseVal;
-    if (vb && vb.width > 0 && vb.height > 0) {
-      natW = vb.width;
-      natH = vb.height;
-    } else {
-      // Measure at scale=1 (already reset above)
-      const r = svg.getBoundingClientRect();
-      natW = r.width;
-      natH = r.height;
-    }
+    const natW = (vb && vb.width > 0) ? vb.width : parseFloat(svg.getAttribute('width') || '0');
+    const natH = (vb && vb.height > 0) ? vb.height : parseFloat(svg.getAttribute('height') || '0');
     if (natW <= 0 || natH <= 0) return;
 
+    // Wrapper size from DOM (not affected by inner transforms)
     const wrapperRect = wrapper.getBoundingClientRect();
-    const pad = 40; // px padding on each side
+    const pad = 40;
     const availW = wrapperRect.width - pad * 2;
     const availH = wrapperRect.height - pad * 2;
     if (availW <= 0 || availH <= 0) return;
 
-    const scale = Math.min(availW / natW, availH / natH);
-    setFitScale(scale);
+    setFitScale(Math.min(availW / natW, availH / natH));
   };
 
   if (error) {
