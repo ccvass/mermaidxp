@@ -133,7 +133,7 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
 
     // Wrapper size from DOM (not affected by inner transforms)
     const wrapperRect = wrapper.getBoundingClientRect();
-    const pad = 40;
+    const pad = 16;
     const availW = wrapperRect.width - pad * 2;
     const availH = wrapperRect.height - pad * 2;
     if (availW <= 0 || availH <= 0) return;
