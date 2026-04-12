@@ -76,8 +76,7 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const [fitZoom, setFitZoom] = useState(1);
-  const zoom = useAppSelector((s) => s.canvas.zoom);
+  const [fitScale, setFitScale] = useState(1);
 
   useEffect(() => {
     if (!code || !containerRef.current) return;
@@ -91,6 +90,8 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
         if (result.error) {
           setError(typeof result.error === 'string' ? result.error : 'Render error');
         } else if (containerRef.current) {
+          // Reset scale to 1 before measuring
+          setFitScale(1);
           containerRef.current.innerHTML = result.svg;
           setError(null);
           const svg = containerRef.current.querySelector('svg');
@@ -99,10 +100,10 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
             svg.style.height = 'auto';
             svg.style.display = 'block';
           }
-          // Auto fit after render
+          // Wait for layout, then fit
           requestAnimationFrame(() => {
             if (cancelled) return;
-            autoFit();
+            calcFit();
           });
         }
       } catch (e) {
@@ -114,16 +115,33 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     return () => { cancelled = true; };
   }, [code, theme]);
 
-  const autoFit = () => {
-    const svg = containerRef.current?.querySelector('svg');
+  const calcFit = () => {
+    const svg = containerRef.current?.querySelector('svg') as SVGSVGElement | null;
     const wrapper = wrapperRef.current;
     if (!svg || !wrapper) return;
-    const svgRect = svg.getBoundingClientRect();
+
+    // Get natural SVG size from attributes or viewBox
+    let natW = 0, natH = 0;
+    const vb = svg.viewBox?.baseVal;
+    if (vb && vb.width > 0 && vb.height > 0) {
+      natW = vb.width;
+      natH = vb.height;
+    } else {
+      // Measure at scale=1 (already reset above)
+      const r = svg.getBoundingClientRect();
+      natW = r.width;
+      natH = r.height;
+    }
+    if (natW <= 0 || natH <= 0) return;
+
     const wrapperRect = wrapper.getBoundingClientRect();
-    const padding = 0.9;
-    const scaleX = (wrapperRect.width * padding) / svgRect.width;
-    const scaleY = (wrapperRect.height * padding) / svgRect.height;
-    setFitZoom(Math.min(scaleX, scaleY, 3));
+    const pad = 40; // px padding on each side
+    const availW = wrapperRect.width - pad * 2;
+    const availH = wrapperRect.height - pad * 2;
+    if (availW <= 0 || availH <= 0) return;
+
+    const scale = Math.min(availW / natW, availH / natH);
+    setFitScale(scale);
   };
 
   if (error) {
@@ -137,15 +155,12 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     );
   }
 
-  // Combine auto-fit zoom with manual zoom (manual zoom acts as multiplier from 1x base)
-  const effectiveZoom = fitZoom * zoom;
-
   return (
-    <div ref={wrapperRef} className="flex items-center justify-center h-full w-full overflow-auto">
+    <div ref={wrapperRef} className="flex items-center justify-center h-full w-full overflow-hidden">
       <div
         ref={containerRef}
         className="sheets-active-diagram"
-        style={{ transform: `scale(${effectiveZoom})`, transformOrigin: 'center center' }}
+        style={{ transform: `scale(${fitScale})`, transformOrigin: 'center center' }}
       />
     </div>
   );
