@@ -94,11 +94,16 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
           setFitScale(1);
           containerRef.current.innerHTML = result.svg;
           setError(null);
-          const svg = containerRef.current.querySelector('svg');
+          const svg = containerRef.current.querySelector('svg') as SVGSVGElement;
           if (svg) {
             svg.style.maxWidth = 'none';
-            svg.style.height = 'auto';
             svg.style.display = 'block';
+            // Use natural size from viewBox instead of 100%
+            const vb = svg.viewBox?.baseVal;
+            if (vb && vb.width > 0 && vb.height > 0) {
+              svg.setAttribute('width', String(vb.width));
+              svg.setAttribute('height', String(vb.height));
+            }
           }
           // Wait for layout, then fit
           requestAnimationFrame(() => {
