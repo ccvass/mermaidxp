@@ -74,7 +74,9 @@ export const SheetsView: React.FC = () => {
 
 const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fitZoom, setFitZoom] = useState(1);
   const zoom = useAppSelector((s) => s.canvas.zoom);
 
   useEffect(() => {
@@ -91,14 +93,17 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
         } else if (containerRef.current) {
           containerRef.current.innerHTML = result.svg;
           setError(null);
-          // Center the SVG
           const svg = containerRef.current.querySelector('svg');
           if (svg) {
-            svg.style.maxWidth = '100%';
+            svg.style.maxWidth = 'none';
             svg.style.height = 'auto';
-            svg.style.margin = '0 auto';
             svg.style.display = 'block';
           }
+          // Auto fit after render
+          requestAnimationFrame(() => {
+            if (cancelled) return;
+            autoFit();
+          });
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Render failed');
@@ -106,10 +111,20 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     };
 
     render();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [code, theme]);
+
+  const autoFit = () => {
+    const svg = containerRef.current?.querySelector('svg');
+    const wrapper = wrapperRef.current;
+    if (!svg || !wrapper) return;
+    const svgRect = svg.getBoundingClientRect();
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const padding = 0.9;
+    const scaleX = (wrapperRect.width * padding) / svgRect.width;
+    const scaleY = (wrapperRect.height * padding) / svgRect.height;
+    setFitZoom(Math.min(scaleX, scaleY, 3));
+  };
 
   if (error) {
     return (
@@ -122,7 +137,18 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     );
   }
 
-  return <div ref={containerRef} className="sheets-active-diagram flex items-center justify-center min-h-full p-8" style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} />;
+  // Combine auto-fit zoom with manual zoom (manual zoom acts as multiplier from 1x base)
+  const effectiveZoom = fitZoom * zoom;
+
+  return (
+    <div ref={wrapperRef} className="flex items-center justify-center h-full w-full overflow-auto">
+      <div
+        ref={containerRef}
+        className="sheets-active-diagram"
+        style={{ transform: `scale(${effectiveZoom})`, transformOrigin: 'center center' }}
+      />
+    </div>
+  );
 };
 
 export default SheetsView;
