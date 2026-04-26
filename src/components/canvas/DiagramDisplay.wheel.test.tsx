@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -10,36 +11,36 @@ import historyEngineSlice from '../../store/slices/historyEngineSlice';
 import canvasElementsSlice from '../../store/slices/canvasElementsSlice';
 
 // Mock dependencies
-jest.mock('../../state/hooks/useDragAndDrop', () => ({
+vi.mock('../../state/hooks/useDragAndDrop', () => ({
   useDragAndDrop: () => ({
     activeDragInfo: null,
-    handleMouseDown: jest.fn(),
-    handleMouseMove: jest.fn(),
-    handleMouseUpOrLeave: jest.fn(),
-    markDraggableElements: jest.fn(),
+    handleMouseDown: vi.fn(),
+    handleMouseMove: vi.fn(),
+    handleMouseUpOrLeave: vi.fn(),
+    markDraggableElements: vi.fn(),
   }),
 }));
 
-jest.mock('../../state/hooks/usePan', () => ({
+vi.mock('../../state/hooks/usePan', () => ({
   usePan: () => ({
-    handlePanStart: jest.fn(),
-    handlePanMove: jest.fn(),
-    handlePanEnd: jest.fn(),
-    updateCursor: jest.fn(),
-    centerDiagram: jest.fn(),
+    handlePanStart: vi.fn(),
+    handlePanMove: vi.fn(),
+    handlePanEnd: vi.fn(),
+    updateCursor: vi.fn(),
+    centerDiagram: vi.fn(),
     isPanning: false,
   }),
 }));
 
-jest.mock('../../features/canvas/utils/canvasTransform', () => ({
-  applyCanvasTransform: jest.fn(),
+vi.mock('../../features/canvas/utils/canvasTransform', () => ({
+  applyCanvasTransform: vi.fn(),
 }));
 
 // Mock mermaid
 Object.defineProperty(window, 'mermaid', {
   value: {
-    initialize: jest.fn(),
-    render: jest.fn(),
+    initialize: vi.fn(),
+    render: vi.fn(),
   },
   writable: true,
 });
@@ -94,10 +95,10 @@ const renderWithStore = (store = createTestStore()) => {
 
 describe('DiagramDisplay Zoom & Pan Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock getBoundingClientRect for container positioning
-    Element.prototype.getBoundingClientRect = jest.fn(() => ({
+    Element.prototype.getBoundingClientRect = vi.fn(() => ({
       left: 0,
       top: 0,
       right: 800,
@@ -106,7 +107,7 @@ describe('DiagramDisplay Zoom & Pan Tests', () => {
       height: 600,
       x: 0,
       y: 0,
-      toJSON: jest.fn(),
+      toJSON: vi.fn(),
     }));
   });
 

@@ -1,6 +1,8 @@
+import { vi } from 'vitest';
+
 export const exportService = {
-  exportSVG: jest.fn(),
-  exportPNG: jest.fn(),
-  exportPDF: jest.fn(),
-  exportToClipboard: jest.fn(),
+  exportSVG: vi.fn(),
+  exportPNG: vi.fn(),
+  exportPDF: vi.fn(),
+  exportToClipboard: vi.fn(),
 };

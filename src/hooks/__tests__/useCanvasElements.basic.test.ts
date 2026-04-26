@@ -1,5 +1,3 @@
-import { describe, it, expect } from '@jest/globals';
-
 describe('useCanvasElements - Basic Tests', () => {
   it('should be importable', async () => {
     const module = await import('../useCanvasElements');

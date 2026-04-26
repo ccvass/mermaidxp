@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
 import diagramReducer, { setMermaidCode } from '../slices/diagramSlice';
 import canvasReducer, { setZoom, setPan } from '../slices/canvasSlice';
@@ -9,7 +10,7 @@ import historyEngineReducer, {
 } from '../slices/historyEngineSlice';
 import { historyEngineMiddleware } from '../middleware/historyEngineMiddleware';
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('historyEngineMiddleware (unified undo/redo)', () => {
   const makeStore = () => {
@@ -57,7 +58,7 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
     expect(store.getState().historyEngine.past.length).toBe(0);
 
     // advance timers to trigger TEXT_COALESCE_MS (700ms)
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
 
     const after = store.getState().historyEngine;
     // present updated and previous present moved to past once
@@ -80,7 +81,7 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
     expect(store.getState().historyEngine.past.length).toBe(past0);
 
     // advance 150ms coalescing window
-    jest.advanceTimersByTime(150);
+    vi.advanceTimersByTime(150);
 
     const { past, present } = store.getState().historyEngine;
     expect(past.length).toBe(past0 + 1);
@@ -97,7 +98,7 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
 
     // make a text change and commit
     store.dispatch(setMermaidCode('Changed #1'));
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
 
     const histLenBefore = store.getState().diagram.history.length;
 
@@ -129,7 +130,7 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
     // set the same code repeatedly
     const original = store.getState().diagram.mermaidCode;
     store.dispatch(setMermaidCode(original));
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
 
     // Since hash and content are identical, no new past entry should be added
     expect(store.getState().historyEngine.past.length).toBe(basePast);
@@ -144,10 +145,10 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
     store.dispatch({ type: 'historyEngine/beginGroup', payload: groupId });
 
     store.dispatch(setMermaidCode('G1-A'));
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
 
     store.dispatch(setMermaidCode('G1-B'));
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
 
     store.dispatch({ type: 'historyEngine/endGroup' });
 
@@ -159,7 +160,7 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
     }
 
     store.dispatch(setMermaidCode('outside-group'));
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
     const after = store.getState().historyEngine;
     expect(after.present?.meta.groupId).toBeNull();
   });
@@ -174,7 +175,7 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
     for (let i = 1; i <= 5; i++) {
       const payload = 'code-' + 'x'.repeat(i); // variable length ensures different hash
       store.dispatch(setMermaidCode(payload));
-      jest.advanceTimersByTime(700);
+      vi.advanceTimersByTime(700);
     }
 
     const { past, present } = store.getState().historyEngine;
@@ -188,10 +189,10 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
     store.dispatch(captureNow({ actionType: 'init' }));
 
     store.dispatch(setMermaidCode('c1'));
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
 
     store.dispatch(setMermaidCode('c2'));
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
 
     const before = store.getState().historyEngine;
     expect(before.past.length).toBeGreaterThan(0);
@@ -216,7 +217,7 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
 
     expect(store.getState().historyEngine.past.length).toBe(past0);
 
-    jest.advanceTimersByTime(150);
+    vi.advanceTimersByTime(150);
 
     const { past, present } = store.getState().historyEngine;
     expect(past.length).toBe(past0 + 1);
@@ -229,7 +230,7 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
     store.dispatch(captureNow({ actionType: 'init' }));
 
     store.dispatch(setMermaidCode('c1'));
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
 
     const histBefore = store.getState().historyEngine;
     const pastBefore = histBefore.past.length;

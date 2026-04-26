@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -10,29 +11,29 @@ import historyEngineReducer from '../../../store/slices/historyEngineSlice';
 import canvasElementsReducer from '../../../store/slices/canvasElementsSlice';
 
 // Mock useAuth to avoid needing AuthProvider
-jest.mock('../../../contexts/AuthContext', () => ({
+vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({
     user: null,
     loading: false,
-    signInWithGoogle: jest.fn(),
-    signOut: jest.fn(),
+    signInWithGoogle: vi.fn(),
+    signOut: vi.fn(),
   }),
 }));
 
 // Mock child components that have complex dependencies
-jest.mock('../../header/FileOperations', () => {
-  return function MockFileOperations() {
+vi.mock('../../header/FileOperations', () => ({
+  default: function MockFileOperations() {
     return <div data-testid="file-operations">FileOperations</div>;
-  };
-});
+  },
+}));
 
-jest.mock('../../auth/UserMenu', () => ({
+vi.mock('../../auth/UserMenu', () => ({
   UserMenu: function MockUserMenu() {
     return <div data-testid="user-menu">UserMenu</div>;
   },
 }));
 
-jest.mock('../../auth/LoginModal', () => ({
+vi.mock('../../auth/LoginModal', () => ({
   LoginModal: function MockLoginModal({ isOpen }: { isOpen: boolean; onClose: () => void }) {
     return isOpen ? <div data-testid="login-modal">LoginModal</div> : null;
   },
@@ -120,7 +121,7 @@ const renderWithStore = (props: any = {}, storeState: any = {}) => {
 
 describe('Header Component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Basic Rendering', () => {

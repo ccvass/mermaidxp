@@ -1,11 +1,11 @@
 import '@testing-library/jest-dom';
-import 'jest-fetch-mock/setupJest';
+import { vi } from 'vitest';
 
 // Mock window.mermaid
 const mockMermaid = {
-  initialize: jest.fn(),
-  render: jest.fn().mockResolvedValue({ svg: '<svg></svg>' }),
-  parseError: jest.fn(),
+  initialize: vi.fn(),
+  render: vi.fn().mockResolvedValue({ svg: '<svg></svg>' }),
+  parseError: vi.fn(),
 };
 
 Object.defineProperty(window, 'mermaid', {
@@ -14,26 +14,26 @@ Object.defineProperty(window, 'mermaid', {
 });
 
 // Mock ResizeObserver
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }));
 
 // Mock DOMParser for SVG validation
-global.DOMParser = jest.fn().mockImplementation(() => ({
-  parseFromString: jest.fn().mockReturnValue({
-    querySelectorAll: jest.fn().mockReturnValue([]),
+global.DOMParser = vi.fn().mockImplementation(() => ({
+  parseFromString: vi.fn().mockReturnValue({
+    querySelectorAll: vi.fn().mockReturnValue([]),
   }),
 }));
 
 // Mock performance.now for performance tests without breaking fake timers
 try {
   if ((global as any).performance && typeof (global as any).performance.now === 'function') {
-    jest.spyOn((global as any).performance, 'now').mockImplementation(() => Date.now());
+    vi.spyOn((global as any).performance, 'now').mockImplementation(() => Date.now());
   } else {
     Object.defineProperty(global, 'performance', {
-      value: { now: jest.fn(() => Date.now()) },
+      value: { now: vi.fn(() => Date.now()) },
       writable: true,
       configurable: true,
     });
@@ -56,9 +56,3 @@ beforeAll(() => {
 afterAll(() => {
   console.error = originalError;
 });
-
-// Ensure DOMParser is available (jsdom provides it but some tests reset it)
-if (typeof globalThis.DOMParser === 'undefined') {
-  const { JSDOM } = require('jsdom');
-  globalThis.DOMParser = new JSDOM().window.DOMParser;
-}

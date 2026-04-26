@@ -11,7 +11,7 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { describe, it, expect, beforeEach } from '@jest/globals';
+
 import diagramReducer, { setMermaidCode } from '../store/slices/diagramSlice';
 import canvasReducer, { setZoom, setPan, setSelectedNodes } from '../store/slices/canvasSlice';
 import canvasElementsReducer, {

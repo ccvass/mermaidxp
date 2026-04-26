@@ -1,17 +1,18 @@
+import { vi } from 'vitest';
 import { mermaidService } from './mermaidService';
 import { Theme } from '../types/ui.types';
 import { MERMAID_CONFIG_LIGHT, MERMAID_CONFIG_DARK } from '../constants/diagram.constants';
 
 describe('MermaidService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Reset service state
     mermaidService.reset();
 
     // Reset mermaid mock
     window.mermaid = {
-      initialize: jest.fn(),
-      render: jest.fn(),
+      initialize: vi.fn(),
+      render: vi.fn(),
       parseError: undefined,
     };
   });
@@ -30,21 +31,20 @@ describe('MermaidService', () => {
     });
 
     it('should handle missing mermaid gracefully', async () => {
-      // @ts-ignore - Temporarily remove mermaid
-      delete window.mermaid;
+      // @ts-ignore - Temporarily set mermaid to undefined
+      window.mermaid = undefined as any;
 
-      // Should not throw in test environment, handle gracefully
-      const result = await mermaidService.initialize();
-      expect(result).toBeUndefined();
+      // Service throws when mermaid is not loaded
+      await expect(mermaidService.initialize()).rejects.toThrow('Mermaid library not loaded');
     });
   });
 
   describe('render', () => {
     it('should render valid mermaid code', async () => {
       const mockSvg = '<svg>test diagram</svg>';
-      const mockBindFunctions = jest.fn();
+      const mockBindFunctions = vi.fn();
 
-      (window.mermaid.render as jest.Mock).mockResolvedValue({
+      (window.mermaid.render as any).mockResolvedValue({
         svg: mockSvg,
         bindFunctions: mockBindFunctions,
       });
@@ -61,9 +61,9 @@ describe('MermaidService', () => {
 
     it('should initialize if not already initialized', async () => {
       const mockSvg = '<svg>test</svg>';
-      (window.mermaid.render as jest.Mock).mockResolvedValue({
+      (window.mermaid.render as any).mockResolvedValue({
         svg: mockSvg,
-        bindFunctions: jest.fn(),
+        bindFunctions: vi.fn(),
       });
 
       await mermaidService.render('graph TD\n  A --> B');
@@ -76,9 +76,9 @@ describe('MermaidService', () => {
       await mermaidService.initialize(Theme.Light);
 
       const mockSvg = '<svg>test</svg>';
-      (window.mermaid.render as jest.Mock).mockResolvedValue({
+      (window.mermaid.render as any).mockResolvedValue({
         svg: mockSvg,
-        bindFunctions: jest.fn(),
+        bindFunctions: vi.fn(),
       });
 
       // Render with dark theme
@@ -90,7 +90,7 @@ describe('MermaidService', () => {
 
     it('should handle render errors', async () => {
       const errorMessage = 'Syntax error in graph';
-      (window.mermaid.render as jest.Mock).mockRejectedValue(new Error(errorMessage));
+      (window.mermaid.render as any).mockRejectedValue(new Error(errorMessage));
 
       const result = await mermaidService.render('invalid syntax');
 
@@ -101,7 +101,7 @@ describe('MermaidService', () => {
     });
 
     it('should handle non-Error error objects', async () => {
-      (window.mermaid.render as jest.Mock).mockRejectedValue('String error');
+      (window.mermaid.render as any).mockRejectedValue('String error');
 
       const result = await mermaidService.render('invalid syntax');
 
@@ -113,9 +113,9 @@ describe('MermaidService', () => {
 
     it('should increment render count for each render', async () => {
       const mockSvg = '<svg>test</svg>';
-      (window.mermaid.render as jest.Mock).mockResolvedValue({
+      (window.mermaid.render as any).mockResolvedValue({
         svg: mockSvg,
-        bindFunctions: jest.fn(),
+        bindFunctions: vi.fn(),
       });
 
       await mermaidService.render('graph TD\n  A --> B');
@@ -130,9 +130,9 @@ describe('MermaidService', () => {
       window.mermaid.parseError = 'Previous error';
 
       const mockSvg = '<svg>test</svg>';
-      (window.mermaid.render as jest.Mock).mockResolvedValue({
+      (window.mermaid.render as any).mockResolvedValue({
         svg: mockSvg,
-        bindFunctions: jest.fn(),
+        bindFunctions: vi.fn(),
       });
 
       await mermaidService.render('graph TD\n  A --> B');
@@ -146,7 +146,7 @@ describe('MermaidService', () => {
       mockElement.id = 'd1';
       document.body.appendChild(mockElement);
 
-      (window.mermaid.render as jest.Mock).mockRejectedValue(new Error('Render failed'));
+      (window.mermaid.render as any).mockRejectedValue(new Error('Render failed'));
 
       await mermaidService.render('invalid syntax');
 
@@ -296,9 +296,9 @@ describe('MermaidService', () => {
 
     it('should increment after each render', async () => {
       const mockSvg = '<svg>test</svg>';
-      (window.mermaid.render as jest.Mock).mockResolvedValue({
+      (window.mermaid.render as any).mockResolvedValue({
         svg: mockSvg,
-        bindFunctions: jest.fn(),
+        bindFunctions: vi.fn(),
       });
 
       await mermaidService.render('graph TD\n  A --> B');
@@ -315,9 +315,9 @@ describe('MermaidService', () => {
       await mermaidService.initialize();
 
       const mockSvg = '<svg>test</svg>';
-      (window.mermaid.render as jest.Mock).mockResolvedValue({
+      (window.mermaid.render as any).mockResolvedValue({
         svg: mockSvg,
-        bindFunctions: jest.fn(),
+        bindFunctions: vi.fn(),
       });
 
       await mermaidService.render('graph TD\n  A --> B');

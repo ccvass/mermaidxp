@@ -1,17 +1,18 @@
+import { vi } from 'vitest';
 import { MermaidRenderResult } from '../types/diagram.types';
 
-// Mock implementation of Mermaid for Jest
-const mockMermaidRender = jest.fn().mockResolvedValue({
+// Mock implementation of Mermaid for Vitest
+const mockMermaidRender = vi.fn().mockResolvedValue({
   svg: '<svg><g><rect x="10" y="10" width="100" height="50"/><text x="60" y="35">Test Node</text></g></svg>',
-  bindFunctions: jest.fn(),
+  bindFunctions: vi.fn(),
 } as MermaidRenderResult);
 
-const mockMermaidInitialize = jest.fn();
+const mockMermaidInitialize = vi.fn();
 
 const mermaid = {
   initialize: mockMermaidInitialize,
   render: mockMermaidRender,
-  parseError: jest.fn(),
+  parseError: vi.fn(),
   mermaidAPI: {
     initialize: mockMermaidInitialize,
     render: mockMermaidRender,

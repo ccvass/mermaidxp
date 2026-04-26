@@ -1,16 +1,17 @@
+import { vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useCleanupEffect } from '../useCleanupEffect';
 
 // Mock timers
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('useCleanupEffect', () => {
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   it('should create safe timeout and cleanup on unmount', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     const { result, unmount } = renderHook(() => useCleanupEffect());
 
     act(() => {
@@ -19,7 +20,7 @@ describe('useCleanupEffect', () => {
 
     // Fast-forward time
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(callback).toHaveBeenCalledTimes(1);
@@ -32,7 +33,7 @@ describe('useCleanupEffect', () => {
   });
 
   it('should manually clear timeout', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     const { result } = renderHook(() => useCleanupEffect());
 
     let timeoutId: NodeJS.Timeout;
@@ -46,7 +47,7 @@ describe('useCleanupEffect', () => {
 
     // Fast-forward time
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(callback).not.toHaveBeenCalled();
@@ -69,8 +70,8 @@ describe('useCleanupEffect', () => {
   });
 
   it('should cleanup all effects manually', () => {
-    const callback1 = jest.fn();
-    const callback2 = jest.fn();
+    const callback1 = vi.fn();
+    const callback2 = vi.fn();
     const { result } = renderHook(() => useCleanupEffect());
 
     let controller: AbortController;
@@ -86,7 +87,7 @@ describe('useCleanupEffect', () => {
 
     // Fast-forward time
     act(() => {
-      jest.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(2000);
     });
 
     expect(callback1).not.toHaveBeenCalled();

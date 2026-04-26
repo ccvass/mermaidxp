@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
 import diagramReducer, {
   setMermaidCode,
@@ -14,10 +15,10 @@ import { DEFAULT_MERMAID_CODE } from '../../constants/diagram.constants';
 import { mermaidService } from '../../services/mermaidService';
 
 // Mock the mermaidService
-jest.mock('../../services/mermaidService', () => ({
+vi.mock('../../services/mermaidService', () => ({
   mermaidService: {
-    validateCode: jest.fn(),
-    render: jest.fn(),
+    validateCode: vi.fn(),
+    render: vi.fn(),
   },
 }));
 
@@ -129,7 +130,7 @@ describe('diagramSlice', () => {
     it('should handle setRenderResult', () => {
       const renderResult: MermaidRenderResult = {
         svg: '<svg>test</svg>',
-        bindFunctions: jest.fn(),
+        bindFunctions: vi.fn(),
         error: null,
       };
       const state = diagramReducer(initialState, setRenderResult(renderResult));
@@ -157,14 +158,14 @@ describe('diagramSlice', () => {
           diagram: diagramReducer,
         },
       });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should handle renderDiagram.pending', () => {
-      const mockValidate = mermaidService.validateCode as jest.MockedFunction<typeof mermaidService.validateCode>;
+      const mockValidate = mermaidService.validateCode as any;
       mockValidate.mockReturnValue({ isValid: true } as any);
 
-      const mockRender = mermaidService.render as jest.MockedFunction<typeof mermaidService.render>;
+      const mockRender = mermaidService.render as any;
       mockRender.mockImplementation(() => new Promise(() => {})); // Never resolves
 
       store.dispatch(renderDiagram({ code: 'test', theme: Theme.Light }));
@@ -175,16 +176,16 @@ describe('diagramSlice', () => {
     });
 
     it('should handle renderDiagram.fulfilled', async () => {
-      const mockValidate = mermaidService.validateCode as jest.MockedFunction<typeof mermaidService.validateCode>;
+      const mockValidate = mermaidService.validateCode as any;
       mockValidate.mockReturnValue({ isValid: true } as any);
 
       const mockResult: MermaidRenderResult = {
         svg: '<svg>test diagram</svg>',
-        bindFunctions: jest.fn(),
+        bindFunctions: vi.fn(),
         error: null,
       };
 
-      const mockRender = mermaidService.render as jest.MockedFunction<typeof mermaidService.render>;
+      const mockRender = mermaidService.render as any;
       mockRender.mockResolvedValue(mockResult as any);
 
       await store.dispatch(renderDiagram({ code: 'test', theme: Theme.Light }));
@@ -196,10 +197,10 @@ describe('diagramSlice', () => {
     });
 
     it('should handle renderDiagram.rejected with validation error', async () => {
-      const mockValidate = mermaidService.validateCode as jest.MockedFunction<typeof mermaidService.validateCode>;
+      const mockValidate = mermaidService.validateCode as any;
       mockValidate.mockReturnValue({ isValid: false, error: 'Invalid syntax' } as any);
 
-      const mockRender = mermaidService.render as jest.MockedFunction<typeof mermaidService.render>;
+      const mockRender = mermaidService.render as any;
       mockRender.mockRejectedValue(new Error('Invalid syntax'));
 
       await store.dispatch(renderDiagram({ code: 'invalid', theme: Theme.Light }));
@@ -210,10 +211,10 @@ describe('diagramSlice', () => {
     });
 
     it('should handle renderDiagram.rejected with render error', async () => {
-      const mockValidate = mermaidService.validateCode as jest.MockedFunction<typeof mermaidService.validateCode>;
+      const mockValidate = mermaidService.validateCode as any;
       mockValidate.mockReturnValue({ isValid: true } as any);
 
-      const mockRender = mermaidService.render as jest.MockedFunction<typeof mermaidService.render>;
+      const mockRender = mermaidService.render as any;
       mockRender.mockRejectedValue(new Error('Render failed'));
 
       await store.dispatch(renderDiagram({ code: 'test', theme: Theme.Light }));
@@ -224,16 +225,16 @@ describe('diagramSlice', () => {
     });
 
     it('should handle renderDiagram with dark theme', async () => {
-      const mockValidate = mermaidService.validateCode as jest.MockedFunction<typeof mermaidService.validateCode>;
+      const mockValidate = mermaidService.validateCode as any;
       mockValidate.mockReturnValue({ isValid: true } as any);
 
       const mockResult: MermaidRenderResult = {
         svg: '<svg>dark theme diagram</svg>',
-        bindFunctions: jest.fn(),
+        bindFunctions: vi.fn(),
         error: null,
       };
 
-      const mockRender = mermaidService.render as jest.MockedFunction<typeof mermaidService.render>;
+      const mockRender = mermaidService.render as any;
       mockRender.mockResolvedValue(mockResult as any);
 
       await store.dispatch(renderDiagram({ code: 'test', theme: Theme.Dark }));

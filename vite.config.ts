@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -40,6 +41,21 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       open: true,
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./src/setupTests.ts'],
+      include: ['src/**/*.test.{ts,tsx}'],
+      css: { modules: { classNameStrategy: 'non-scoped' } },
+      alias: {
+        '@components': path.resolve(__dirname, 'src/components'),
+        '@features': path.resolve(__dirname, 'src/features'),
+        '@services': path.resolve(__dirname, 'src/services'),
+        '@utils': path.resolve(__dirname, 'src/utils'),
+        '@types': path.resolve(__dirname, 'src/types'),
+        '@store': path.resolve(__dirname, 'src/store'),
+      },
     },
   };
 });

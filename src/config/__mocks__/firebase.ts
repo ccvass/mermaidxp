@@ -1,3 +1,5 @@
-export const auth = { currentUser: null, onAuthStateChanged: jest.fn() };
+import { vi } from 'vitest';
+
+export const auth = { currentUser: null, onAuthStateChanged: vi.fn() };
 export const googleProvider = {};
 export default {};

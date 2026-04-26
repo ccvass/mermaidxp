@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Button } from '../Button';
@@ -120,7 +121,7 @@ describe('Button Component', () => {
 
   describe('Interaction', () => {
     it('should call onClick when clicked', () => {
-      const handleClick = jest.fn();
+      const handleClick = vi.fn();
       render(<Button onClick={handleClick}>Clickable</Button>);
 
       const button = screen.getByRole('button');
@@ -130,7 +131,7 @@ describe('Button Component', () => {
     });
 
     it('should not call onClick when disabled', () => {
-      const handleClick = jest.fn();
+      const handleClick = vi.fn();
       render(
         <Button onClick={handleClick} disabled>
           Disabled
@@ -144,7 +145,7 @@ describe('Button Component', () => {
     });
 
     it('should not call onClick when loading', () => {
-      const handleClick = jest.fn();
+      const handleClick = vi.fn();
       render(
         <Button onClick={handleClick} loading>
           Loading
@@ -226,7 +227,7 @@ describe('Button Component', () => {
     });
 
     it('should support keyboard navigation', () => {
-      const handleClick = jest.fn();
+      const handleClick = vi.fn();
       render(<Button onClick={handleClick}>Keyboard</Button>);
 
       const button = screen.getByRole('button');
@@ -249,7 +250,7 @@ describe('Button Component', () => {
     });
 
     it('should memoize component properly', () => {
-      const handleClick = jest.fn();
+      const handleClick = vi.fn();
       const { rerender } = render(
         <Button onClick={handleClick} variant="primary">
           Test
@@ -270,7 +271,7 @@ describe('Button Component', () => {
 
   describe('Complex Combinations', () => {
     it('should handle multiple props together', () => {
-      const handleClick = jest.fn();
+      const handleClick = vi.fn();
       render(
         <Button
           onClick={handleClick}
