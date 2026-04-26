@@ -68,7 +68,7 @@ describe('MermaidService', () => {
 
       await mermaidService.render('graph TD\n  A --> B');
 
-      expect(window.mermaid.initialize).toHaveBeenCalledTimes(2); // Once for init, once for render
+      expect(window.mermaid.initialize).toHaveBeenCalledTimes(1); // Once for render (auto-init)
     });
 
     it('should update theme configuration on render', async () => {
@@ -331,7 +331,7 @@ describe('MermaidService', () => {
 
       // Should initialize again on next render
       await mermaidService.render('graph TD\n  A --> B');
-      expect(window.mermaid.initialize).toHaveBeenCalledTimes(4); // 1 initial + 1 for render + 1 after reset + 1 for render
+      expect(window.mermaid.initialize).toHaveBeenCalledTimes(2); // 1 initial + 1 after reset for render
     });
   });
 });

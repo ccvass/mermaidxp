@@ -199,6 +199,9 @@ describe('diagramSlice', () => {
       const mockValidate = mermaidService.validateCode as jest.MockedFunction<typeof mermaidService.validateCode>;
       mockValidate.mockReturnValue({ isValid: false, error: 'Invalid syntax' } as any);
 
+      const mockRender = mermaidService.render as jest.MockedFunction<typeof mermaidService.render>;
+      mockRender.mockRejectedValue(new Error('Invalid syntax'));
+
       await store.dispatch(renderDiagram({ code: 'invalid', theme: Theme.Light }));
 
       const state = store.getState().diagram;
