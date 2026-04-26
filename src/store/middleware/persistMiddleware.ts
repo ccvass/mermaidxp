@@ -1,11 +1,11 @@
 import { Middleware } from '@reduxjs/toolkit';
 import { RootState } from '../index';
+import { CanvasElement } from '../slices/canvasElementsSlice';
 import { logger } from '../../utils/logger';
 
-// Define the structure of persisted state
-// CRITICAL: interactionMode MUST be persisted to prevent zoom issues during drag/drop
-// When interactionMode becomes undefined, it triggers the "zoom back check" useEffect
-// in DiagramDisplay.tsx, causing unwanted zoom changes during drop operations.
+// Max localStorage budget for canvasElements (500KB)
+const MAX_ELEMENTS_SIZE = 500 * 1024;
+
 export interface PersistedState {
   diagram: {
     mermaidCode: string;
@@ -16,7 +16,11 @@ export interface PersistedState {
   canvas: {
     zoom: number;
     pan: { x: number; y: number };
-    interactionMode: 'pan' | 'drag'; // REQUIRED: Must persist to prevent zoom issues
+    interactionMode: 'pan' | 'drag';
+  };
+  canvasElements?: {
+    elements: Record<string, CanvasElement>;
+    nextId: number;
   };
 }
 
@@ -34,8 +38,19 @@ const PERSISTED_ACTIONS = [
   'canvas/setPan',
   'canvas/updatePan',
   'canvas/fitToViewport',
-  'canvas/setInteractionMode', // REQUIRED: Prevents zoom issues during drag/drop
-  'canvas/toggleInteractionMode', // REQUIRED: Prevents zoom issues during drag/drop
+  'canvas/setInteractionMode',
+  'canvas/toggleInteractionMode',
+  'canvasElements/addElement',
+  'canvasElements/updateElement',
+  'canvasElements/deleteElement',
+  'canvasElements/deleteElements',
+  'canvasElements/moveElement',
+  'canvasElements/moveElements',
+  'canvasElements/resizeElement',
+  'canvasElements/updateElementStyle',
+  'canvasElements/updateElementContent',
+  'canvasElements/setAllElements',
+  'canvasElements/pasteElements',
 ];
 
 const STORAGE_KEY = 'mermaidViewerState';
@@ -48,19 +63,34 @@ const DEBOUNCE_DELAY = 500; // 500ms
  * Extracts the persisted state from the full Redux state
  * CRITICAL: interactionMode MUST be extracted to prevent zoom issues
  */
-const extractPersistedState = (state: RootState): PersistedState => ({
-  diagram: {
-    mermaidCode: state.diagram.mermaidCode,
-  },
-  ui: {
-    theme: state.ui.theme,
-  },
-  canvas: {
-    zoom: state.canvas.zoom,
-    pan: state.canvas.pan,
-    interactionMode: state.canvas.interactionMode, // REQUIRED: Prevents undefined mode causing zoom issues
-  },
-});
+const extractPersistedState = (state: RootState): PersistedState => {
+  const base: PersistedState = {
+    diagram: { mermaidCode: state.diagram.mermaidCode },
+    ui: { theme: state.ui.theme },
+    canvas: {
+      zoom: state.canvas.zoom,
+      pan: state.canvas.pan,
+      interactionMode: state.canvas.interactionMode,
+    },
+  };
+
+  // Strip image data URLs to stay within localStorage budget
+  const elements: Record<string, CanvasElement> = {};
+  for (const [id, el] of Object.entries(state.canvasElements.elements)) {
+    if (el.type === 'image' && el.imageUrl && el.imageUrl.length > MAX_ELEMENTS_SIZE) {
+      elements[id] = { ...el, imageUrl: '' }; // Drop oversized images
+    } else {
+      elements[id] = el;
+    }
+  }
+
+  const elementsJson = JSON.stringify(elements);
+  if (elementsJson.length <= MAX_ELEMENTS_SIZE) {
+    base.canvasElements = { elements, nextId: state.canvasElements.nextId };
+  }
+
+  return base;
+};
 
 /**
  * Persists state to localStorage with debouncing

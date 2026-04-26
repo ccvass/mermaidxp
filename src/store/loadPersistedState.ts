@@ -59,27 +59,22 @@ export const loadPersistedState = (): Record<string, any> | undefined => {
     // Use default code if persisted code is empty
     const mermaidCode = parsedState.diagram.mermaidCode.trim() || DEFAULT_MERMAID_CODE;
 
-    // Return the persisted state as a partial RootState
     return {
-      diagram: {
-        mermaidCode,
-        // Other diagram properties will use their initial values
-      },
-      ui: {
-        theme: parsedState.ui.theme,
-        // Other ui properties will use their initial values
-      },
+      diagram: { mermaidCode },
+      ui: { theme: parsedState.ui.theme },
       canvas: {
         zoom: parsedState.canvas.zoom,
         pan: parsedState.canvas.pan,
-        // CRITICAL: interactionMode MUST be restored to prevent zoom issues during drag/drop
-        // MODES DOCUMENTATION:
-        // 'pan' = MOUSE MODE (🖱️) = DEFAULT = Moves the ENTIRE diagram/canvas
-        // 'drag' = HAND MODE (✋) = Moves INDIVIDUAL elements within the diagram
-        // PERMANENTLY FORCE 'pan' mode by default - NEVER CHANGE THIS AGAIN
-        interactionMode: 'pan', // ALWAYS START IN MOUSE MODE - DO NOT CHANGE
-        // Other canvas properties will use their initial values
+        interactionMode: 'pan' as const,
       },
+      ...(parsedState.canvasElements?.elements && {
+        canvasElements: {
+          elements: parsedState.canvasElements.elements,
+          selectedElementIds: [],
+          clipboard: [],
+          nextId: parsedState.canvasElements.nextId || 1,
+        },
+      }),
     };
   } catch (error) {
     logger.error('Failed to load persisted state:', 'loadPersistedState', error instanceof Error ? error : undefined);
