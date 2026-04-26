@@ -121,11 +121,7 @@ class ExportService {
 
   async exportPDF(svgElement: SVGElement, filename: string = 'diagram'): Promise<void> {
     try {
-      // Check if jsPDF is available
-      const w = window as any;
-      if (!w.jspdf || !w.jspdf.jsPDF) {
-        throw new Error('jsPDF library not loaded');
-      }
+      const { jsPDF } = await import('jspdf');
 
       // Get SVG dimensions
       let bbox: { width: number; height: number };
@@ -140,7 +136,7 @@ class ExportService {
 
       // Create PDF with landscape orientation if diagram is wider than tall
       const orientation = svgWidth > svgHeight ? 'landscape' : 'portrait';
-      const pdf = new w.jspdf.jsPDF({
+      const pdf = new jsPDF({
         orientation,
         unit: 'pt',
         format: EXPORT_CONFIG.PDF.format,
