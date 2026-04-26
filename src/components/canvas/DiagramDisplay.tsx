@@ -36,7 +36,7 @@ export const DiagramDisplay: React.FC = () => {
   const { mermaidCode, renderResult, isLoading, error } = useAppSelector((state) => state.diagram);
   const sheetsActive = useAppSelector((state) => state.diagram.sheets.length > 0);
   const { theme } = useAppSelector((state) => state.ui);
-  const { zoom, pan, interactionMode, placingElement } = useAppSelector((state) => state.canvas);
+  const { zoom, pan, interactionMode, placingElement, showGrid } = useAppSelector((state) => state.canvas);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const renderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -619,6 +619,18 @@ export const DiagramDisplay: React.FC = () => {
       <div className="absolute inset-0 opacity-50">
         <div className="w-full h-full diagram-canvas-bg dark:diagram-canvas-bg-dark"></div>
       </div>
+
+      {/* Grid overlay */}
+      {showGrid && (
+        <div
+          className="absolute inset-0 pointer-events-none z-[1]"
+          style={{
+            backgroundSize: '20px 20px',
+            backgroundImage:
+              'linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px)',
+          }}
+        />
+      )}
 
       {/* Content */}
       <div className="relative z-10 h-full overflow-hidden">

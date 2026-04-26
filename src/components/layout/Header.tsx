@@ -41,7 +41,9 @@ export const Header: FC<HeaderProps> = ({ title }) => {
 
   const handleExportAllPages = async (format: 'svg' | 'png' | 'pdf') => {
     setShowExportMenu(false);
-    await exportAllPages(sheets, format, theme, notify);
+    await exportAllPages(sheets, format, theme, notify, ({ current, total }) => {
+      notify(`Exporting page ${current} of ${total}...`, 'info');
+    });
   };
 
   return (

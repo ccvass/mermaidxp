@@ -109,6 +109,10 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [showRecentFiles, setShowRecentFiles] = useState(false);
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importUrl, setImportUrl] = useState('');
+  const [importLoading, setImportLoading] = useState(false);
+  const [importError, setImportError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // New Document with template selection
@@ -268,31 +272,31 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
 
   // Import from URL
   const handleImportFromUrl = useCallback(async () => {
-    const url = prompt('Enter URL to import diagram from:');
-    if (!url) return;
+    setImportError('');
+    setImportUrl('');
+    setShowImportModal(true);
+  }, []);
+
+  const handleImportSubmit = useCallback(async () => {
+    if (!importUrl.trim()) return;
+    setImportLoading(true);
+    setImportError('');
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(importUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const content = await response.text();
       dispatch(setMermaidCode(content));
-      dispatch(captureNow({ actionType: `Imported from URL: ${url}` }));
-      dispatch(
-        showNotification({
-          message: 'Diagram imported successfully from URL',
-          type: 'success',
-        })
-      );
+      dispatch(captureNow({ actionType: `Imported from URL: ${importUrl}` }));
+      dispatch(showNotification({ message: 'Diagram imported successfully from URL', type: 'success' }));
+      setShowImportModal(false);
     } catch (error) {
-      dispatch(
-        showNotification({
-          message: `Failed to import from URL: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          type: 'error',
-        })
-      );
+      setImportError(error instanceof Error ? error.message : 'Unknown error');
+    } finally {
+      setImportLoading(false);
     }
-  }, [dispatch]);
+  }, [dispatch, importUrl]);
 
   // Load recent files from localStorage (migrate old string[] format)
   React.useEffect(() => {
@@ -515,6 +519,45 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
             setShowRecentFiles(false);
           }}
         />
+      )}
+
+      {/* Import URL Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-96 max-w-[90vw]">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Import from URL</h3>
+            <input
+              type="url"
+              value={importUrl}
+              onChange={(e) => setImportUrl(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleImportSubmit()}
+              placeholder="https://example.com/diagram.mmd"
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              autoFocus
+              disabled={importLoading}
+            />
+            {importError && <p className="mt-2 text-xs text-red-600 dark:text-red-400">Failed: {importError}</p>}
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setShowImportModal(false)}
+                disabled={importLoading}
+                className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleImportSubmit}
+                disabled={importLoading || !importUrl.trim()}
+                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                {importLoading && (
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
+                Import
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

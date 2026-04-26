@@ -44,6 +44,7 @@ export interface CanvasState {
   selectedNodes: string[];
   isDragging: boolean;
   interactionMode: InteractionMode;
+  showGrid: boolean;
 }
 
 export interface PlacingElementInfo {

@@ -1,30 +1,128 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect, useRef } from 'react';
+import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from '@codemirror/view';
+import { EditorState, Compartment } from '@codemirror/state';
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
+import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
+import { searchKeymap, highlightSelectionMatches } from '@codemirror/search';
+import { oneDark } from '@codemirror/theme-one-dark';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setMermaidCode } from '../../store/slices/diagramSlice';
-import { SyncedTextarea } from './SyncedTextarea';
 import { useHistoryEngine } from '../../hooks/useHistoryEngine';
+import { mermaidLanguage } from './mermaidLanguage';
+
 const DiagramSamples = lazy(() => import('./DiagramSamples').then((m) => ({ default: m.DiagramSamples })));
+
+const themeCompartment = new Compartment();
+const editableCompartment = new Compartment();
+
+const lightTheme = EditorView.theme({
+  '&': { height: '100%', backgroundColor: 'white' },
+  '.cm-scroller': { overflow: 'auto' },
+  '.cm-gutters': { backgroundColor: '#f9fafb', borderRight: '1px solid #e5e7eb' },
+});
+
+const darkTheme = EditorView.theme({
+  '&': { height: '100%', backgroundColor: '#1f2937' },
+  '.cm-scroller': { overflow: 'auto' },
+  '.cm-gutters': { backgroundColor: '#111827', borderRight: '1px solid #374151' },
+});
 
 export const CodeEditor: React.FC = () => {
   const dispatch = useAppDispatch();
   const { mermaidCode, isLoading } = useAppSelector((state) => state.diagram);
+  const theme = useAppSelector((state) => state.ui.theme);
   const { beginGroup, endGroup, captureNow } = useHistoryEngine();
 
-  const handleCodeChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newCode = event.target.value;
-    dispatch(setMermaidCode(newCode));
-    // historyEngine middleware coalesces text changes automatically
-  };
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<EditorView | null>(null);
+  // Track whether the last change came from the editor (user typing) to avoid loops
+  const isInternalUpdate = useRef(false);
 
-  const handleFocus = () => {
-    beginGroup();
-  };
+  // Initialize CodeMirror
+  useEffect(() => {
+    if (!containerRef.current) return;
 
-  const handleBlur = () => {
-    endGroup();
-    // Flush any pending coalesced text edit into history
-    captureNow('text-blur');
-  };
+    const isDark = theme === 'dark';
+
+    const state = EditorState.create({
+      doc: mermaidCode,
+      extensions: [
+        lineNumbers(),
+        highlightActiveLine(),
+        highlightActiveLineGutter(),
+        history(),
+        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
+        highlightSelectionMatches(),
+        mermaidLanguage,
+        syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+        themeCompartment.of(isDark ? [oneDark, darkTheme] : [lightTheme]),
+        editableCompartment.of(EditorView.editable.of(!isLoading)),
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged) {
+            isInternalUpdate.current = true;
+            dispatch(setMermaidCode(update.state.doc.toString()));
+          }
+          if (update.focusChanged) {
+            if (update.view.hasFocus) {
+              beginGroup();
+            } else {
+              endGroup();
+              captureNow('text-blur');
+            }
+          }
+        }),
+      ],
+    });
+
+    const view = new EditorView({ state, parent: containerRef.current });
+    viewRef.current = view;
+
+    return () => {
+      view.destroy();
+      viewRef.current = null;
+    };
+    // Only run on mount — theme/loading changes handled by separate effects
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync external mermaidCode changes (undo/redo, samples) into the editor
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+
+    if (isInternalUpdate.current) {
+      isInternalUpdate.current = false;
+      return;
+    }
+
+    const currentDoc = view.state.doc.toString();
+    if (currentDoc !== mermaidCode) {
+      view.dispatch({
+        changes: { from: 0, to: currentDoc.length, insert: mermaidCode },
+      });
+    }
+  }, [mermaidCode]);
+
+  // Sync theme changes
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+
+    const isDark = theme === 'dark';
+    view.dispatch({
+      effects: themeCompartment.reconfigure(isDark ? [oneDark, darkTheme] : [lightTheme]),
+    });
+  }, [theme]);
+
+  // Sync editable state
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+
+    view.dispatch({
+      effects: editableCompartment.reconfigure(EditorView.editable.of(!isLoading)),
+    });
+  }, [isLoading]);
 
   return (
     <div className="h-full flex flex-col">
@@ -41,45 +139,8 @@ export const CodeEditor: React.FC = () => {
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="flex-1 relative">
-        <SyncedTextarea
-          value={mermaidCode}
-          onChange={handleCodeChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          className="
-            absolute inset-0 w-full h-full p-4 
-            font-mono text-sm leading-relaxed
-            bg-white dark:bg-gray-800 
-            text-gray-900 dark:text-gray-100
-            border-none outline-none resize-none
-            placeholder-gray-400 dark:placeholder-gray-500
-          "
-          placeholder={`Enter your Mermaid diagram code here...
-
-Example:
-graph TD
-    A[Start] --> B{Decision}
-    B -->|Yes| C[Action 1]
-    B -->|No| D[Action 2]
-    C --> E[End]
-    D --> E`}
-          spellCheck={false}
-          disabled={isLoading}
-        />
-
-        {/* Line numbers overlay (optional enhancement) */}
-        <div className="absolute left-0 top-0 p-4 pointer-events-none select-none">
-          <div className="font-mono text-sm text-gray-400 dark:text-gray-600 leading-relaxed">
-            {mermaidCode.split('\n').map((_: string, index: number) => (
-              <div key={index} className="text-right pr-2 min-w-[2rem]">
-                {index + 1}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* CodeMirror Editor */}
+      <div ref={containerRef} className="flex-1 overflow-hidden" />
 
       {/* Footer with stats */}
       <div className="flex-shrink-0 px-3 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">

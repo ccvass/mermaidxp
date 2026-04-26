@@ -7,6 +7,7 @@ import {
   setPlacingElement,
   toggleInteractionMode,
   fitToViewport,
+  toggleGrid,
 } from '../../store/slices/canvasSlice';
 import { showNotification } from '../../store/slices/uiSlice';
 import { useHistoryEngine } from '../../hooks/useHistoryEngine';
@@ -112,7 +113,7 @@ const PresentationIcon = ({ size = 20 }: { size?: number }) => (
 // Main Improved Toolbar Component
 export const ToolbarImproved: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { zoom, interactionMode } = useAppSelector((state) => state.canvas);
+  const { zoom, interactionMode, showGrid } = useAppSelector((state) => state.canvas);
   const { undo, redo, canUndo, canRedo } = useHistoryEngine();
 
   const [isShapesPanelOpen, setIsShapesPanelOpen] = useState(false);
@@ -328,6 +329,17 @@ export const ToolbarImproved: React.FC = () => {
               variant={interactionMode === 'drag' ? 'success' : 'default'}
             >
               {interactionMode === 'drag' ? <DragIcon size={18} /> : <PanIcon size={18} />}
+            </ToolbarButton>
+
+            <ToolbarButton
+              onClick={() => dispatch(toggleGrid())}
+              label="Grid"
+              title={showGrid ? 'Hide grid (snap enabled)' : 'Show grid (snap disabled)'}
+              isActive={showGrid}
+            >
+              <svg width={18} height={18} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h16v16H4zM4 12h16M12 4v16" />
+              </svg>
             </ToolbarButton>
           </div>
 

@@ -10,6 +10,7 @@ interface Sheet {
 }
 
 type NotifyFn = (msg: string, type: 'info' | 'success' | 'error' | 'warning') => void;
+type ProgressFn = (progress: { current: number; total: number }) => void;
 
 let isExporting = false;
 
@@ -45,7 +46,13 @@ export async function exportSingleDiagram(format: 'svg' | 'png' | 'pdf', notify:
   }
 }
 
-export async function exportAllPages(sheets: Sheet[], format: 'svg' | 'png' | 'pdf', theme: string, notify: NotifyFn) {
+export async function exportAllPages(
+  sheets: Sheet[],
+  format: 'svg' | 'png' | 'pdf',
+  theme: string,
+  notify: NotifyFn,
+  onProgress?: ProgressFn
+) {
   if (isExporting) {
     notify('An export is already in progress', 'warning');
     return;
@@ -57,9 +64,9 @@ export async function exportAllPages(sheets: Sheet[], format: 'svg' | 'png' | 'p
   isExporting = true;
   try {
     if (format === 'pdf') {
-      await exportAllAsPdf(sheets, themeEnum, notify);
+      await exportAllAsPdf(sheets, themeEnum, notify, onProgress);
     } else {
-      await exportAllAsSvgOrPng(sheets, format, themeEnum, notify);
+      await exportAllAsSvgOrPng(sheets, format, themeEnum, notify, onProgress);
     }
   } catch {
     notify('Export failed', 'error');
@@ -68,7 +75,7 @@ export async function exportAllPages(sheets: Sheet[], format: 'svg' | 'png' | 'p
   }
 }
 
-async function exportAllAsPdf(sheets: Sheet[], themeEnum: Theme, notify: NotifyFn) {
+async function exportAllAsPdf(sheets: Sheet[], themeEnum: Theme, notify: NotifyFn, onProgress?: ProgressFn) {
   const { jsPDF } = await import('jspdf');
   let pdf: JsPDFType | null = null;
   let exported = 0;
@@ -184,6 +191,7 @@ async function exportAllAsPdf(sheets: Sheet[], themeEnum: Theme, notify: NotifyF
         document.body.removeChild(wrapper);
       }
     }
+    onProgress?.({ current: i + 1, total: sheets.length });
     await new Promise((r) => setTimeout(r, 200));
   }
 
@@ -198,7 +206,13 @@ async function exportAllAsPdf(sheets: Sheet[], themeEnum: Theme, notify: NotifyF
   }
 }
 
-async function exportAllAsSvgOrPng(sheets: Sheet[], format: 'svg' | 'png', themeEnum: Theme, notify: NotifyFn) {
+async function exportAllAsSvgOrPng(
+  sheets: Sheet[],
+  format: 'svg' | 'png',
+  themeEnum: Theme,
+  notify: NotifyFn,
+  onProgress?: ProgressFn
+) {
   const div = document.createElement('div');
   div.style.cssText = 'position:absolute;left:-9999px;top:0';
   document.body.appendChild(div);
@@ -233,6 +247,7 @@ async function exportAllAsSvgOrPng(sheets: Sheet[], format: 'svg' | 'png', theme
           error instanceof Error ? error : undefined
         );
       }
+      onProgress?.({ current: i + 1, total: sheets.length });
     }
   } finally {
     document.body.removeChild(div);

@@ -16,6 +16,7 @@ const initialState: CanvasState = {
   selectedNodes: [],
   isDragging: false,
   interactionMode: 'pan', // DEFAULT: pan mode (mouse icon)
+  showGrid: false,
 };
 
 const canvasSlice = createSlice({
@@ -89,6 +90,9 @@ const canvasSlice = createSlice({
     toggleInteractionMode: (state) => {
       state.interactionMode = state.interactionMode === 'drag' ? 'pan' : 'drag';
     },
+    toggleGrid: (state) => {
+      state.showGrid = !state.showGrid;
+    },
     // Complex action for fitting diagram to viewport
     fitToViewport: (
       state,
@@ -142,6 +146,7 @@ export const {
   setInteractionMode,
   toggleInteractionMode,
   fitToViewport,
+  toggleGrid,
 } = canvasSlice.actions;
 
 // Selectors
@@ -152,6 +157,7 @@ export const selectPlacingElement = (state: { canvas: CanvasState }) => state.ca
 export const selectSelectedNodes = (state: { canvas: CanvasState }) => state.canvas.selectedNodes;
 export const selectIsDragging = (state: { canvas: CanvasState }) => state.canvas.isDragging;
 export const selectInteractionMode = (state: { canvas: CanvasState }) => state.canvas.interactionMode;
+export const selectShowGrid = (state: { canvas: CanvasState }) => state.canvas.showGrid;
 
 export const selectCanZoomIn = createSelector(selectZoom, (z) => z < MAX_ZOOM);
 export const selectCanZoomOut = createSelector(selectZoom, (z) => z > MIN_ZOOM);

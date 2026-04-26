@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { store } from '../store';
 import {
   addElement,
   updateElement,
@@ -68,7 +69,11 @@ export const useCanvasElements = () => {
   // Position and size operations
   const moveElementTo = useCallback(
     (id: string, position: { x: number; y: number }) => {
-      dispatch(moveElement({ id, position }));
+      const showGrid = store.getState().canvas.showGrid;
+      const snapped = showGrid
+        ? { x: Math.round(position.x / 20) * 20, y: Math.round(position.y / 20) * 20 }
+        : position;
+      dispatch(moveElement({ id, position: snapped }));
     },
     [dispatch]
   );
