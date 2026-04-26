@@ -158,7 +158,6 @@ Optional enhancements:
 - Save diagrams to Firestore per user
 - Add social sharing with user attribution
 - Implement role-based access (admin, editor, viewer)
-- Add team collaboration features
 
 ## Resources
 

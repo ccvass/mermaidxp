@@ -26,7 +26,7 @@ src/
 │   ├── editor/        # CodeEditor, DiagramSamples (lazy)
 │   ├── header/        # FileOperations (.mmd/.md parsing)
 │   ├── auth/          # LoginModal, UserMenu
-│   └── collaboration/ # CollaborationManager (inactive)
+│   └── common/        # Reusable UI components
 ├── store/
 │   ├── slices/        # diagramSlice, canvasSlice, uiSlice, historyEngineSlice
 │   └── middleware/    # persistMiddleware, historyEngineMiddleware
@@ -43,7 +43,9 @@ src/
 ```text
 User input → CodeEditor → diagramSlice.setMermaidCode
   → mermaidService.render() → DiagramDisplay (SVG in DOM)
-  → persistMiddleware → localStorage
+  → persistMiddleware → localStorage (code, theme, zoom, pan, interactionMode)
+
+App start → loadPersistedState() → preloadedState → configureStore()
 
 File open (.md) → mdParser → sheets[] → SheetsView (multi-page)
 File open (.mmd) → direct mermaidCode → DiagramDisplay (single)
@@ -57,11 +59,10 @@ Chunks split via Vite `manualChunks`:
 
 - `vendor` — React, Redux (~38KB)
 - `firebase` — Firebase Auth (~156KB, lazy)
-- `jspdf` — PDF export (~390KB, lazy on export)
+- `pdf` — jsPDF + html2canvas (~754KB, lazy on export)
+- `purify.es` — DOMPurify (~23KB)
 - `DiagramSamples` — sample diagrams (~18KB, lazy)
-- `index` — app core (~355KB)
-
-`html2canvas` excluded via `rollupOptions.external` (jsPDF transitive dep, unused).
+- `index` — app core (~358KB)
 
 ## Deployment
 

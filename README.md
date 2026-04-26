@@ -179,7 +179,8 @@ npm run deploy       # Deploy to Cloudflare Workers
 
 - 📖 **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Cloudflare Workers deployment, environment variables, Firebase setup, CI/CD
 - 📖 **[FIREBASE_SETUP.md](./FIREBASE_SETUP.md)** - Detailed Firebase configuration
-- 📖 **[TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md)** - Architecture and troubleshooting
+- 📖 **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** - Architecture and data flow
+- 📖 **[docs/STANDARDS.md](./docs/STANDARDS.md)** - Tech stack and coding standards
 
 ## 🐛 Troubleshooting
 
@@ -209,7 +210,7 @@ npm run deploy       # Deploy to Cloudflare Workers
 - Look for errors in browser console
 - Try refreshing the page
 
-For more detailed troubleshooting, see [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md).
+For more detailed troubleshooting, see [DEPLOYMENT.md](./DEPLOYMENT.md).
 
 ## 🚀 Deployment
 
@@ -236,7 +237,7 @@ npm run deploy
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Read [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) before making changes
+3. Read [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) before making changes
 4. Commit your changes (`git commit -m 'Add amazing feature'`)
 5. Push to the branch (`git push origin feature/amazing-feature`)
 6. Open a Pull Request
@@ -265,6 +266,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ **Fully Functional**: All core features working
 - ✅ **Pan/Drag Fixed**: Precise interaction from any point
 - ✅ **Resize System**: Unified proportional scaling for all elements
+- ✅ **State Persistence**: Code, theme, zoom, pan saved to localStorage
 - ✅ **Production Ready**: Optimized build and deployment
 - ✅ **Well Documented**: Comprehensive technical docs
 - 🔄 **Actively Maintained**: Regular updates and improvements

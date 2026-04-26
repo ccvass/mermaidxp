@@ -305,6 +305,6 @@ jobs:
 ## Need Help?
 
 Check the [troubleshooting section](#troubleshooting) or review:
-- [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) - Architecture details
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) - Architecture details
 - [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) - Firebase configuration
 - [README.md](./README.md) - Project overview
