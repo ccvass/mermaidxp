@@ -1,7 +1,4 @@
 import { PersistedState } from './middleware/persistMiddleware';
-import { RootState } from './index';
-// Local DeepPartial helper for TS
-type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
 import { DEFAULT_MERMAID_CODE } from '../constants/diagram.constants';
 import { logger } from '../utils/logger';
 
@@ -47,7 +44,7 @@ const isValidPersistedState = (state: unknown): state is PersistedState => {
  * Loads persisted state from localStorage and validates it
  * Returns a partial state object to be used as preloadedState in the store
  */
-export const loadPersistedState = (): DeepPartial<RootState> | undefined => {
+export const loadPersistedState = (): Record<string, any> | undefined => {
   try {
     const serializedState = localStorage.getItem(STORAGE_KEY);
     if (!serializedState) return undefined;
