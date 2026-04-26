@@ -128,17 +128,14 @@ export const ToolbarImproved: React.FC = () => {
   // Zoom handlers
   const handleZoomIn = () => {
     dispatch(zoomIn());
-    dispatch(showNotification({ message: `Zoom: ${Math.round((zoom + 0.1) * 100)}%`, type: 'info' }));
   };
 
   const handleZoomOut = () => {
     dispatch(zoomOut());
-    dispatch(showNotification({ message: `Zoom: ${Math.round((zoom - 0.1) * 100)}%`, type: 'info' }));
   };
 
   const handleResetZoom = () => {
     dispatch(resetZoom());
-    dispatch(showNotification({ message: 'Zoom reset to 100%', type: 'info' }));
   };
 
   const handleFitToScreen = () => {
@@ -175,12 +172,10 @@ export const ToolbarImproved: React.FC = () => {
   // History handlers
   const handleUndo = () => {
     undo();
-    dispatch(showNotification({ message: 'Undo', type: 'info' }));
   };
 
   const handleRedo = () => {
     redo();
-    dispatch(showNotification({ message: 'Redo', type: 'info' }));
   };
 
   // Element placement handlers
@@ -215,13 +210,6 @@ export const ToolbarImproved: React.FC = () => {
   // Interaction mode handler
   const toggleInteractionModeHandler = () => {
     dispatch(toggleInteractionMode());
-    const newMode = interactionMode === 'drag' ? 'pan' : 'drag';
-    dispatch(
-      showNotification({
-        message: `${newMode === 'pan' ? 'Pan' : 'Drag'} mode activated`,
-        type: 'info',
-      })
-    );
   };
 
   // Presentation mode handler
