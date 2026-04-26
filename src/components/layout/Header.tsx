@@ -122,20 +122,11 @@ export const Header: FC<HeaderProps> = ({ title }) => {
     dispatch(showNotification({ message: msg, type }));
 
   const handleExport = async (format: 'svg' | 'png' | 'pdf') => {
-    if (!user) {
-      setShowLoginModal(true);
-      notify('You must sign in to export diagrams', 'warning');
-      return;
-    }
     setShowExportMenu(false);
     await exportSingleDiagram(format, notify);
   };
 
   const handleExportAllPages = async (format: 'svg' | 'png' | 'pdf') => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
     setShowExportMenu(false);
     await exportAllPages(sheets, format, theme, notify);
   };

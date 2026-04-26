@@ -4,9 +4,7 @@ import { setMermaidCode, setSheets, clearSheets } from '../../store/slices/diagr
 import { showNotification } from '../../store/slices/uiSlice';
 import { captureNow } from '../../store/slices/historyEngineSlice';
 import { deleteElements } from '../../store/slices/canvasElementsSlice';
-import { useAuth } from '../../contexts/AuthContext';
 import { parseMdToSheets } from '../../utils/mdParser';
-import { LoginModal } from '../auth/LoginModal';
 
 interface FileOperationsProps {
   className?: string;
@@ -104,9 +102,7 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
   const [showTemplates, setShowTemplates] = useState(false);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [recentFiles, setRecentFiles] = useState<string[]>([]);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
 
   // New Document with template selection
   const handleNewDocument = useCallback(
@@ -201,18 +197,6 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
   // Save As functionality
   const handleSaveAs = useCallback(
     (format: 'mmd' | 'md' | 'txt' = 'mmd') => {
-      // Require authentication for save
-      if (!user) {
-        setShowLoginModal(true);
-        dispatch(
-          showNotification({
-            message: 'You must sign in to save diagrams',
-            type: 'warning',
-          })
-        );
-        return;
-      }
-
       if (!mermaidCode.trim()) {
         dispatch(
           showNotification({
@@ -248,7 +232,7 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
         })
       );
     },
-    [mermaidCode, dispatch, user]
+    [mermaidCode, dispatch]
   );
 
   // Import from URL
@@ -445,9 +429,6 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
           }}
         />
       )}
-
-      {/* Login Modal */}
-      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </div>
   );
 };
