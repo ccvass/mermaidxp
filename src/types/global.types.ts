@@ -95,24 +95,6 @@ export interface ApiResponse<T = any> {
   timestamp: number;
 }
 
-// Collaboration types (for future implementation)
-export interface CollaborationState {
-  isConnected: boolean;
-  users: Array<{
-    id: string;
-    name: string;
-    cursor?: { x: number; y: number };
-    selection?: string;
-  }>;
-  changes: Array<{
-    id: string;
-    userId: string;
-    timestamp: number;
-    type: 'edit' | 'move' | 'delete';
-    data: unknown;
-  }>;
-}
-
 // Plugin system types (for future implementation)
 export interface Plugin {
   id: string;

@@ -26,14 +26,13 @@ export default defineConfig(({ mode }) => {
       target: 'esnext',
       minify: 'esbuild',
       sourcemap: mode === 'development',
-      chunkSizeWarningLimit: 600,
       cssCodeSplit: true,
       rollupOptions: {
-        external: ['html2canvas'],
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-redux', '@reduxjs/toolkit'],
             firebase: ['firebase/app', 'firebase/auth'],
+            pdf: ['jspdf', 'html2canvas', 'canvg'],
           },
         },
       },

@@ -20,10 +20,7 @@ import {
   extractToolbarDragData,
   hasToolbarDragData,
 } from '../../features/canvas/utils/toolbarDrag';
-import CollaborationManager from '../collaboration/CollaborationManager';
-import CollaborativeCursors from '../collaboration/CollaborativeCursors';
 import { logger } from '../../utils/logger';
-// Collaboration imports disabled
 
 // Constants
 const CustomElementSelector = '.custom-text-group, .custom-image-group, .custom-svg-shape-group, .custom-icon-group';
@@ -50,12 +47,6 @@ export const DiagramDisplay: React.FC = () => {
   const [renderVersion, setRenderVersion] = useState(0);
   const { beginGroup, endGroup, captureNow } = useHistoryEngine();
   const { createElement, deleteSelectedElements, hasSelection } = useCanvasElements();
-  // Collaboration disabled
-  // Collaboration disabled — stub values
-  const users = [] as never[];
-  const sessionId: string | undefined = undefined;
-  const isConnected = false;
-  const isEnabled = false;
 
   // Store custom elements before container wipe for re-insertion later
   const extractedElementsRef = useRef<
@@ -678,12 +669,6 @@ export const DiagramDisplay: React.FC = () => {
             pan={pan}
             interactionMode={interactionMode}
           />
-
-          {/* Collaboration Manager - handles real-time collaboration */}
-          <CollaborationManager enabled={isEnabled} sessionId={sessionId} />
-
-          {/* Collaborative Cursors - shows other users' cursors */}
-          {isConnected && <CollaborativeCursors users={users} containerRef={containerRef} zoom={zoom} pan={pan} />}
         </div>
       </div>
 

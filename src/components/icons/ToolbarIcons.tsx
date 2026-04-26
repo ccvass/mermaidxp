@@ -278,18 +278,3 @@ export const HelpIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => 
     <circle cx="12" cy="17" r="1" fill="currentColor" />
   </svg>
 );
-
-// Collaboration Icon
-export const CollaborationIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-    <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-    <path
-      d="M3 21V19C3 17 5 15 9 15C13 15 15 17 15 19V21"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <circle cx="17" cy="9" r="3" stroke="currentColor" strokeWidth="2" />
-    <path d="M21 19V18C21 16.5 19.5 15.5 17 15.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);

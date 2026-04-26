@@ -26,12 +26,6 @@ jest.mock('../../header/FileOperations', () => {
   };
 });
 
-jest.mock('../../collaboration/CollaborationPanel', () => {
-  return function MockCollaborationPanel() {
-    return <div data-testid="collaboration-panel">CollaborationPanel</div>;
-  };
-});
-
 jest.mock('../../auth/UserMenu', () => ({
   UserMenu: function MockUserMenu() {
     return <div data-testid="user-menu">UserMenu</div>;
@@ -135,7 +129,7 @@ describe('Header Component', () => {
       expect(screen.getByText('Test Title')).toBeInTheDocument();
     });
 
-    it('renders main controls (sidebar, file ops, export, collab, theme, sign in)', () => {
+    it('renders main controls (sidebar, file ops, export, theme, sign in)', () => {
       renderWithStore();
 
       // Sidebar toggle
@@ -147,9 +141,6 @@ describe('Header Component', () => {
 
       // Export button
       expect(screen.getByTitle('Export Diagram')).toBeInTheDocument();
-
-      // Collaboration button
-      expect(screen.getByTitle('Live Collaboration (Toggle Panel)')).toBeInTheDocument();
 
       // Theme toggle
       expect(screen.getByTitle(/switch to/i)).toBeInTheDocument();
@@ -183,23 +174,6 @@ describe('Header Component', () => {
       expect(await screen.findByText('📄 Export as SVG')).toBeInTheDocument();
       expect(screen.getByText('🖼️ Export as PNG')).toBeInTheDocument();
       expect(screen.getByText('📑 Export as PDF')).toBeInTheDocument();
-    });
-  });
-
-  describe('Collaboration Panel', () => {
-    it('toggles collaboration panel visibility', () => {
-      renderWithStore();
-
-      // Panel not visible initially
-      expect(screen.queryByTestId('collaboration-panel')).not.toBeInTheDocument();
-
-      // Click to show
-      fireEvent.click(screen.getByTitle('Live Collaboration (Toggle Panel)'));
-      expect(screen.getByTestId('collaboration-panel')).toBeInTheDocument();
-
-      // Click to hide
-      fireEvent.click(screen.getByTitle('Live Collaboration (Toggle Panel)'));
-      expect(screen.queryByTestId('collaboration-panel')).not.toBeInTheDocument();
     });
   });
 

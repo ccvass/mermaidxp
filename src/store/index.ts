@@ -6,7 +6,6 @@ import exportReducer from './slices/exportSlice';
 import historyEngineReducer, { setFeatureEnabled } from './slices/historyEngineSlice';
 import canvasElementsReducer from './slices/canvasElementsSlice';
 import { historyEngineMiddleware } from './middleware/historyEngineMiddleware';
-import { collaborationMiddleware } from './middleware/collaborationMiddleware';
 import { persistMiddleware } from './middleware/persistMiddleware';
 import { loadPersistedState } from './loadPersistedState';
 
@@ -32,7 +31,7 @@ export const store = configureStore({
         // Ignore these paths in the state
         ignoredPaths: ['canvas.placingElement', 'canvas.activeDragInfo', 'diagram.renderResult.bindFunctions'],
       },
-    }).concat(historyEngineMiddleware, collaborationMiddleware, persistMiddleware),
+    }).concat(historyEngineMiddleware, persistMiddleware),
   devTools: process.env.NODE_ENV !== 'production',
 });
 

@@ -11,9 +11,6 @@ import { CodeEditor } from './components/editor/CodeEditor';
 import { MainCanvas } from './components/canvas/MainCanvas';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
-// Import collaboration
-// Collaboration disabled
-
 // Import services and utilities
 import { APP_TITLE } from './constants/ui.constants';
 import { setMermaidCode } from './store/slices/diagramSlice';
@@ -26,7 +23,6 @@ import { LazyExportController, LazyUndoRedoManager } from './components/lazy';
 // NotificationSystem disabled
 import { KeyboardManager } from './components/KeyboardManager';
 import { setFeatureEnabled, captureNow } from './store/slices/historyEngineSlice';
-// WebServiceIntegration disabled
 
 const AppContent: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -41,8 +37,6 @@ const AppContent: React.FC = () => {
       (window as any).store = store;
     }
   }, []);
-
-  // Collaboration system disabled
 
   // Apply theme to document
   useEffect(() => {
@@ -121,10 +115,6 @@ const AppContent: React.FC = () => {
 
         {/* Keyboard Manager for unified history engine */}
         <KeyboardManager />
-
-        {/* Web Service Integration - DISABLED */}
-
-        {/* Error Recovery for Collaboration - DISABLED */}
       </div>
     </ErrorBoundary>
   );

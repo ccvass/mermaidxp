@@ -2,7 +2,6 @@ import React, { type FC, type SVGProps } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { toggleTheme, toggleSidebar, showNotification } from '../../store/slices/uiSlice';
 import FileOperations from '../header/FileOperations';
-import CollaborationPanel from '../collaboration/CollaborationPanel';
 import { exportSingleDiagram, exportAllPages } from '../header/ExportController';
 import { UserMenu } from '../auth/UserMenu';
 import { LoginModal } from '../auth/LoginModal';
@@ -42,24 +41,6 @@ const CloseIcon = (props: SVGProps<SVGSVGElement>) => (
   >
     <line x1="6" y1="6" x2="18" y2="18" />
     <line x1="6" y1="18" x2="18" y2="6" />
-  </svg>
-);
-
-const UsersIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-5 h-5"
-    {...props}
-  >
-    <circle cx="9" cy="8" r="3" />
-    <circle cx="17" cy="8" r="3" />
-    <path d="M3 20c0-3.3137 3.6863-6 7-6s7 2.6863 7 6" />
-    <path d="M12 20c0-2 2.5-4 5-4" />
   </svg>
 );
 
@@ -122,7 +103,6 @@ export const Header: FC<HeaderProps> = ({ title }) => {
   const dispatch = useAppDispatch();
   const { theme, isSidebarVisible } = useAppSelector((state) => state.ui);
   const sheets = useAppSelector((state) => state.diagram.sheets);
-  const [showCollabPanel, setShowCollabPanel] = React.useState(false);
   const [showExportMenu, setShowExportMenu] = React.useState(false);
   const [showLoginModal, setShowLoginModal] = React.useState(false);
   const { user } = useAuth();
@@ -133,10 +113,6 @@ export const Header: FC<HeaderProps> = ({ title }) => {
 
   const handleToggleSidebar = () => {
     dispatch(toggleSidebar());
-  };
-
-  const handleToggleCollaboration = () => {
-    setShowCollabPanel(!showCollabPanel);
   };
 
   const sidebarTitle = isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar';
@@ -257,18 +233,6 @@ export const Header: FC<HeaderProps> = ({ title }) => {
           <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />
 
           <button
-            onClick={handleToggleCollaboration}
-            className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-              showCollabPanel ? 'bg-blue-100 dark:bg-blue-900' : ''
-            }`}
-            title="Live Collaboration (Toggle Panel)"
-            aria-label="Live Collaboration"
-          >
-            <UsersIcon />
-            <span className="text-xs ml-1 hidden sm:inline">Collab</span>
-          </button>
-
-          <button
             onClick={handleToggleTheme}
             className="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             title={themeTitle}
@@ -294,7 +258,6 @@ export const Header: FC<HeaderProps> = ({ title }) => {
         </div>
       </header>
 
-      {showCollabPanel && <CollaborationPanel />}
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </>
   );
