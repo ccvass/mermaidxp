@@ -137,13 +137,6 @@ export interface UseThemeReturn {
   isLight: boolean;
 }
 
-export interface UseLocalStorageReturn<T> {
-  value: T;
-  setValue: (value: T) => void;
-  removeValue: () => void;
-  hasValue: boolean;
-}
-
 // Keyboard shortcut types
 export interface KeyboardShortcut {
   key: string;

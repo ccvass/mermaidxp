@@ -76,7 +76,7 @@ const ToolbarButton = memo(
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-900 dark:text-gray-600'
               : variantClasses[variant]
           }
-          rounded-lg transition-all duration-200 transform hover:scale-105
+          rounded-lg transition-all duration-200
           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
           flex items-center justify-center
           border border-gray-200 dark:border-gray-600
@@ -142,23 +142,20 @@ export const ToolbarImproved: React.FC = () => {
     // Try normal DiagramDisplay container first
     let container: HTMLElement | null = document.getElementById('mermaid-container');
     let svg = container?.querySelector('svg') as SVGSVGElement | null;
-    let isSheets = false;
 
     // Fallback to sheets mode
     if (!svg) {
       const sheetsContainer = document.querySelector('.sheets-active-diagram');
       svg = sheetsContainer?.querySelector('svg') as SVGSVGElement | null;
       container = sheetsContainer?.closest('.overflow-auto') as HTMLElement | null;
-      isSheets = true;
     }
 
     if (container && svg) {
       const containerRect = container.getBoundingClientRect();
       // Use natural SVG size (divide by current zoom to undo scaling)
       const svgRect = svg.getBoundingClientRect();
-      const currentZoom = isSheets ? zoom : zoom;
-      const naturalWidth = svgRect.width / currentZoom;
-      const naturalHeight = svgRect.height / currentZoom;
+      const naturalWidth = svgRect.width / zoom;
+      const naturalHeight = svgRect.height / zoom;
       dispatch(
         fitToViewport({
           diagramBounds: { width: naturalWidth, height: naturalHeight },
@@ -325,7 +322,7 @@ export const ToolbarImproved: React.FC = () => {
             {/* Interaction Mode */}
             <ToolbarButton
               onClick={toggleInteractionModeHandler}
-              label={interactionMode === 'drag' ? '✋ Drag' : '🖐 Pan'}
+              label={interactionMode === 'drag' ? 'Drag' : 'Pan'}
               title={`Current: ${interactionMode === 'drag' ? 'Drag elements' : 'Pan canvas'} (Click to switch)`}
               isActive={interactionMode === 'drag'}
               variant={interactionMode === 'drag' ? 'success' : 'default'}

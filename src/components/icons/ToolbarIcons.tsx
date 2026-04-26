@@ -278,3 +278,101 @@ export const HelpIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => 
     <circle cx="12" cy="17" r="1" fill="currentColor" />
   </svg>
 );
+
+// Menu Icon - Hamburger menu
+export const MenuIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <line x1="4" y1="6" x2="20" y2="6" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="18" x2="20" y2="18" />
+  </svg>
+);
+
+// Close Icon - X mark
+export const CloseIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <line x1="6" y1="6" x2="18" y2="18" />
+    <line x1="6" y1="18" x2="18" y2="6" />
+  </svg>
+);
+
+// Sun Icon - Light theme
+export const SunIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <circle cx="12" cy="12" r="4" />
+    <line x1="12" y1="2" x2="12" y2="6" />
+    <line x1="12" y1="18" x2="12" y2="22" />
+    <line x1="2" y1="12" x2="6" y2="12" />
+    <line x1="18" y1="12" x2="22" y2="12" />
+    <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
+    <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
+    <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
+    <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
+  </svg>
+);
+
+// Moon Icon - Dark theme
+export const MoonIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+  </svg>
+);
+
+// Download Icon - Export/download arrow
+export const DownloadIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);

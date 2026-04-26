@@ -1,4 +1,4 @@
-import React, { type FC, type SVGProps } from 'react';
+import React, { type FC } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { toggleTheme, toggleSidebar, showNotification } from '../../store/slices/uiSlice';
 import FileOperations from '../header/FileOperations';
@@ -6,98 +6,11 @@ import { exportSingleDiagram, exportAllPages } from '../header/ExportController'
 import { UserMenu } from '../auth/UserMenu';
 import { LoginModal } from '../auth/LoginModal';
 import { useAuth } from '../../contexts/AuthContext';
+import { MenuIcon, CloseIcon, SunIcon, MoonIcon, DownloadIcon } from '../icons/ToolbarIcons';
 
 interface HeaderProps {
   title: string;
 }
-
-const MenuIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-5 h-5"
-    {...props}
-  >
-    <line x1="4" y1="6" x2="20" y2="6" />
-    <line x1="4" y1="12" x2="20" y2="12" />
-    <line x1="4" y1="18" x2="20" y2="18" />
-  </svg>
-);
-
-const CloseIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-5 h-5"
-    {...props}
-  >
-    <line x1="6" y1="6" x2="18" y2="18" />
-    <line x1="6" y1="18" x2="18" y2="6" />
-  </svg>
-);
-
-const SunIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-5 h-5"
-    {...props}
-  >
-    <circle cx="12" cy="12" r="4" />
-    <line x1="12" y1="2" x2="12" y2="6" />
-    <line x1="12" y1="18" x2="12" y2="22" />
-    <line x1="2" y1="12" x2="6" y2="12" />
-    <line x1="18" y1="12" x2="22" y2="12" />
-    <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
-    <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
-    <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
-    <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
-  </svg>
-);
-
-const MoonIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-5 h-5"
-    {...props}
-  >
-    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-  </svg>
-);
-
-const DownloadIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-5 h-5"
-    {...props}
-  >
-    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-    <polyline points="7 10 12 15 17 10" />
-    <line x1="12" y1="15" x2="12" y2="3" />
-  </svg>
-);
 
 export const Header: FC<HeaderProps> = ({ title }) => {
   const dispatch = useAppDispatch();

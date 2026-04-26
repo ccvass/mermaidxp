@@ -273,6 +273,13 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
     }
   }, []);
 
+  // Listen for keyboard shortcut save event (Ctrl+S dispatched from DiagramDisplay)
+  React.useEffect(() => {
+    const onSave = () => handleSaveAs('mmd');
+    window.addEventListener('mxp:save', onSave);
+    return () => window.removeEventListener('mxp:save', onSave);
+  }, [handleSaveAs]);
+
   return (
     <div className={`relative ${className}`}>
       {/* File Operations Dropdown */}

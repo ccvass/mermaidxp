@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { renderDiagram, setRenderResult } from '../../store/slices/diagramSlice';
-import { showNotification } from '../../store/slices/uiSlice';
-import { setPlacingElement, fitToViewport } from '../../store/slices/canvasSlice';
+import { showNotification, toggleSidebar } from '../../store/slices/uiSlice';
+import { setPlacingElement, fitToViewport, zoomIn, zoomOut, resetZoom } from '../../store/slices/canvasSlice';
 import { useDragAndDrop } from '../../state/hooks/useDragAndDrop';
 import { usePan } from '../../state/hooks/usePan';
 import { DragIndicator } from './DragIndicator';
@@ -511,8 +511,36 @@ export const DiagramDisplay: React.FC = () => {
         return;
       }
 
+      // Ctrl/Cmd shortcuts
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 's':
+            e.preventDefault();
+            window.dispatchEvent(new CustomEvent('mxp:save'));
+            return;
+          case 'b':
+            e.preventDefault();
+            dispatch(toggleSidebar());
+            return;
+          case '=':
+            e.preventDefault();
+            dispatch(zoomIn());
+            return;
+          case '-':
+            e.preventDefault();
+            dispatch(zoomOut());
+            return;
+          case '0':
+            e.preventDefault();
+            dispatch(resetZoom());
+            return;
+        }
+      }
+
       // Handle Delete key for removing selected custom elements
       if (e.key === 'Delete' || e.key === 'Backspace') {
+        // Don't intercept when user is typing in an input or textarea
+        if (document.activeElement?.tagName === 'TEXTAREA' || document.activeElement?.tagName === 'INPUT') return;
         try {
           if (hasSelection) {
             deleteSelectedElements();
