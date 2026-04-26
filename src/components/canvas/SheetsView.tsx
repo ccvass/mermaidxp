@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setActiveSheet } from '../../store/slices/diagramSlice';
 import { mermaidService } from '../../services/mermaidService';
@@ -10,8 +10,14 @@ export const SheetsView: React.FC = () => {
   const { theme } = useAppSelector((s) => s.ui);
   const total = sheets.length;
 
-  const prev = () => dispatch(setActiveSheet(Math.max(0, activeSheetIndex - 1)));
-  const next = () => dispatch(setActiveSheet(Math.min(total - 1, activeSheetIndex + 1)));
+  const prev = useCallback(
+    () => dispatch(setActiveSheet(Math.max(0, activeSheetIndex - 1))),
+    [dispatch, activeSheetIndex]
+  );
+  const next = useCallback(
+    () => dispatch(setActiveSheet(Math.min(total - 1, activeSheetIndex + 1))),
+    [dispatch, activeSheetIndex, total]
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -20,7 +26,7 @@ export const SheetsView: React.FC = () => {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [activeSheetIndex, total]);
+  }, [prev, next]);
 
   if (total === 0) return null;
 
@@ -117,7 +123,9 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     };
 
     render();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [code, theme]);
 
   const calcFit = () => {
@@ -127,8 +135,8 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
 
     // Get natural SVG size from viewBox (most reliable)
     const vb = svg.viewBox?.baseVal;
-    const natW = (vb && vb.width > 0) ? vb.width : parseFloat(svg.getAttribute('width') || '0');
-    const natH = (vb && vb.height > 0) ? vb.height : parseFloat(svg.getAttribute('height') || '0');
+    const natW = vb && vb.width > 0 ? vb.width : parseFloat(svg.getAttribute('width') || '0');
+    const natH = vb && vb.height > 0 ? vb.height : parseFloat(svg.getAttribute('height') || '0');
     if (natW <= 0 || natH <= 0) return;
 
     // Wrapper size from DOM (not affected by inner transforms)

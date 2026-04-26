@@ -91,7 +91,13 @@ export function useElementPlacement({
   );
 
   const handleElementPlacement = useCallback(
-    async (element: Record<string, unknown>, _screenX: number, _screenY: number, diagramX: number, diagramY: number) => {
+    async (
+      element: Record<string, unknown>,
+      _screenX: number,
+      _screenY: number,
+      diagramX: number,
+      diagramY: number
+    ) => {
       if (!element) return;
 
       // Helper: get the custom-elements-layer (or SVG root as fallback)

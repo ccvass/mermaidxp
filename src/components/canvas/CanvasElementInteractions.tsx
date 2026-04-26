@@ -113,7 +113,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
             draggedElementId: elementId,
             startPosition: screenToCanvas(e.clientX, e.clientY),
             startElementPosition: element.position,
-          lastPosition: { x: 0, y: 0 },
+            lastPosition: { x: 0, y: 0 },
             isResizing: true,
             resizeHandle: handleType,
             startSize: element.size,
@@ -164,7 +164,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
         selectElementById(elementId);
       }
     },
-    [interactionMode, getElementById, selectedElementIds, selectElementById, screenToCanvas]
+    [interactionMode, getElementById, selectedElementIds, selectElementById, screenToCanvas, clearElementSelection]
   );
 
   // Add resize handles to selected elements
@@ -231,7 +231,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
             draggedElementId: elementId,
             startPosition: screenToCanvas(ev.clientX, ev.clientY),
             startElementPosition: element.position,
-          lastPosition: { x: 0, y: 0 },
+            lastPosition: { x: 0, y: 0 },
             isResizing: true,
             resizeHandle: handle.position,
             startSize: element.size,
@@ -252,7 +252,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
             draggedElementId: elementId,
             startPosition: screenToCanvas(clientX, clientY),
             startElementPosition: element.position,
-          lastPosition: { x: 0, y: 0 },
+            lastPosition: { x: 0, y: 0 },
             isResizing: true,
             resizeHandle: handle.position,
             startSize: element.size,
@@ -368,7 +368,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
             draggedElementId: elementId,
             startPosition: screenToCanvas(ev.clientX, ev.clientY),
             startElementPosition: element.position,
-          lastPosition: { x: 0, y: 0 },
+            lastPosition: { x: 0, y: 0 },
             isResizing: true,
             resizeHandle: handle.position,
             startSize: element.size,
@@ -389,7 +389,7 @@ export const CanvasElementInteractions: React.FC<CanvasElementInteractionsProps>
         elementGroup.appendChild(handleElement);
       });
     },
-    [getElementById, moveElementTo, resizeElementTo, screenToCanvas]
+    [getElementById, moveElementTo, resizeElementTo, screenToCanvas] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // Enable resize via double-click in drag mode

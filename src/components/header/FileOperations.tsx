@@ -248,7 +248,7 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
         })
       );
     },
-    [mermaidCode, dispatch]
+    [mermaidCode, dispatch, user]
   );
 
   // Import from URL

@@ -15,11 +15,11 @@ export const useHistoryEngine = () => {
 
   const undo = useCallback(() => {
     dispatch(historyUndo());
-  }, [dispatch, past.length]);
+  }, [dispatch]);
 
   const redo = useCallback(() => {
     dispatch(historyRedo());
-  }, [dispatch, future.length]);
+  }, [dispatch]);
   const startGroup = useCallback((label?: string) => dispatch(beginGroup(label)), [dispatch]);
   const endGroupAction = useCallback(() => dispatch(endGroup()), [dispatch]);
   const capture = useCallback((actionType?: string) => dispatch(captureNow({ actionType })), [dispatch]);

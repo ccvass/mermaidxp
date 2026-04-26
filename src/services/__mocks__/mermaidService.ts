@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { MermaidRenderResult } from '../../types/diagram.types';
 import { Theme } from '../../types/ui.types';
 

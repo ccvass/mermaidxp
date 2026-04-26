@@ -102,7 +102,7 @@ export const DiagramDisplay: React.FC = () => {
         dispatch(setRenderResult(null));
       }
     }, 300); // 300ms debounce
-  }, [mermaidCode, theme, dispatch]);
+  }, [mermaidCode, theme, dispatch, sheetsActive]);
 
   // Initialize Mermaid
   useEffect(() => {

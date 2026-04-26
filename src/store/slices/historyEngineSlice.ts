@@ -127,7 +127,6 @@ const slice = createSlice({
       state.future = [];
       // keep present as is to avoid losing current screen state
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     captureNow(_state, _action: PayloadAction<{ actionType?: string } | undefined>) {
       // no-op; handled by middleware to capture a fresh snapshot (middleware reads optional actionType)
     },
