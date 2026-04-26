@@ -7,6 +7,7 @@ import historyEngineReducer, { setFeatureEnabled } from './slices/historyEngineS
 import canvasElementsReducer from './slices/canvasElementsSlice';
 import { historyEngineMiddleware } from './middleware/historyEngineMiddleware';
 import { persistMiddleware } from './middleware/persistMiddleware';
+import { dirtyTrackerMiddleware } from './middleware/dirtyTrackerMiddleware';
 import { loadPersistedState } from './loadPersistedState';
 
 const rootReducer = combineReducers({
@@ -31,7 +32,7 @@ export const store = configureStore({
         // Ignore these paths in the state
         ignoredPaths: ['canvas.placingElement', 'canvas.activeDragInfo', 'diagram.renderResult.bindFunctions'],
       },
-    }).concat(historyEngineMiddleware, persistMiddleware),
+    }).concat(historyEngineMiddleware, persistMiddleware, dirtyTrackerMiddleware),
   devTools: process.env.NODE_ENV !== 'production',
 });
 

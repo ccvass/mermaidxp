@@ -14,7 +14,7 @@ interface HeaderProps {
 
 export const Header: FC<HeaderProps> = ({ title }) => {
   const dispatch = useAppDispatch();
-  const { theme, isSidebarVisible } = useAppSelector((state) => state.ui);
+  const { theme, isSidebarVisible, isDirty, currentFilename } = useAppSelector((state) => state.ui);
   const sheets = useAppSelector((state) => state.diagram.sheets);
   const [showExportMenu, setShowExportMenu] = React.useState(false);
   const [showLoginModal, setShowLoginModal] = React.useState(false);
@@ -60,7 +60,17 @@ export const Header: FC<HeaderProps> = ({ title }) => {
           >
             {isSidebarVisible ? <CloseIcon /> : <MenuIcon />}
           </button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            {title}
+            {currentFilename && (
+              <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">— {currentFilename}</span>
+            )}
+            {isDirty && (
+              <span className="ml-1 text-orange-500" title="Unsaved changes">
+                ●
+              </span>
+            )}
+          </h1>
         </div>
 
         {/* Right: File Ops + Actions */}

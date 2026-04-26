@@ -14,6 +14,8 @@ interface UiState {
   isPresentationMode: boolean;
   diagramMode: DiagramMode;
   interactionMode: InteractionMode;
+  isDirty: boolean;
+  currentFilename: string | null;
 }
 
 const initialState: UiState = {
@@ -27,6 +29,8 @@ const initialState: UiState = {
   isPresentationMode: false,
   diagramMode: DiagramMode.Diagram,
   interactionMode: InteractionMode.Drag,
+  isDirty: false,
+  currentFilename: null,
 };
 
 const uiSlice = createSlice({
@@ -64,6 +68,15 @@ const uiSlice = createSlice({
     setInteractionMode(state, action: PayloadAction<InteractionMode>) {
       state.interactionMode = action.payload;
     },
+    setDirty(state, action: PayloadAction<boolean>) {
+      state.isDirty = action.payload;
+    },
+    markClean(state) {
+      state.isDirty = false;
+    },
+    setCurrentFilename(state, action: PayloadAction<string | null>) {
+      state.currentFilename = action.payload;
+    },
   },
 });
 
@@ -76,5 +89,8 @@ export const {
   setPresentationMode,
   setDiagramMode,
   setInteractionMode,
+  setDirty,
+  markClean,
+  setCurrentFilename,
 } = uiSlice.actions;
 export default uiSlice.reducer;

@@ -19,6 +19,12 @@ interface DiagramTemplate {
   preview?: string;
 }
 
+interface RecentFile {
+  name: string;
+  content: string;
+  date: string;
+}
+
 const DIAGRAM_TEMPLATES: DiagramTemplate[] = [
   {
     id: 'flowchart-basic',
@@ -101,16 +107,15 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
   const canvasElements = useAppSelector((state) => state.canvasElements.elements);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showExportOptions, setShowExportOptions] = useState(false);
-  const [recentFiles, setRecentFiles] = useState<string[]>([]);
+  const [showRecentFiles, setShowRecentFiles] = useState(false);
+  const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // New Document with template selection
   const handleNewDocument = useCallback(
     (template?: DiagramTemplate) => {
-      // Blank document = empty string, template = template code
       const newCode = template ? template.code : '';
 
-      // Clear all canvas elements (icons, text, images, shapes)
       const elementIds = Object.keys(canvasElements);
       if (elementIds.length > 0) {
         dispatch(deleteElements(elementIds));
@@ -147,13 +152,11 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
       reader.onload = (e) => {
         const content = e.target?.result as string;
         if (content) {
-          // Clear all canvas elements when opening a file
           const elementIds = Object.keys(canvasElements);
           if (elementIds.length > 0) {
             dispatch(deleteElements(elementIds));
           }
 
-          // Check if MD file contains mermaid blocks → sheets mode
           const isMd = file.name.endsWith('.md');
           const sheets = isMd ? parseMdToSheets(content) : [];
 
@@ -180,18 +183,46 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
             })
           );
 
-          // Add to recent files
-          const newRecentFiles = [file.name, ...recentFiles.filter((f) => f !== file.name)].slice(0, 5);
+          // Add to recent files with content
+          const entry: RecentFile = { name: file.name, content, date: new Date().toISOString() };
+          const newRecentFiles = [entry, ...recentFiles.filter((f) => f.name !== file.name)].slice(0, 5);
           setRecentFiles(newRecentFiles);
           localStorage.setItem('mermaidxp-recent-files', JSON.stringify(newRecentFiles));
         }
       };
       reader.readAsText(file);
 
-      // Reset input
       event.target.value = '';
     },
     [dispatch, recentFiles, canvasElements]
+  );
+
+  // Load a recent file from stored content
+  const handleLoadRecent = useCallback(
+    (recent: RecentFile) => {
+      const elementIds = Object.keys(canvasElements);
+      if (elementIds.length > 0) {
+        dispatch(deleteElements(elementIds));
+      }
+
+      const isMd = recent.name.endsWith('.md');
+      const sheets = isMd ? parseMdToSheets(recent.content) : [];
+
+      if (isMd && sheets.length >= 1) {
+        dispatch(setSheets(sheets));
+      } else if (isMd && sheets.length === 0) {
+        dispatch(showNotification({ message: 'No mermaid diagrams found in this file.', type: 'warning' }));
+        return;
+      } else {
+        dispatch(clearSheets());
+        dispatch(setMermaidCode(recent.content));
+      }
+
+      dispatch(captureNow({ actionType: `Opened recent: ${recent.name}` }));
+      dispatch(showNotification({ message: `Loaded "${recent.name}"`, type: 'success' }));
+      setShowRecentFiles(false);
+    },
+    [dispatch, canvasElements]
   );
 
   // Save As functionality
@@ -263,13 +294,23 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
     }
   }, [dispatch]);
 
-  // Load recent files from localStorage
+  // Load recent files from localStorage (migrate old string[] format)
   React.useEffect(() => {
     const stored = localStorage.getItem('mermaidxp-recent-files');
     if (stored) {
       try {
-        setRecentFiles(JSON.parse(stored));
-      } catch {}
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (typeof parsed[0] === 'string') {
+            // Old format (string[]) — discard since we need content
+            localStorage.removeItem('mermaidxp-recent-files');
+          } else {
+            setRecentFiles(parsed);
+          }
+        }
+      } catch {
+        // Corrupted data
+      }
     }
   }, []);
 
@@ -327,22 +368,60 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
           )}
         </div>
 
-        {/* Open File */}
-        <button
-          onClick={handleOpenFile}
-          className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-          title="Open File (Ctrl+O)"
-        >
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5l-2-2H5a2 2 0 00-2 2z"
-            />
-          </svg>
-          Open
-        </button>
+        {/* Open File with Recent Files dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowRecentFiles(!showRecentFiles)}
+            className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+            title="Open File (Ctrl+O)"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5l-2-2H5a2 2 0 00-2 2z"
+              />
+            </svg>
+            Open
+            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showRecentFiles && (
+            <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+              <button
+                onClick={() => {
+                  handleOpenFile();
+                  setShowRecentFiles(false);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-600 font-medium text-gray-900 dark:text-white text-sm"
+              >
+                Browse files…
+              </button>
+              {recentFiles.length > 0 && (
+                <>
+                  <div className="px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Recent
+                  </div>
+                  {recentFiles.map((rf, i) => (
+                    <button
+                      key={`${rf.name}-${i}`}
+                      onClick={() => handleLoadRecent(rf)}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm"
+                    >
+                      <div className="text-gray-900 dark:text-white truncate">{rf.name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(rf.date).toLocaleDateString()}
+                      </div>
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Save As */}
         <div className="relative">
@@ -427,12 +506,13 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
       />
 
       {/* Click outside to close dropdowns */}
-      {(showTemplates || showExportOptions) && (
+      {(showTemplates || showExportOptions || showRecentFiles) && (
         <div
           className="fixed inset-0 z-40"
           onClick={() => {
             setShowTemplates(false);
             setShowExportOptions(false);
+            setShowRecentFiles(false);
           }}
         />
       )}
