@@ -1,4 +1,4 @@
-import { API_CONFIG, SAVE_DIAGRAM_ENDPOINT } from '../constants/api.constants';
+import { API_CONFIG, SAVE_DIAGRAM_ENDPOINT, WEB_SERVICE_CONFIG } from '../constants/api.constants';
 import { SaveDiagramRequest, SaveDiagramResponse } from '../types/api.types';
 
 class ApiService {
@@ -85,16 +85,24 @@ class ApiService {
 
   private async fetchWithRetry(url: string, options: RequestInit, retries: number): Promise<Response> {
     let lastError: Error | null = null;
+    const callerSignal = options.signal;
 
     for (let i = 0; i <= retries; i++) {
-      try {
-        const timeoutId = setTimeout(() => {
-          if (options.signal && !options.signal.aborted) {
-            (options.signal as AbortSignal).dispatchEvent(new Event('abort'));
-          }
-        }, API_CONFIG.TIMEOUT);
+      const attemptController = new AbortController();
 
-        const response = await fetch(url, options);
+      // Forward caller's abort to per-attempt controller
+      if (callerSignal) {
+        if (callerSignal.aborted) {
+          attemptController.abort();
+        } else {
+          callerSignal.addEventListener('abort', () => attemptController.abort(), { once: true });
+        }
+      }
+
+      const timeoutId = setTimeout(() => attemptController.abort(), API_CONFIG.TIMEOUT);
+
+      try {
+        const response = await fetch(url, { ...options, signal: attemptController.signal });
         clearTimeout(timeoutId);
 
         // Don't retry on client errors (4xx)
@@ -105,22 +113,23 @@ class ApiService {
         // Retry on server errors (5xx) or network errors
         if (!response.ok && i < retries) {
           lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
-          await this.delay(API_CONFIG.RETRY_DELAY * (i + 1)); // Exponential backoff
+          await this.delay(API_CONFIG.RETRY_DELAY * Math.pow(2, i));
           continue;
         }
 
         return response;
       } catch (error) {
+        clearTimeout(timeoutId);
         lastError = error as Error;
 
-        // Don't retry on abort
-        if (lastError.name === 'AbortError') {
+        // Don't retry on caller-initiated abort
+        if (callerSignal?.aborted) {
           throw lastError;
         }
 
-        // Retry on network errors
+        // Retry on network errors and timeouts
         if (i < retries) {
-          await this.delay(API_CONFIG.RETRY_DELAY * (i + 1));
+          await this.delay(API_CONFIG.RETRY_DELAY * Math.pow(2, i));
           continue;
         }
       }
@@ -149,7 +158,7 @@ class ApiService {
   // Helper method to check if the API is available
   async checkHealth(): Promise<boolean> {
     try {
-      const response = await fetch(`${SAVE_DIAGRAM_ENDPOINT}/health`, {
+      const response = await fetch(`${WEB_SERVICE_CONFIG.BASE_URL}${WEB_SERVICE_CONFIG.ENDPOINTS.HEALTH}`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000), // 5 second timeout
       });
