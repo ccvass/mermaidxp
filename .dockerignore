@@ -1,10 +1,14 @@
 node_modules
 dist
 .git
+.wrangler
 debug
 reference
+coverage
 *.md
+*.log
 .env*
 REMOTE.md
 .kiro
 .playwright-mcp
+todo.json
