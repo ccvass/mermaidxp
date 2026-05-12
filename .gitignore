@@ -88,3 +88,9 @@ tmp/
 # Coverage
 coverage/
 .nyc_output/
+todo.json
+__pycache__/
+.venv/
+*.pem
+*.key
+certs/

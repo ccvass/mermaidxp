@@ -60,7 +60,7 @@ export const loadPersistedState = (): Record<string, any> | undefined => {
     const mermaidCode = parsedState.diagram.mermaidCode.trim() || DEFAULT_MERMAID_CODE;
 
     return {
-      diagram: { mermaidCode },
+      diagram: { mermaidCode, sheets: [], activeSheetIndex: 0 },
       ui: { theme: parsedState.ui.theme },
       canvas: {
         zoom: parsedState.canvas.zoom,
