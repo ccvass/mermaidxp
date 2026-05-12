@@ -5,101 +5,26 @@ import { showNotification } from '../../store/slices/uiSlice';
 import { captureNow } from '../../store/slices/historyEngineSlice';
 import { deleteElements } from '../../store/slices/canvasElementsSlice';
 import { parseMdToSheets } from '../../utils/mdParser';
+import {
+  DiagramTemplate,
+  RecentFile,
+  loadRecentFiles,
+  saveRecentFiles,
+  addToRecentFiles,
+  createDownloadBlob,
+  formatMermaidAsMarkdown,
+  generateFilename,
+} from './fileOperations.utils';
+import {
+  TemplatesDropdown,
+  RecentFilesDropdown,
+  ExportOptionsDropdown,
+  ImportUrlModal,
+} from './FileOperationsDropdowns';
 
 interface FileOperationsProps {
   className?: string;
 }
-
-interface DiagramTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  code: string;
-  preview?: string;
-}
-
-interface RecentFile {
-  name: string;
-  content: string;
-  date: string;
-}
-
-const DIAGRAM_TEMPLATES: DiagramTemplate[] = [
-  {
-    id: 'flowchart-basic',
-    name: 'Basic Flowchart',
-    description: 'Simple flowchart template',
-    category: 'Flowchart',
-    code: `flowchart TD
-    A[Start] --> B{Decision}
-    B -->|Yes| C[Process 1]
-    B -->|No| D[Process 2]
-    C --> E[End]
-    D --> E`,
-  },
-  {
-    id: 'sequence-basic',
-    name: 'Basic Sequence',
-    description: 'Simple sequence diagram template',
-    category: 'Sequence',
-    code: `sequenceDiagram
-    participant A as User
-    participant B as System
-    A->>B: Request
-    B-->>A: Response`,
-  },
-  {
-    id: 'class-basic',
-    name: 'Basic Class Diagram',
-    description: 'Simple class diagram template',
-    category: 'Class',
-    code: `classDiagram
-    class Animal {
-        +String name
-        +int age
-        +makeSound()
-    }
-    class Dog {
-        +String breed
-        +bark()
-    }
-    Animal <|-- Dog`,
-  },
-  {
-    id: 'gitgraph-basic',
-    name: 'Basic Git Graph',
-    description: 'Simple git workflow template',
-    category: 'Git',
-    code: `gitgraph
-    commit
-    branch develop
-    checkout develop
-    commit
-    commit
-    checkout main
-    merge develop`,
-  },
-  {
-    id: 'mindmap-basic',
-    name: 'Basic Mind Map',
-    description: 'Simple mind map template',
-    category: 'Mind Map',
-    code: `mindmap
-  root((Project))
-    Planning
-      Research
-      Requirements
-      Timeline
-    Development
-      Frontend
-      Backend
-      Testing
-    Deployment
-      Staging
-      Production`,
-  },
-];
 
 export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }) => {
   const dispatch = useAppDispatch();
@@ -115,15 +40,11 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
   const [importError, setImportError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // New Document with template selection
   const handleNewDocument = useCallback(
     (template?: DiagramTemplate) => {
       const newCode = template ? template.code : '';
-
       const elementIds = Object.keys(canvasElements);
-      if (elementIds.length > 0) {
-        dispatch(deleteElements(elementIds));
-      }
+      if (elementIds.length > 0) dispatch(deleteElements(elementIds));
 
       dispatch(clearSheets());
       dispatch(setMermaidCode(newCode));
@@ -134,17 +55,13 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
           type: 'success',
         })
       );
-
       setShowTemplates(false);
     },
     [dispatch, canvasElements]
   );
 
-  // Open file from local system
   const handleOpenFile = useCallback(() => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    fileInputRef.current?.click();
   }, []);
 
   const handleFileSelect = useCallback(
@@ -155,59 +72,42 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
-        if (content) {
-          const elementIds = Object.keys(canvasElements);
-          if (elementIds.length > 0) {
-            dispatch(deleteElements(elementIds));
-          }
+        if (!content) return;
 
-          const isMd = file.name.endsWith('.md');
-          const sheets = isMd ? parseMdToSheets(content) : [];
+        const elementIds = Object.keys(canvasElements);
+        if (elementIds.length > 0) dispatch(deleteElements(elementIds));
 
-          if (isMd && sheets.length >= 1) {
-            dispatch(setSheets(sheets));
-          } else if (isMd && sheets.length === 0) {
-            dispatch(
-              showNotification({
-                message: 'No mermaid diagrams found in this markdown file.',
-                type: 'warning',
-              })
-            );
-            return;
-          } else {
-            dispatch(clearSheets());
-            dispatch(setMermaidCode(content));
-          }
+        const isMd = file.name.endsWith('.md');
+        const sheets = isMd ? parseMdToSheets(content) : [];
 
-          dispatch(captureNow({ actionType: `Opened file: ${file.name}` }));
-          dispatch(
-            showNotification({
-              message: `File "${file.name}" opened successfully`,
-              type: 'success',
-            })
-          );
-
-          // Add to recent files with content
-          const entry: RecentFile = { name: file.name, content, date: new Date().toISOString() };
-          const newRecentFiles = [entry, ...recentFiles.filter((f) => f.name !== file.name)].slice(0, 5);
-          setRecentFiles(newRecentFiles);
-          localStorage.setItem('mermaidxp-recent-files', JSON.stringify(newRecentFiles));
+        if (isMd && sheets.length >= 1) {
+          dispatch(setSheets(sheets));
+        } else if (isMd && sheets.length === 0) {
+          dispatch(showNotification({ message: 'No mermaid diagrams found in this markdown file.', type: 'warning' }));
+          return;
+        } else {
+          dispatch(clearSheets());
+          dispatch(setMermaidCode(content));
         }
+
+        dispatch(captureNow({ actionType: `Opened file: ${file.name}` }));
+        dispatch(showNotification({ message: `File "${file.name}" opened successfully`, type: 'success' }));
+
+        const entry: RecentFile = { name: file.name, content, date: new Date().toISOString() };
+        const newRecentFiles = addToRecentFiles(entry, recentFiles);
+        setRecentFiles(newRecentFiles);
+        saveRecentFiles(newRecentFiles);
       };
       reader.readAsText(file);
-
       event.target.value = '';
     },
     [dispatch, recentFiles, canvasElements]
   );
 
-  // Load a recent file from stored content
   const handleLoadRecent = useCallback(
     (recent: RecentFile) => {
       const elementIds = Object.keys(canvasElements);
-      if (elementIds.length > 0) {
-        dispatch(deleteElements(elementIds));
-      }
+      if (elementIds.length > 0) dispatch(deleteElements(elementIds));
 
       const isMd = recent.name.endsWith('.md');
       const sheets = isMd ? parseMdToSheets(recent.content) : [];
@@ -229,49 +129,21 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
     [dispatch, canvasElements]
   );
 
-  // Save As functionality
   const handleSaveAs = useCallback(
     (format: 'mmd' | 'md' | 'txt' = 'mmd') => {
       if (!mermaidCode.trim()) {
-        dispatch(
-          showNotification({
-            message: 'Nothing to save. Please create a diagram first.',
-            type: 'info',
-          })
-        );
+        dispatch(showNotification({ message: 'Nothing to save. Please create a diagram first.', type: 'info' }));
         return;
       }
-
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-      const filename = `diagram-${timestamp}.${format}`;
-
-      let content = mermaidCode;
-      if (format === 'md') {
-        content = `# Mermaid Diagram\n\n\`\`\`mermaid\n${mermaidCode}\n\`\`\``;
-      }
-
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      dispatch(
-        showNotification({
-          message: `File saved as "${filename}"`,
-          type: 'success',
-        })
-      );
+      const filename = generateFilename(format);
+      const content = format === 'md' ? formatMermaidAsMarkdown(mermaidCode) : mermaidCode;
+      createDownloadBlob(content, filename);
+      dispatch(showNotification({ message: `File saved as "${filename}"`, type: 'success' }));
     },
     [mermaidCode, dispatch]
   );
 
-  // Import from URL
-  const handleImportFromUrl = useCallback(async () => {
+  const handleImportFromUrl = useCallback(() => {
     setImportError('');
     setImportUrl('');
     setShowImportModal(true);
@@ -281,11 +153,9 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
     if (!importUrl.trim()) return;
     setImportLoading(true);
     setImportError('');
-
     try {
       const response = await fetch(importUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
       const content = await response.text();
       dispatch(setMermaidCode(content));
       dispatch(captureNow({ actionType: `Imported from URL: ${importUrl}` }));
@@ -298,27 +168,8 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
     }
   }, [dispatch, importUrl]);
 
-  // Load recent files from localStorage (migrate old string[] format)
-  React.useEffect(() => {
-    const stored = localStorage.getItem('mermaidxp-recent-files');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          if (typeof parsed[0] === 'string') {
-            // Old format (string[]) — discard since we need content
-            localStorage.removeItem('mermaidxp-recent-files');
-          } else {
-            setRecentFiles(parsed);
-          }
-        }
-      } catch {
-        // Corrupted data
-      }
-    }
-  }, []);
+  React.useEffect(() => { setRecentFiles(loadRecentFiles()); }, []);
 
-  // Listen for keyboard shortcut save event (Ctrl+S dispatched from DiagramDisplay)
   React.useEffect(() => {
     const onSave = () => handleSaveAs('mmd');
     window.addEventListener('mxp:save', onSave);
@@ -327,7 +178,6 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
 
   return (
     <div className={`relative ${className}`}>
-      {/* File Operations Dropdown */}
       <div className="flex items-center space-x-2">
         {/* New Document */}
         <div className="relative">
@@ -341,38 +191,10 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
             </svg>
             New
           </button>
-
-          {/* Templates Dropdown */}
-          {showTemplates && (
-            <div className="absolute top-full left-0 mt-1 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-              <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Choose Template</h3>
-              </div>
-              <div className="max-h-96 overflow-y-auto">
-                <button
-                  onClick={() => handleNewDocument()}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
-                >
-                  <div className="font-medium text-gray-900 dark:text-white">Blank Document</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Start with empty diagram</div>
-                </button>
-                {DIAGRAM_TEMPLATES.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => handleNewDocument(template)}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
-                  >
-                    <div className="font-medium text-gray-900 dark:text-white">{template.name}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{template.description}</div>
-                    <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">{template.category}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {showTemplates && <TemplatesDropdown onNewDocument={handleNewDocument} />}
         </div>
 
-        {/* Open File with Recent Files dropdown */}
+        {/* Open File */}
         <div className="relative">
           <button
             onClick={() => setShowRecentFiles(!showRecentFiles)}
@@ -380,50 +202,19 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
             title="Open File (Ctrl+O)"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5l-2-2H5a2 2 0 00-2 2z"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5l-2-2H5a2 2 0 00-2 2z" />
             </svg>
             Open
             <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-
           {showRecentFiles && (
-            <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-              <button
-                onClick={() => {
-                  handleOpenFile();
-                  setShowRecentFiles(false);
-                }}
-                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-600 font-medium text-gray-900 dark:text-white text-sm"
-              >
-                Browse files…
-              </button>
-              {recentFiles.length > 0 && (
-                <>
-                  <div className="px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    Recent
-                  </div>
-                  {recentFiles.map((rf, i) => (
-                    <button
-                      key={`${rf.name}-${i}`}
-                      onClick={() => handleLoadRecent(rf)}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm"
-                    >
-                      <div className="text-gray-900 dark:text-white truncate">{rf.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {new Date(rf.date).toLocaleDateString()}
-                      </div>
-                    </button>
-                  ))}
-                </>
-              )}
-            </div>
+            <RecentFilesDropdown
+              recentFiles={recentFiles}
+              onOpenFile={() => { handleOpenFile(); setShowRecentFiles(false); }}
+              onLoadRecent={handleLoadRecent}
+            />
           )}
         </div>
 
@@ -435,50 +226,12 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
             title="Save As (Ctrl+S)"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             Save As
           </button>
-
-          {/* Export Options Dropdown */}
           {showExportOptions && (
-            <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-              <button
-                onClick={() => {
-                  handleSaveAs('mmd');
-                  setShowExportOptions(false);
-                }}
-                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
-              >
-                <div className="font-medium text-gray-900 dark:text-white">Mermaid (.mmd)</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Native Mermaid format</div>
-              </button>
-              <button
-                onClick={() => {
-                  handleSaveAs('md');
-                  setShowExportOptions(false);
-                }}
-                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
-              >
-                <div className="font-medium text-gray-900 dark:text-white">Markdown (.md)</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Markdown with code block</div>
-              </button>
-              <button
-                onClick={() => {
-                  handleSaveAs('txt');
-                  setShowExportOptions(false);
-                }}
-                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                <div className="font-medium text-gray-900 dark:text-white">Text (.txt)</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Plain text format</div>
-              </button>
-            </div>
+            <ExportOptionsDropdown onSaveAs={handleSaveAs} onClose={() => setShowExportOptions(false)} />
           )}
         </div>
 
@@ -489,75 +242,27 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
           title="Import from URL"
         >
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
           </svg>
           Import
         </button>
       </div>
 
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".mmd,.md,.txt,.mermaid"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
+      <input ref={fileInputRef} type="file" accept=".mmd,.md,.txt,.mermaid" onChange={handleFileSelect} className="hidden" />
 
-      {/* Click outside to close dropdowns */}
       {(showTemplates || showExportOptions || showRecentFiles) && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => {
-            setShowTemplates(false);
-            setShowExportOptions(false);
-            setShowRecentFiles(false);
-          }}
-        />
+        <div className="fixed inset-0 z-40" onClick={() => { setShowTemplates(false); setShowExportOptions(false); setShowRecentFiles(false); }} />
       )}
 
-      {/* Import URL Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-96 max-w-[90vw]">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Import from URL</h3>
-            <input
-              type="url"
-              value={importUrl}
-              onChange={(e) => setImportUrl(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleImportSubmit()}
-              placeholder="https://example.com/diagram.mmd"
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              autoFocus
-              disabled={importLoading}
-            />
-            {importError && <p className="mt-2 text-xs text-red-600 dark:text-red-400">Failed: {importError}</p>}
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => setShowImportModal(false)}
-                disabled={importLoading}
-                className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleImportSubmit}
-                disabled={importLoading || !importUrl.trim()}
-                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-              >
-                {importLoading && (
-                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                )}
-                Import
-              </button>
-            </div>
-          </div>
-        </div>
+        <ImportUrlModal
+          importUrl={importUrl}
+          importLoading={importLoading}
+          importError={importError}
+          onUrlChange={setImportUrl}
+          onSubmit={handleImportSubmit}
+          onClose={() => setShowImportModal(false)}
+        />
       )}
     </div>
   );
