@@ -14,7 +14,7 @@ type ProgressFn = (progress: { current: number; total: number }) => void;
 
 let isExporting = false;
 
-export async function exportSingleDiagram(format: 'svg' | 'png' | 'pdf', notify: NotifyFn) {
+export async function exportSingleDiagram(format: 'svg' | 'png' | 'png-transparent' | 'pdf', notify: NotifyFn) {
   if (isExporting) {
     notify('An export is already in progress', 'warning');
     return;
@@ -34,6 +34,8 @@ export async function exportSingleDiagram(format: 'svg' | 'png' | 'pdf', notify:
       await exportService.exportSVG(svgElement, 'diagram');
     } else if (format === 'png') {
       await exportService.exportPNG(svgElement, 'diagram', 'white');
+    } else if (format === 'png-transparent') {
+      await exportService.exportPNG(svgElement, 'diagram', 'transparent');
     } else {
       await exportService.exportPDF(svgElement, 'diagram');
     }

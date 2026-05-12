@@ -17,6 +17,8 @@ import { setMermaidCode, setSheets, clearSheets } from './store/slices/diagramSl
 import { showNotification } from './store/slices/uiSlice';
 import { deleteElements } from './store/slices/canvasElementsSlice';
 import { parseMdToSheets } from './utils/mdParser';
+import { loadSharedDiagram } from './services/shareService';
+import { useCloudSync } from './hooks/useCloudSync';
 
 // Import existing components that are working
 import NotificationContainer from './components/common/NotificationContainer';
@@ -35,6 +37,9 @@ const AppContent: React.FC = () => {
   const featureEnabled = useAppSelector((state) => state.historyEngine.featureEnabled);
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = React.useRef(0);
+
+  // Auto-save to Firebase for authenticated users
+  useCloudSync();
 
   // Process a dropped file (same logic as FileOperations.handleFileSelect)
   const processDroppedFile = useCallback(
@@ -148,6 +153,20 @@ const AppContent: React.FC = () => {
 
   // Enable unified history engine on mount for this build and capture initial snapshot
   useEffect(() => {
+    // Load shared diagram if ?d=ID is in URL
+    const params = new URLSearchParams(window.location.search);
+    const sharedId = params.get('d');
+    if (sharedId) {
+      loadSharedDiagram(sharedId).then((data) => {
+        if (data) {
+          dispatch(clearSheets());
+          dispatch(setMermaidCode(data.code));
+          dispatch(showNotification({ message: `Loaded: ${data.title}`, type: 'success' }));
+          window.history.replaceState({}, '', '/');
+        }
+      });
+    }
+
     dispatch(setFeatureEnabled(true));
 
     // Capture initial snapshot after a delay to ensure everything is initialized
