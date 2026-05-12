@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useCallback, useRef } from 'react';
 
 import { DRAGGABLE_ELEMENT_CLASSES } from '../../constants/diagram.constants';
@@ -397,6 +396,7 @@ export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | n
     setActiveDragInfo(null);
     canvasInitialPanRef.current = null;
     canvasInitialMousePosRef.current = null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -409,6 +409,7 @@ export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | n
     // canvasInitialPanRef.current = { ...pan };
     canvasInitialMousePosRef.current = { x: e.clientX, y: e.clientY };
     if (mermaidDivRef.current) mermaidDivRef.current.style.cursor = 'grabbing';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

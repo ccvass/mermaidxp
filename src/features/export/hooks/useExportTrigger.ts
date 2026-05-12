@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, RefObject } from 'react';
 import { exportService } from '../../../services/exportService';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
@@ -33,6 +32,7 @@ export const useExportTrigger = (svgContainerRef: RefObject<HTMLDivElement | nul
           .catch((err) => dispatch(showNotification({ message: err.message, type: 'error' })));
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exportSvgTrigger, dispatch, svgContainerRef]);
 
   useEffect(() => {
@@ -45,6 +45,7 @@ export const useExportTrigger = (svgContainerRef: RefObject<HTMLDivElement | nul
           .catch((err) => dispatch(showNotification({ message: err.message, type: 'error' })));
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exportPngWhiteBgTrigger, dispatch, svgContainerRef]);
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export const useExportTrigger = (svgContainerRef: RefObject<HTMLDivElement | nul
           .catch((err) => dispatch(showNotification({ message: err.message, type: 'error' })));
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exportPngTransparentTrigger, dispatch, svgContainerRef]);
 
   useEffect(() => {
@@ -69,5 +71,6 @@ export const useExportTrigger = (svgContainerRef: RefObject<HTMLDivElement | nul
           .catch((err) => dispatch(showNotification({ message: err.message, type: 'error' })));
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exportPdfTrigger, dispatch, svgContainerRef]);
 };

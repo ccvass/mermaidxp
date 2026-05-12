@@ -155,7 +155,7 @@ export const historyEngineMiddleware: Middleware = (store) => {
     const state = store.getState();
     const present = state.historyEngine.present;
     if (!present) {
-      logger.error('❌ RESTORE FAILED: No present snapshot', 'historyEngineMiddleware');
+      logger.error('RESTORE FAILED: No present snapshot', 'historyEngineMiddleware');
       return;
     }
 

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { renderDiagram, setRenderResult } from '../../../store/slices/diagramSlice';
@@ -90,9 +89,11 @@ export function useOptimizedMermaidRenderer(): UseOptimizedMermaidRendererReturn
     } finally {
       renderPromiseRef.current = null;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // REMOVED ALL DEPENDENCIES to prevent infinite recreation
 
   // Debounced render function with increased delay - STABLE REFERENCE
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedRender = useMemo(() => debounce(performRender, UI_CONFIG.DEBOUNCE_DELAY), []);
 
   // Effect to trigger renders - REMOVED debouncedRender from dependencies to prevent infinite loop
@@ -105,6 +106,7 @@ export function useOptimizedMermaidRenderer(): UseOptimizedMermaidRendererReturn
     return () => {
       debouncedRender.cancel?.();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mermaidCode, theme]); // REMOVED debouncedRender dependency
 
   // Force render function (bypasses debounce)

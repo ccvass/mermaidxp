@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch } from '../store/hooks';
 import { showNotification } from '../store/slices/uiSlice';
@@ -150,6 +149,7 @@ export const useAccessibility = (options: AccessibilityOptions = {}): UseAccessi
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enableKeyboardNavigation, keyboardShortcuts]);
 
   // Announce messages to screen readers
