@@ -4,13 +4,11 @@ import { DEFAULT_MERMAID_CODE } from '../../constants/diagram.constants';
 import { mermaidService } from '../../services/mermaidService';
 import { Theme } from '../../types/ui.types';
 
-const initialState: DiagramState = {
+export const initialState: DiagramState = {
   mermaidCode: DEFAULT_MERMAID_CODE,
   renderResult: null,
   isLoading: false,
   error: null,
-  history: [DEFAULT_MERMAID_CODE],
-  historyIndex: 0,
   sheets: [],
   activeSheetIndex: 0,
 };
@@ -33,44 +31,13 @@ const diagramSlice = createSlice({
   reducers: {
     setMermaidCode: (state, action: PayloadAction<string>) => {
       state.mermaidCode = action.payload;
-      // Add to history if it's different from the current state
-      if (state.history[state.historyIndex] !== action.payload) {
-        // Remove any history after current index
-        state.history = state.history.slice(0, state.historyIndex + 1);
-        // Add new code to history
-        state.history.push(action.payload);
-        state.historyIndex = state.history.length - 1;
-
-        // Limit history to 50 items
-        if (state.history.length > 50) {
-          state.history = state.history.slice(-50);
-          state.historyIndex = state.history.length - 1;
-        }
-      }
     },
-    // Set code without mutating the legacy diagram history (used for history engine restores)
+    // Set code without triggering history engine capture (used for restores)
     applyMermaidCode: (state, action: PayloadAction<string>) => {
       state.mermaidCode = action.payload;
     },
     appendMermaidCode: (state, action: PayloadAction<string>) => {
-      const newCode = `${state.mermaidCode.trim()}\n${action.payload}\n`;
-      state.mermaidCode = newCode;
-      // Add to history
-      state.history = state.history.slice(0, state.historyIndex + 1);
-      state.history.push(newCode);
-      state.historyIndex = state.history.length - 1;
-    },
-    undo: (state) => {
-      if (state.historyIndex > 0) {
-        state.historyIndex--;
-        state.mermaidCode = state.history[state.historyIndex];
-      }
-    },
-    redo: (state) => {
-      if (state.historyIndex < state.history.length - 1) {
-        state.historyIndex++;
-        state.mermaidCode = state.history[state.historyIndex];
-      }
+      state.mermaidCode = `${state.mermaidCode.trim()}\n${action.payload}\n`;
     },
     clearError: (state) => {
       state.error = null;
@@ -116,8 +83,6 @@ export const {
   setMermaidCode,
   applyMermaidCode,
   appendMermaidCode,
-  undo,
-  redo,
   clearError,
   setRenderResult,
   setSheets,

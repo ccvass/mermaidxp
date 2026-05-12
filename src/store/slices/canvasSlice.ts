@@ -9,7 +9,7 @@ export const DEFAULT_ZOOM = 1;
 const clampZoom = (z: number) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z));
 const round2 = (z: number) => Math.round(z * 100) / 100;
 
-const initialState: CanvasState = {
+export const initialState: CanvasState = {
   zoom: 1,
   pan: { x: 0, y: 0 },
   placingElement: null,

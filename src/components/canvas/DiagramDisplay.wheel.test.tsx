@@ -72,8 +72,6 @@ const createTestStore = (initialCanvasState: Partial<CanvasState> = {}) => {
         },
         isLoading: false,
         error: null,
-        history: ['graph TD\n  A --> B'],
-        historyIndex: 0,
         sheets: [],
         activeSheetIndex: 0,
       },

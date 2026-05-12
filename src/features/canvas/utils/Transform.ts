@@ -39,7 +39,7 @@ export class Transform {
    * @returns Transform instance
    */
   static fromScaleAndPan(scale: number, pan: Point): Transform {
-    // Validar parámetros
+    // Validate parameters
     const safeScale = typeof scale === 'number' && !isNaN(scale) && scale > 0 ? scale : 1;
     const safePan =
       pan &&

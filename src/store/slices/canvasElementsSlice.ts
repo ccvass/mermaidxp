@@ -36,7 +36,7 @@ export interface CanvasElementsState {
   nextId: number;
 }
 
-const initialState: CanvasElementsState = {
+export const initialState: CanvasElementsState = {
   elements: {},
   selectedElementIds: [],
   clipboard: [],

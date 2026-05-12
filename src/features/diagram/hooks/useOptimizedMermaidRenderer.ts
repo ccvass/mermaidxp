@@ -175,7 +175,7 @@ export function useIsDiagramValid(): boolean {
  * Hook to get diagram statistics
  */
 export function useDiagramStats() {
-  const { mermaidCode, history } = useAppSelector((state) => state.diagram);
+  const { mermaidCode } = useAppSelector((state) => state.diagram);
 
   return useMemo(() => {
     const lines = mermaidCode.split('\n').length;
@@ -196,7 +196,6 @@ export function useDiagramStats() {
       characters,
       words,
       complexity,
-      historySize: history.length,
     };
-  }, [mermaidCode, history]);
+  }, [mermaidCode]);
 }

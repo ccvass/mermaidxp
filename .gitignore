@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 REMOTE.md
+docs/PITCH.md
 
 # Cloudflare (contains account info)
 wrangler.jsonc

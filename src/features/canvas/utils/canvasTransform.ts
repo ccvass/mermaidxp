@@ -16,7 +16,7 @@ export function applyCanvasTransform(
     return;
   }
 
-  // Validar y sanitizar parámetros
+  // Validate and sanitize parameters
   const safeZoom = typeof zoom === 'number' && !isNaN(zoom) && zoom > 0 ? zoom : 1;
   const safePan =
     pan &&
@@ -41,7 +41,7 @@ export function applyCanvasTransform(
     }
   } catch (error) {
     logger.error('Error in applyCanvasTransform:', 'canvasTransform', error instanceof Error ? error : undefined);
-    // Aplicar transformación por defecto en caso de error
+    // Apply default transform in case of error
     try {
       const defaultTransform = new Transform(1, 0, 0);
       if (element.tagName.toLowerCase() === 'svg') {
@@ -103,7 +103,7 @@ export function calculateCenterPan(
   contentHeight: number,
   zoom: number = 1
 ): { x: number; y: number } {
-  // Validar parámetros
+  // Validate parameters
   const safeContainerWidth = typeof containerWidth === 'number' && containerWidth > 0 ? containerWidth : 800;
   const safeContainerHeight = typeof containerHeight === 'number' && containerHeight > 0 ? containerHeight : 600;
   const safeContentWidth = typeof contentWidth === 'number' && contentWidth > 0 ? contentWidth : 400;

@@ -63,8 +63,6 @@ const createTestStore = (initialState: any = {}) => {
         renderResult: null,
         isLoading: false,
         error: null,
-        history: ['graph TD\n  A --> B'],
-        historyIndex: 0,
         sheets: [],
         activeSheetIndex: 0,
         ...initialState.diagram,

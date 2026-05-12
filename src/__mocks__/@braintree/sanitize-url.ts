@@ -1,15 +1,15 @@
 /**
- * Mock para @braintree/sanitize-url
- * Proporciona una implementación simple para tests
+ * Mock for @braintree/sanitize-url
+ * Provides a simple implementation for tests
  */
 
 export function sanitizeUrl(url: string): string {
-  // Implementación simple para tests
+  // Simple implementation for tests
   if (!url || typeof url !== 'string') {
     return 'about:blank';
   }
 
-  // Remover protocolos peligrosos
+  // Remove dangerous protocols
   const dangerousProtocols = ['javascript:', 'data:', 'vbscript:'];
   const lowerUrl = url.toLowerCase().trim();
 

@@ -25,8 +25,6 @@ export interface DiagramState {
   renderResult: MermaidRenderResult | null;
   isLoading: boolean;
   error: string | null;
-  history: string[];
-  historyIndex: number;
   sheets: SheetData[];
   activeSheetIndex: number;
 }

@@ -4,9 +4,8 @@ import reducer, {
   toggleTheme,
   toggleSidebar,
   setDiagramMode,
-  setInteractionMode,
 } from './uiSlice';
-import { DiagramMode, InteractionMode } from '../../types/ui.types';
+import { DiagramMode } from '../../types/ui.types';
 
 describe('uiSlice', () => {
   type NotificationStateTest = { message: string; type: 'success' | 'error' | 'info'; visible: boolean };
@@ -15,7 +14,6 @@ describe('uiSlice', () => {
     theme: 'light' | 'dark';
     isSidebarVisible: boolean;
     diagramMode: DiagramMode;
-    interactionMode: InteractionMode;
   };
 
   const initialState: UiStateTest = {
@@ -27,7 +25,6 @@ describe('uiSlice', () => {
     theme: 'light',
     isSidebarVisible: true,
     diagramMode: DiagramMode.Diagram,
-    interactionMode: InteractionMode.Drag,
   };
 
   describe('notification actions', () => {
@@ -118,46 +115,21 @@ describe('uiSlice', () => {
     });
   });
 
-  describe('interaction mode actions', () => {
-    it('should set interaction mode to Drag', () => {
-      const state = reducer(initialState, setInteractionMode(InteractionMode.Drag));
-      expect(state.interactionMode).toBe(InteractionMode.Drag);
-    });
-
-    it('should set interaction mode to Pan', () => {
-      const state = reducer(initialState, setInteractionMode(InteractionMode.Pan));
-      expect(state.interactionMode).toBe(InteractionMode.Pan);
-    });
-  });
-
   describe('complex scenarios', () => {
     it('should handle multiple state changes correctly', () => {
       let state = initialState;
 
-      // Show a notification
       state = reducer(state, showNotification({ message: 'Diagram saved', type: 'success' }));
-
-      // Toggle theme
       state = reducer(state, toggleTheme());
-
-      // Hide sidebar
       state = reducer(state, toggleSidebar());
 
-      // Change interaction mode
-      state = reducer(state, setInteractionMode(InteractionMode.Pan));
-
-      // Verify final state
-      expect(state).toEqual({
-        notification: {
-          message: 'Diagram saved',
-          type: 'success',
-          visible: true,
-        },
-        theme: 'dark',
-        isSidebarVisible: false,
-        diagramMode: DiagramMode.Diagram,
-        interactionMode: InteractionMode.Pan,
+      expect(state.notification).toEqual({
+        message: 'Diagram saved',
+        type: 'success',
+        visible: true,
       });
+      expect(state.theme).toBe('dark');
+      expect(state.isSidebarVisible).toBe(false);
     });
 
     it('should maintain other state properties when updating one', () => {
@@ -169,18 +141,18 @@ describe('uiSlice', () => {
         },
         theme: 'dark' as const,
         isSidebarVisible: false,
+        isPresentationMode: false,
         diagramMode: DiagramMode.Whiteboard,
-        interactionMode: InteractionMode.Pan,
+        isDirty: false,
+        currentFilename: null,
       };
 
       const state = reducer(customInitialState, toggleTheme());
 
-      // Only theme should change
       expect(state.theme).toBe('light');
       expect(state.notification).toEqual(customInitialState.notification);
       expect(state.isSidebarVisible).toBe(customInitialState.isSidebarVisible);
       expect(state.diagramMode).toBe(customInitialState.diagramMode);
-      expect(state.interactionMode).toBe(customInitialState.interactionMode);
     });
   });
 });

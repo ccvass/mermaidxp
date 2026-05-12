@@ -1,58 +1,58 @@
 /**
- * Calculadora precisa del espacio usable del canvas
- * Considera la resolución de pantalla, header, toolbar y sidebar
+ * Precise calculator for usable canvas space
+ * Considers screen resolution, header, toolbar and sidebar
  */
 
 export interface CanvasSpaceInfo {
-  // Dimensiones totales de la ventana
+  // Total window dimensions
   windowWidth: number;
   windowHeight: number;
 
-  // Dimensiones del viewport
+  // Viewport dimensions
   viewportWidth: number;
   viewportHeight: number;
 
-  // Alturas de elementos fijos
+  // Fixed element heights
   headerHeight: number;
   toolbarHeight: number;
 
-  // Ancho del sidebar (si está visible)
+  // Sidebar width (if visible)
   sidebarWidth: number;
 
-  // Espacio disponible para el canvas
+  // Available space for the canvas
   canvasWidth: number;
   canvasHeight: number;
 
-  // Área efectiva para el diagrama (con padding)
+  // Effective area for the diagram (with padding)
   effectiveWidth: number;
   effectiveHeight: number;
 
-  // Factor de escala de la pantalla
+  // Screen scale factor
   devicePixelRatio: number;
 
-  // Información adicional
+  // Additional information
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
 }
 
 /**
- * Detecta las dimensiones de elementos fijos de la UI
+ * Detects the dimensions of fixed UI elements
  */
 function detectUIElementSizes(): {
   headerHeight: number;
   toolbarHeight: number;
   sidebarWidth: number;
 } {
-  // Detectar altura del header
+  // Detect header height
   const headerElement = document.querySelector('header');
   const headerHeight = headerElement ? headerElement.getBoundingClientRect().height : 60;
 
-  // Detectar altura del toolbar
+  // Detect toolbar height
   const toolbarElement = document.querySelector('.bg-white.dark\\:bg-gray-800.border-b');
   const toolbarHeight = toolbarElement ? toolbarElement.getBoundingClientRect().height : 50;
 
-  // Detectar ancho del sidebar (si está visible)
+  // Detect sidebar width (if visible)
   const sidebarElement = document.querySelector('aside[role="complementary"]');
   const sidebarWidth = sidebarElement ? sidebarElement.getBoundingClientRect().width : 0;
 
@@ -64,7 +64,7 @@ function detectUIElementSizes(): {
 }
 
 /**
- * Detecta el tipo de dispositivo basado en el tamaño de pantalla
+ * Detects the device type based on screen size
  */
 function detectDeviceType(width: number): {
   isMobile: boolean;
@@ -79,31 +79,31 @@ function detectDeviceType(width: number): {
 }
 
 /**
- * Calcula el espacio usable del canvas considerando todos los elementos de la UI
- * @param padding - Padding interno para el diagrama (default: 40px)
- * @returns Información completa del espacio disponible
+ * Calculates the usable canvas space considering all UI elements
+ * @param padding - Internal padding for the diagram (default: 40px)
+ * @returns Complete information about available space
  */
 export function calculateCanvasSpace(padding: number = 40): CanvasSpaceInfo {
-  // Obtener dimensiones de la ventana
+  // Get window dimensions
   const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight;
 
-  // Obtener dimensiones del viewport (considerando scrollbars)
+  // Get viewport dimensions (considering scrollbars)
   const viewportWidth = document.documentElement.clientWidth || windowWidth;
   const viewportHeight = document.documentElement.clientHeight || windowHeight;
 
-  // Detectar tamaños de elementos UI
+  // Detect UI element sizes
   const { headerHeight, toolbarHeight, sidebarWidth } = detectUIElementSizes();
 
-  // Calcular espacio disponible para el canvas
+  // Calculate available space for the canvas
   const canvasWidth = viewportWidth - sidebarWidth;
   const canvasHeight = viewportHeight - headerHeight - toolbarHeight;
 
-  // Calcular área efectiva para el diagrama (con padding)
+  // Calculate effective area for the diagram (with padding)
   const effectiveWidth = Math.max(canvasWidth - padding * 2, 100);
   const effectiveHeight = Math.max(canvasHeight - padding * 2, 100);
 
-  // Obtener información del dispositivo
+  // Get device information
   const devicePixelRatio = window.devicePixelRatio || 1;
   const deviceInfo = detectDeviceType(windowWidth);
 
@@ -127,11 +127,11 @@ export function calculateCanvasSpace(padding: number = 40): CanvasSpaceInfo {
 }
 
 /**
- * Obtiene el elemento contenedor del canvas
- * @returns Elemento contenedor o null si no se encuentra
+ * Gets the canvas container element
+ * @returns Container element or null if not found
  */
 export function getCanvasContainer(): HTMLElement | null {
-  // Buscar el contenedor del canvas por diferentes selectores
+  // Search for the canvas container using different selectors
   const selectors = [
     '[data-interaction-mode]',
     '.diagram-container',
@@ -150,9 +150,9 @@ export function getCanvasContainer(): HTMLElement | null {
 }
 
 /**
- * Valida que el espacio calculado sea razonable
- * @param spaceInfo - Información del espacio calculado
- * @returns true si el espacio es válido
+ * Validates that the calculated space is reasonable
+ * @param spaceInfo - Calculated space information
+ * @returns true if the space is valid
  */
 export function validateCanvasSpace(spaceInfo: CanvasSpaceInfo): boolean {
   const minWidth = 200;
@@ -172,10 +172,10 @@ export function validateCanvasSpace(spaceInfo: CanvasSpaceInfo): boolean {
 }
 
 /**
- * Escucha cambios en el tamaño de la ventana y recalcula el espacio
- * @param callback - Función a llamar cuando cambie el tamaño
- * @param debounceMs - Tiempo de debounce en milisegundos (default: 250ms)
- * @returns Función para limpiar el listener
+ * Listens for window size changes and recalculates the space
+ * @param callback - Function to call when size changes
+ * @param debounceMs - Debounce time in milliseconds (default: 250ms)
+ * @returns Cleanup function for the listener
  */
 export function watchCanvasSpaceChanges(
   callback: (spaceInfo: CanvasSpaceInfo) => void,
@@ -193,10 +193,10 @@ export function watchCanvasSpaceChanges(
     }, debounceMs);
   };
 
-  // Escuchar cambios de tamaño de ventana
+  // Listen for window size changes
   window.addEventListener('resize', handleResize);
 
-  // Escuchar cambios de orientación en móviles
+  // Listen for orientation changes on mobile
   window.addEventListener('orientationchange', handleResize);
 
   // Cleanup function
@@ -208,8 +208,8 @@ export function watchCanvasSpaceChanges(
 }
 
 /**
- * Obtiene información de debug del espacio del canvas
- * @returns Información detallada para debugging
+ * Gets debug information about the canvas space
+ * @returns Detailed information for debugging
  */
 export function getCanvasSpaceDebugInfo(): Record<string, any> {
   const spaceInfo = calculateCanvasSpace();

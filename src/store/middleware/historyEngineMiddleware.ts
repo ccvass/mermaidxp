@@ -161,33 +161,18 @@ export const historyEngineMiddleware: Middleware = (store) => {
 
     store.dispatch(setIsRestoring(true));
 
-    // Apply in a microtask to ensure reducers settled
-    Promise.resolve().then(() => {
-      const snap = store.getState().historyEngine.present || present;
+    // Apply synchronously — present is already updated by the reducer
+    const snap = store.getState().historyEngine.present || present;
 
-      // Restore diagram state (CODE ONLY - don't restore pan/zoom to avoid moving diagram)
-      store.dispatch(applyMermaidCode(snap.mermaidCode));
-      // DON'T restore zoom/pan - let user keep their current view
-      // store.dispatch(setZoom(snap.canvas.zoom));
-      // store.dispatch(setPan(snap.canvas.pan));
-      store.dispatch(setSelectedNodes(snap.canvas.selectedNodes));
+    store.dispatch(applyMermaidCode(snap.mermaidCode));
+    store.dispatch(setSelectedNodes(snap.canvas.selectedNodes));
 
-      // Restore canvas elements state
-      if (snap.canvasElements) {
-        const elementsToRestore = snap.canvasElements.elements;
-        const elementIds = Object.keys(elementsToRestore);
+    if (snap.canvasElements) {
+      store.dispatch(setAllElements(snap.canvasElements.elements));
+      store.dispatch(setSelectedElements(snap.canvasElements.selectedElementIds));
+    }
 
-        // Log first element details for debugging
-        if (elementIds.length > 0) {
-          // Elements available for restore
-        }
-
-        store.dispatch(setAllElements(elementsToRestore));
-        store.dispatch(setSelectedElements(snap.canvasElements.selectedElementIds));
-      }
-
-      store.dispatch(setIsRestoring(false));
-    });
+    store.dispatch(setIsRestoring(false));
   };
 
   return (next) => (action: unknown) => {

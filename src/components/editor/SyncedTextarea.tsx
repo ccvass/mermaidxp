@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
 
 interface SyncedTextareaProps {
   value: string;
@@ -24,22 +22,12 @@ export const SyncedTextarea: React.FC<SyncedTextareaProps> = ({
   spellCheck,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { historyIndex } = useSelector((state: RootState) => state.diagram);
-  const [lastHistoryIndex, setLastHistoryIndex] = useState(historyIndex);
   const [internalValue, setInternalValue] = useState(value);
 
-  // Update internal value when the prop changes
+  // Update internal value when the prop changes (including undo/redo)
   useEffect(() => {
     setInternalValue(value);
   }, [value]);
-
-  // Handle undo/redo history changes
-  useEffect(() => {
-    if (historyIndex !== lastHistoryIndex) {
-      setInternalValue(value);
-      setLastHistoryIndex(historyIndex);
-    }
-  }, [historyIndex, value, lastHistoryIndex]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInternalValue(e.target.value);

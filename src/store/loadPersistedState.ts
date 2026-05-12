@@ -1,6 +1,10 @@
 import { PersistedState } from './middleware/persistMiddleware';
 import { DEFAULT_MERMAID_CODE } from '../constants/diagram.constants';
 import { logger } from '../utils/logger';
+import { initialState as diagramInitial } from './slices/diagramSlice';
+import { initialState as uiInitial } from './slices/uiSlice';
+import { initialState as canvasInitial } from './slices/canvasSlice';
+import { initialState as canvasElementsInitial } from './slices/canvasElementsSlice';
 
 const STORAGE_KEY = 'mermaidViewerState';
 
@@ -60,40 +64,18 @@ export const loadPersistedState = (): Record<string, any> | undefined => {
     const mermaidCode = parsedState.diagram.mermaidCode.trim() || DEFAULT_MERMAID_CODE;
 
     return {
-      diagram: {
-        mermaidCode,
-        renderResult: null,
-        isLoading: false,
-        error: null,
-        history: [mermaidCode],
-        historyIndex: 0,
-        sheets: [],
-        activeSheetIndex: 0,
-      },
-      ui: {
-        notification: { message: '', type: 'info', visible: false },
-        theme: parsedState.ui.theme,
-        isSidebarVisible: false,
-        isPresentationMode: false,
-        diagramMode: 'diagram',
-        interactionMode: 'drag',
-        isDirty: false,
-        currentFilename: null,
-      },
+      diagram: { ...diagramInitial, mermaidCode },
+      ui: { ...uiInitial, theme: parsedState.ui.theme },
       canvas: {
+        ...canvasInitial,
         zoom: parsedState.canvas.zoom,
         pan: parsedState.canvas.pan,
-        placingElement: null,
-        selectedNodes: [],
-        isDragging: false,
-        interactionMode: 'pan' as const,
-        showGrid: false,
+        interactionMode: (parsedState.canvas.interactionMode as 'pan' | 'drag') || 'pan',
       },
       ...(parsedState.canvasElements?.elements && {
         canvasElements: {
+          ...canvasElementsInitial,
           elements: parsedState.canvasElements.elements,
-          selectedElementIds: [],
-          clipboard: [],
           nextId: parsedState.canvasElements.nextId || 1,
         },
       }),

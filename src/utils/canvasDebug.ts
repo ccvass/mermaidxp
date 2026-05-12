@@ -1,5 +1,5 @@
 /**
- * Utilidades para debugging del estado del canvas
+ * Canvas state debugging utilities
  */
 
 export interface CanvasDebugInfo {
@@ -11,18 +11,18 @@ export interface CanvasDebugInfo {
 }
 
 /**
- * Valida y proporciona información de debugging sobre el estado del canvas
+ * Validates and provides debugging information about the canvas state
  */
 export function debugCanvasState(zoom: number, pan: { x: number; y: number }): CanvasDebugInfo {
   const errors: string[] = [];
 
-  // Validar zoom
+  // Validate zoom
   const isZoomValid = typeof zoom === 'number' && !isNaN(zoom) && zoom > 0;
   if (!isZoomValid) {
     errors.push(`Invalid zoom: ${typeof zoom} ${zoom}`);
   }
 
-  // Validar pan
+  // Validate pan
   const isPanValid =
     pan &&
     typeof pan === 'object' &&
@@ -45,7 +45,7 @@ export function debugCanvasState(zoom: number, pan: { x: number; y: number }): C
 }
 
 /**
- * Log información de debugging del canvas
+ * Log canvas debugging information
  */
 export function logCanvasDebug(zoom: number, pan: { x: number; y: number }, context: string = 'Canvas'): void {
   if (process.env.NODE_ENV !== 'development') return;
@@ -59,7 +59,7 @@ export function logCanvasDebug(zoom: number, pan: { x: number; y: number }, cont
 }
 
 /**
- * Sanitiza los valores del canvas para uso seguro
+ * Sanitizes canvas values for safe usage
  */
 export function sanitizeCanvasValues(zoom: unknown, pan: unknown): { zoom: number; pan: { x: number; y: number } } {
   const debug = debugCanvasState(zoom as number, pan as { x: number; y: number });

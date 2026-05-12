@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DiagramMode, InteractionMode } from '../../types/ui.types';
+import { DiagramMode } from '../../types/ui.types';
 
 interface NotificationState {
   message: string;
@@ -13,22 +13,20 @@ interface UiState {
   isSidebarVisible: boolean;
   isPresentationMode: boolean;
   diagramMode: DiagramMode;
-  interactionMode: InteractionMode;
   isDirty: boolean;
   currentFilename: string | null;
 }
 
-const initialState: UiState = {
+export const initialState: UiState = {
   notification: {
     message: '',
     type: 'info',
     visible: false,
   },
   theme: 'light',
-  isSidebarVisible: false, // Start with sidebar closed for better canvas visibility
+  isSidebarVisible: false,
   isPresentationMode: false,
   diagramMode: DiagramMode.Diagram,
-  interactionMode: InteractionMode.Drag,
   isDirty: false,
   currentFilename: null,
 };
@@ -65,9 +63,6 @@ const uiSlice = createSlice({
     setDiagramMode(state, action: PayloadAction<DiagramMode>) {
       state.diagramMode = action.payload;
     },
-    setInteractionMode(state, action: PayloadAction<InteractionMode>) {
-      state.interactionMode = action.payload;
-    },
     setDirty(state, action: PayloadAction<boolean>) {
       state.isDirty = action.payload;
     },
@@ -88,7 +83,6 @@ export const {
   togglePresentationMode,
   setPresentationMode,
   setDiagramMode,
-  setInteractionMode,
   setDirty,
   markClean,
   setCurrentFilename,

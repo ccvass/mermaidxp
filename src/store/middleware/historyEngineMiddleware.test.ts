@@ -100,24 +100,20 @@ describe('historyEngineMiddleware (unified undo/redo)', () => {
     store.dispatch(setMermaidCode('Changed #1'));
     vi.advanceTimersByTime(700);
 
-    const histLenBefore = store.getState().diagram.history.length;
-
-    // undo should restore initialCode via applyMermaidCode and NOT push new diagram history entry
+    // undo should restore initialCode via applyMermaidCode
     store.dispatch(heUndo());
     // middleware applies snapshot on microtask -> flush it
     await Promise.resolve();
 
     const stateAfterUndo = store.getState();
     expect(stateAfterUndo.diagram.mermaidCode).toBe(initialCode);
-    expect(stateAfterUndo.diagram.history.length).toBe(histLenBefore);
 
-    // redo should restore Changed #1 and also not push diagram history
+    // redo should restore Changed #1
     store.dispatch(heRedo());
     await Promise.resolve();
 
     const stateAfterRedo = store.getState();
     expect(stateAfterRedo.diagram.mermaidCode).toBe('Changed #1');
-    expect(stateAfterRedo.diagram.history.length).toBe(histLenBefore);
   });
 
   test('deduplicates identical snapshots by hash', () => {

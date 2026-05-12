@@ -192,7 +192,7 @@ export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | n
         // Clear previous markings
         mermaidDivRef.current.querySelectorAll('.draggable-element').forEach((el) => {
           el.classList.remove('draggable-element');
-          // Eliminar listeners previos
+          // Remove previous listeners
           if ((el as any)._directDragHandler) {
             el.removeEventListener('mousedown', (el as any)._directDragHandler);
             (el as any)._directDragHandler = undefined;
@@ -233,7 +233,7 @@ export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | n
 
             if (isValid) {
               group.classList.add('draggable-element');
-              // Forzar pointer-events y cursor en todos los hijos
+              // Force pointer-events and cursor on all children
               group.querySelectorAll('*').forEach((child) => {
                 if (child instanceof SVGElement) {
                   child.style.pointerEvents = 'all';
@@ -246,12 +246,12 @@ export const useDragAndDrop = (mermaidDivRef: React.RefObject<HTMLDivElement | n
                 const element = group as SVGGraphicsElement;
 
                 if (!mermaidDivRef.current) return;
-                if (mouseEvent.button !== 0) return; // Solo botón izquierdo
+                if (mouseEvent.button !== 0) return; // Left button only
 
                 mouseEvent.preventDefault();
                 mouseEvent.stopPropagation();
 
-                // Extraer node ID usando la función existente
+                // Extract node ID using the existing function
                 const draggedElementId = extractMermaidNodeId(element);
                 if (!draggedElementId) return;
 
