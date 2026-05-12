@@ -60,12 +60,34 @@ export const loadPersistedState = (): Record<string, any> | undefined => {
     const mermaidCode = parsedState.diagram.mermaidCode.trim() || DEFAULT_MERMAID_CODE;
 
     return {
-      diagram: { mermaidCode, sheets: [], activeSheetIndex: 0 },
-      ui: { theme: parsedState.ui.theme, notification: { message: '', type: 'info', visible: false } },
+      diagram: {
+        mermaidCode,
+        renderResult: null,
+        isLoading: false,
+        error: null,
+        history: [mermaidCode],
+        historyIndex: 0,
+        sheets: [],
+        activeSheetIndex: 0,
+      },
+      ui: {
+        notification: { message: '', type: 'info', visible: false },
+        theme: parsedState.ui.theme,
+        isSidebarVisible: false,
+        isPresentationMode: false,
+        diagramMode: 'diagram',
+        interactionMode: 'drag',
+        isDirty: false,
+        currentFilename: null,
+      },
       canvas: {
         zoom: parsedState.canvas.zoom,
         pan: parsedState.canvas.pan,
+        placingElement: null,
+        selectedNodes: [],
+        isDragging: false,
         interactionMode: 'pan' as const,
+        showGrid: false,
       },
       ...(parsedState.canvasElements?.elements && {
         canvasElements: {
