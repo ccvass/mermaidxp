@@ -42,13 +42,19 @@ try {
   // If overriding fails, ignore to keep tests running
 }
 
-// Suppress console errors in tests unless explicitly testing error handling
+// Filter known React/jsdom noise — real errors pass through
+const SUPPRESSED_PATTERNS = [
+  /Warning: ReactDOM\.render is no longer supported/,
+  /Warning: An update to .* inside a test was not wrapped in act/,
+  /Error: Not implemented: navigation/,
+  /Error: Could not parse CSS stylesheet/,
+];
+
 const originalError = console.error;
 beforeAll(() => {
   console.error = (...args) => {
-    if (typeof args[0] === 'string' && args[0].includes('Warning: ReactDOM.render is no longer supported')) {
-      return;
-    }
+    const msg = typeof args[0] === 'string' ? args[0] : String(args[0]);
+    if (SUPPRESSED_PATTERNS.some((p) => p.test(msg))) return;
     originalError.call(console, ...args);
   };
 });

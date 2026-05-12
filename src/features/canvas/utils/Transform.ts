@@ -1,13 +1,10 @@
 import { logger } from '../../../utils/logger';
+import type { Point } from '../../../types/drag-drop.types';
+export type { Point } from '../../../types/drag-drop.types';
 /**
  * Transform utility for handling canvas transformations
  * Supports uniform scaling and translation
  */
-
-export interface Point {
-  x: number;
-  y: number;
-}
 
 export interface TransformMatrix {
   a: number; // scale x

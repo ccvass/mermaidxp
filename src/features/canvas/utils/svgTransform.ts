@@ -2,10 +2,8 @@
  * Utilities for handling SVG transformations
  */
 
-export interface Point {
-  x: number;
-  y: number;
-}
+import type { Point } from '../../../types/drag-drop.types';
+export type { Point } from '../../../types/drag-drop.types';
 
 export interface Transform {
   translate: Point;

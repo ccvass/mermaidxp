@@ -5,13 +5,8 @@
  * for working with points, coordinates, and basic geometric operations.
  */
 
-/**
- * Basic 2D point interface
- */
-export interface Point {
-  x: number;
-  y: number;
-}
+export type { Point } from '../types/drag-drop.types';
+import type { Point } from '../types/drag-drop.types';
 
 /**
  * Calculate the distance between two points
