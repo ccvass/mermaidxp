@@ -61,7 +61,7 @@ export const loadPersistedState = (): Record<string, any> | undefined => {
 
     return {
       diagram: { mermaidCode, sheets: [], activeSheetIndex: 0 },
-      ui: { theme: parsedState.ui.theme },
+      ui: { theme: parsedState.ui.theme, notification: { message: '', type: 'info', visible: false } },
       canvas: {
         zoom: parsedState.canvas.zoom,
         pan: parsedState.canvas.pan,
