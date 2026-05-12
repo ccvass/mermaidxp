@@ -214,3 +214,46 @@ These remain as accepted technical debt due to high coupling risk.
 | M6 | Emojis in production code logs | Quick win |
 | M13 | `store/types.ts` has `RootState = any` | Quick win |
 | L1–L11 | Low priority backlog | Low |
+
+---
+
+## 🚀 FEATURES — Priorizadas por Impacto/Valor
+
+### Tier 1 — Alto Impacto (diferenciadores de producto)
+
+| # | Feature | Impacto | Esfuerzo | ROI |
+|---|---------|---------|----------|-----|
+| F1 | Compartir por URL (link público con diagrama embebido) | 🔥🔥🔥 | Medio | **Altísimo** — viral, zero-friction sharing |
+| F2 | Auto-save a la nube (Firebase/KV por usuario) | 🔥🔥🔥 | Medio | **Alto** — retención, no perder trabajo |
+| F3 | CI/CD pipeline (GitHub Actions: build+test+deploy) | 🔥🔥 | Bajo | **Alto** — calidad, velocidad de desarrollo |
+| F4 | Importar desde URL (GitHub/GitLab .md) | 🔥🔥 | Bajo | **Alto** — onboarding instantáneo |
+
+### Tier 2 — Medio Impacto (mejoran UX significativamente)
+
+| # | Feature | Impacto | Esfuerzo | ROI |
+|---|---------|---------|----------|-----|
+| F5 | Zoom/Pan con scroll+drag en sheets mode | 🔥🔥 | Bajo | **Alto** — UX básica esperada |
+| F6 | Debounce del render (300ms) | 🔥🔥 | Bajo | **Alto** — fluidez en edición |
+| F7 | Historial de versiones (ver/restaurar) | 🔥🔥 | Medio | **Medio** — seguridad del usuario |
+| F8 | Export PNG con fondo transparente | 🔥 | Bajo | **Medio** — feature request común |
+| F9 | Web Worker para Mermaid render | 🔥🔥 | Medio | **Medio** — no bloquea UI |
+| F10 | PWA / offline support | 🔥 | Medio | **Medio** — uso sin conexión |
+
+### Tier 3 — Largo Plazo (requieren infraestructura)
+
+| # | Feature | Impacto | Esfuerzo | ROI |
+|---|---------|---------|----------|-----|
+| F11 | Colaboración en tiempo real (WebSocket/CRDT) | 🔥🔥🔥 | **Alto** | Medio — gran esfuerzo |
+| F12 | Error tracking (Sentry) | 🔥 | Bajo | **Medio** — visibilidad producción |
+| F13 | Preview deploys (PRs a URLs temporales) | 🔥 | Medio | **Medio** — DX |
+| F14 | Templates categorizados y buscables | 🔥 | Bajo | **Bajo** — nice-to-have |
+| F15 | Bundle optimization (672KB → target 400KB) | 🔥 | Medio | **Bajo** — ya funciona |
+| F16 | E2E tests con Playwright | 🔥 | Medio | **Bajo** — ya hay 293 unit tests |
+| F17 | Analytics de uso | 🔥 | Bajo | **Bajo** — datos de producto |
+
+### Recomendación de ejecución
+
+**Sprint 1 (máximo valor, mínimo esfuerzo):** F3, F4, F5, F6
+**Sprint 2 (diferenciadores):** F1, F2, F8
+**Sprint 3 (robustez):** F7, F9, F12
+**Backlog:** F10, F11, F13-F17

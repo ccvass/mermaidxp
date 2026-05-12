@@ -136,3 +136,16 @@ export function generateFilename(format: string): string {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
   return `diagram-${timestamp}.${format}`;
 }
+
+/** Convert GitHub/GitLab URLs to raw content URLs */
+export function toRawUrl(url: string): string {
+  // GitHub: github.com/user/repo/blob/branch/file → raw.githubusercontent.com/user/repo/branch/file
+  const ghMatch = url.match(/github\.com\/([^/]+\/[^/]+)\/blob\/(.+)/);
+  if (ghMatch) return `https://raw.githubusercontent.com/${ghMatch[1]}/${ghMatch[2]}`;
+
+  // GitLab: gitlab.com/user/repo/-/blob/branch/file → gitlab.com/user/repo/-/raw/branch/file
+  const glMatch = url.match(/(gitlab\.[^/]+\/[^/]+\/[^/]+)\/-\/blob\/(.+)/);
+  if (glMatch) return `https://${glMatch[1]}/-/raw/${glMatch[2]}`;
+
+  return url;
+}

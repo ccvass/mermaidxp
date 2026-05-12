@@ -14,6 +14,7 @@ import {
   createDownloadBlob,
   formatMermaidAsMarkdown,
   generateFilename,
+  toRawUrl,
 } from './fileOperations.utils';
 import {
   TemplatesDropdown,
@@ -154,15 +155,32 @@ export const FileOperations: React.FC<FileOperationsProps> = ({ className = '' }
     setImportLoading(true);
     setImportError('');
     try {
-      const response = await fetch(importUrl);
+      const rawUrl = toRawUrl(importUrl.trim());
+      const response = await fetch(rawUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const content = await response.text();
-      dispatch(setMermaidCode(content));
+
+      // If .md file, parse for mermaid blocks
+      if (rawUrl.endsWith('.md') || importUrl.endsWith('.md')) {
+        const { parseMdToSheets } = await import('../../utils/mdParser');
+        const sheets = parseMdToSheets(content);
+        if (sheets.length > 1) {
+          dispatch(setSheets(sheets));
+        } else if (sheets.length === 1) {
+          dispatch(clearSheets());
+          dispatch(setMermaidCode(sheets[0].code));
+        } else {
+          throw new Error('No mermaid diagrams found in markdown');
+        }
+      } else {
+        dispatch(clearSheets());
+        dispatch(setMermaidCode(content));
+      }
       dispatch(captureNow({ actionType: `Imported from URL: ${importUrl}` }));
-      dispatch(showNotification({ message: 'Diagram imported successfully from URL', type: 'success' }));
+      dispatch(showNotification({ message: 'Diagram imported from URL', type: 'success' }));
       setShowImportModal(false);
     } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'Unknown error');
+      setImportError(error instanceof Error ? error.message : 'Failed to fetch URL');
     } finally {
       setImportLoading(false);
     }

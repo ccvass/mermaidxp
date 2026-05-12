@@ -83,6 +83,11 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [fitScale, setFitScale] = useState(1);
+  const [userZoom, setUserZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ active: boolean; startX: number; startY: number; startPanX: number; startPanY: number }>({
+    active: false, startX: 0, startY: 0, startPanX: 0, startPanY: 0,
+  });
 
   useEffect(() => {
     if (!code || !containerRef.current) return;
@@ -96,22 +101,21 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
         if (result.error) {
           setError(typeof result.error === 'string' ? result.error : 'Render error');
         } else if (containerRef.current) {
-          // Reset scale to 1 before measuring
           setFitScale(1);
+          setUserZoom(1);
+          setPan({ x: 0, y: 0 });
           containerRef.current.innerHTML = result.svg;
           setError(null);
           const svg = containerRef.current.querySelector('svg') as SVGSVGElement;
           if (svg) {
             svg.style.maxWidth = 'none';
             svg.style.display = 'block';
-            // Use natural size from viewBox instead of 100%
             const vb = svg.viewBox?.baseVal;
             if (vb && vb.width > 0 && vb.height > 0) {
               svg.setAttribute('width', String(vb.width));
               svg.setAttribute('height', String(vb.height));
             }
           }
-          // Wait for layout, then fit
           requestAnimationFrame(() => {
             if (cancelled) return;
             calcFit();
@@ -123,30 +127,50 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     };
 
     render();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [code, theme]);
 
   const calcFit = () => {
     const svg = containerRef.current?.querySelector('svg') as SVGSVGElement | null;
     const wrapper = wrapperRef.current;
     if (!svg || !wrapper) return;
-
-    // Get natural SVG size from viewBox (most reliable)
     const vb = svg.viewBox?.baseVal;
     const natW = vb && vb.width > 0 ? vb.width : parseFloat(svg.getAttribute('width') || '0');
     const natH = vb && vb.height > 0 ? vb.height : parseFloat(svg.getAttribute('height') || '0');
     if (natW <= 0 || natH <= 0) return;
-
-    // Wrapper size from DOM (not affected by inner transforms)
     const wrapperRect = wrapper.getBoundingClientRect();
     const pad = 16;
     const availW = wrapperRect.width - pad * 2;
     const availH = wrapperRect.height - pad * 2;
     if (availW <= 0 || availH <= 0) return;
-
     setFitScale(Math.min(availW / natW, availH / natH));
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      setUserZoom((z) => Math.max(0.2, Math.min(5, z * delta)));
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) {
+      dragRef.current = { active: true, startX: e.clientX, startY: e.clientY, startPanX: pan.x, startPanY: pan.y };
+      (e.currentTarget as HTMLElement).style.cursor = 'grabbing';
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragRef.current.active) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    setPan({ x: dragRef.current.startPanX + dx, y: dragRef.current.startPanY + dy });
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    dragRef.current.active = false;
+    (e.currentTarget as HTMLElement).style.cursor = 'grab';
   };
 
   if (error) {
@@ -160,12 +184,23 @@ const SheetRenderer: React.FC<{ code: string; theme: string }> = ({ code, theme 
     );
   }
 
+  const scale = fitScale * userZoom;
+
   return (
-    <div ref={wrapperRef} className="flex items-center justify-center h-full w-full overflow-hidden">
+    <div
+      ref={wrapperRef}
+      className="flex items-center justify-center h-full w-full overflow-hidden"
+      style={{ cursor: 'grab' }}
+      onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
       <div
         ref={containerRef}
         className="sheets-active-diagram"
-        style={{ transform: `scale(${fitScale})`, transformOrigin: 'center center' }}
+        style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`, transformOrigin: 'center center' }}
       />
     </div>
   );
