@@ -87,7 +87,7 @@ class LazyMermaidLoader {
 
       script.onerror = () => {
         const error = new Error('Failed to load Mermaid library from CDN');
-        logger.error('❌ Mermaid loading error:', 'lazyMermaidLoader', error instanceof Error ? error : undefined);
+        logger.error('Mermaid loading error:', 'lazyMermaidLoader', error instanceof Error ? error : undefined);
         this.status.error = error;
         this.status.loading = false;
         reject(error);

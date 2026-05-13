@@ -43,11 +43,12 @@ try {
 }
 
 // Filter known React/jsdom noise — real errors pass through
+// Each pattern is documented with its source to avoid hiding real bugs
 const SUPPRESSED_PATTERNS = [
-  /Warning: ReactDOM\.render is no longer supported/,
-  /Warning: An update to .* inside a test was not wrapped in act/,
-  /Error: Not implemented: navigation/,
-  /Error: Could not parse CSS stylesheet/,
+  /Warning: ReactDOM\.render is no longer supported/, // React 18 migration noise
+  /Warning: An update to .* inside a test was not wrapped in act/, // async state updates in tests
+  /Error: Not implemented: navigation/, // jsdom limitation
+  /Error: Could not parse CSS stylesheet/, // jsdom CSS limitation
 ];
 
 const originalError = console.error;

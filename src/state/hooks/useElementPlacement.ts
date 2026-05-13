@@ -1,18 +1,18 @@
 import { useState, useCallback } from 'react';
 import { ShapeDefinition } from '../../types/shapes.types';
 
-export interface PlacingElementInfo {
+export interface LocalPlacingInfo {
   type: 'shape' | 'text' | 'icon' | 'image' | null;
   definition?: unknown;
 }
 
 export const useElementPlacement = (onAppendCode: (code: string) => void, onCancelElementPlacement: () => void) => {
-  const [placingElementInfo, setPlacingElementInfo] = useState<PlacingElementInfo>({ type: null });
+  const [placingElementInfo, setPlacingElementInfo] = useState<LocalPlacingInfo>({ type: null });
 
   const generateSafeId = (prefix: string = 'node') =>
     `${prefix}${Date.now()}${Math.random().toString(36).substring(2, 7)}`;
 
-  const handleInitiateElementPlacement = (elementType: PlacingElementInfo['type'], definition?: unknown) => {
+  const handleInitiateElementPlacement = (elementType: LocalPlacingInfo['type'], definition?: unknown) => {
     if (placingElementInfo.type === elementType && elementType !== 'shape') {
       setPlacingElementInfo({ type: null });
     } else {

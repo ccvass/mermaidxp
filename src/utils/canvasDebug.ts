@@ -2,7 +2,7 @@
  * Canvas state debugging utilities
  */
 
-export interface CanvasDebugInfo {
+interface CanvasDebugState {
   zoom: number;
   pan: { x: number; y: number };
   isZoomValid: boolean;
@@ -13,7 +13,7 @@ export interface CanvasDebugInfo {
 /**
  * Validates and provides debugging information about the canvas state
  */
-export function debugCanvasState(zoom: number, pan: { x: number; y: number }): CanvasDebugInfo {
+export function debugCanvasState(zoom: number, pan: { x: number; y: number }): CanvasDebugState {
   const errors: string[] = [];
 
   // Validate zoom
@@ -53,7 +53,7 @@ export function logCanvasDebug(zoom: number, pan: { x: number; y: number }, cont
   const debug = debugCanvasState(zoom as number, pan as { x: number; y: number });
 
   if (debug.errors.length > 0) {
-    console.group(`🐛 ${context} Debug Info`);
+    console.group(`[DEBUG] ${context} Info`);
     console.groupEnd();
   }
 }

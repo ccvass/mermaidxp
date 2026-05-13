@@ -8,6 +8,7 @@ import { LoginModal } from '../auth/LoginModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { MenuIcon, CloseIcon, SunIcon, MoonIcon, DownloadIcon } from '../icons/ToolbarIcons';
 import { createShareLink } from '../../services/shareService';
+import { VersionHistoryPanel } from '../header/VersionHistoryPanel';
 
 interface HeaderProps {
   title: string;
@@ -19,6 +20,7 @@ export const Header: FC<HeaderProps> = ({ title }) => {
   const sheets = useAppSelector((state) => state.diagram.sheets);
   const [showExportMenu, setShowExportMenu] = React.useState(false);
   const [showLoginModal, setShowLoginModal] = React.useState(false);
+  const [showVersions, setShowVersions] = React.useState(false);
   const { user } = useAuth();
 
   const handleToggleTheme = () => {
@@ -178,6 +180,20 @@ export const Header: FC<HeaderProps> = ({ title }) => {
             <span className="text-xs ml-1 hidden sm:inline">Share</span>
           </button>
 
+          {user && (
+            <button
+              onClick={() => setShowVersions(true)}
+              className="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Version history"
+              aria-label="Version history"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-xs ml-1 hidden sm:inline">History</span>
+            </button>
+          )}
+
           <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />
 
           <button
@@ -207,6 +223,7 @@ export const Header: FC<HeaderProps> = ({ title }) => {
       </header>
 
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      <VersionHistoryPanel isOpen={showVersions} onClose={() => setShowVersions(false)} />
     </>
   );
 };
