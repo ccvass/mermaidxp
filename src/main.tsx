@@ -2,9 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import { initSentry } from './config/sentry';
-
-initSentry();
 
 // Ensure the root element exists
 const rootElement = document.getElementById('root');

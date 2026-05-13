@@ -26,7 +26,6 @@
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.36.8",
     "@reduxjs/toolkit": "^2.8.2",
-    "@sentry/react": "8.53.0",
     "codemirror": "^6.0.1",
     "firebase": "^12.3.0",
     "jspdf": "^4.2.1",
