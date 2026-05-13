@@ -18,6 +18,7 @@ import { showNotification } from './store/slices/uiSlice';
 import { deleteElements } from './store/slices/canvasElementsSlice';
 import { parseMdToSheets } from './utils/mdParser';
 import { loadSharedDiagram } from './services/shareService';
+import { ReloadPrompt } from './components/common/ReloadPrompt';
 import { useCloudSync } from './hooks/useCloudSync';
 
 // Import existing components that are working
@@ -248,6 +249,7 @@ const AppContent: React.FC = () => {
 
         {/* Keyboard Manager for unified history engine */}
         <KeyboardManager />
+        <ReloadPrompt />
       </div>
     </ErrorBoundary>
   );
