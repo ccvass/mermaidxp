@@ -56,7 +56,19 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-redux', '@reduxjs/toolkit'],
-            firebase: ['firebase/app', 'firebase/auth'],
+            'firebase-auth': ['firebase/app', 'firebase/auth'],
+            'firebase-db': ['firebase/firestore'],
+            codemirror: [
+              'codemirror',
+              '@codemirror/autocomplete',
+              '@codemirror/commands',
+              '@codemirror/lang-javascript',
+              '@codemirror/language',
+              '@codemirror/search',
+              '@codemirror/state',
+              '@codemirror/theme-one-dark',
+              '@codemirror/view',
+            ],
             pdf: ['jspdf', 'html2canvas', 'canvg'],
           },
         },
