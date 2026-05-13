@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, Suspense } from 'react';
+import React, { useEffect, useState, useCallback, Suspense, lazy } from 'react';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch, useAppSelector } from './store/hooks';
@@ -7,7 +7,7 @@ import { AuthProvider } from './contexts/AuthContext';
 // Import migrated components
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
-import { CodeEditor } from './components/editor/CodeEditor';
+const CodeEditor = lazy(() => import('./components/editor/CodeEditor').then(m => ({ default: m.CodeEditor })));
 import { MainCanvas } from './components/canvas/MainCanvas';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
@@ -18,6 +18,7 @@ import { showNotification } from './store/slices/uiSlice';
 import { deleteElements } from './store/slices/canvasElementsSlice';
 import { parseMdToSheets } from './utils/mdParser';
 import { loadSharedDiagram } from './services/shareService';
+import { ReloadPrompt } from './components/common/ReloadPrompt';
 import { useCloudSync } from './hooks/useCloudSync';
 
 // Import existing components that are working
@@ -222,7 +223,9 @@ const AppContent: React.FC = () => {
           {/* Sidebar - Hidden in presentation mode */}
           {!isPresentationMode && (
             <Sidebar>
-              <CodeEditor />
+              <Suspense fallback={<div className="p-4 text-gray-500">Loading editor...</div>}>
+                <CodeEditor />
+              </Suspense>
             </Sidebar>
           )}
 
@@ -248,6 +251,7 @@ const AppContent: React.FC = () => {
 
         {/* Keyboard Manager for unified history engine */}
         <KeyboardManager />
+        <ReloadPrompt />
       </div>
     </ErrorBoundary>
   );
