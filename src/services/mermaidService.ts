@@ -4,6 +4,14 @@ import { Theme } from '../types/ui.types';
 import { mermaidLoader } from './lazyMermaidLoader';
 import { logger } from '../utils/logger';
 
+/** Yield control to the main thread so UI stays responsive */
+function yieldToMain(): Promise<void> {
+  if ('scheduler' in window && typeof (window as any).scheduler?.yield === 'function') {
+    return (window as any).scheduler.yield();
+  }
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 class MermaidService {
   private initialized = false;
   private renderCount = 0;
@@ -25,6 +33,9 @@ class MermaidService {
     if (!this.initialized || this.lastTheme !== theme) {
       await this.initialize(theme);
     }
+
+    // Yield to main thread before heavy render to keep UI responsive
+    await yieldToMain();
 
     try {
       // Generate unique ID for this render
